@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/azuki-beans/coperni/security/advisories/new
+    about: Please report security issues privately.
+  - name: Questions about CAMS data
+    url: https://atmosphere.copernicus.eu/help-and-support
+    about: Questions about the forecast data itself go to Copernicus support.

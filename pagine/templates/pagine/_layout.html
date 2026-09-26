@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titolo }} — Coperni</title>
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-hover: #242836;
+            --border: #2e3346;
+            --text: #e1e4ed;
+            --text-dim: #8b90a5;
+            --accent: #6c8cff;
+            --radius: 10px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .logo h1 span {
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-left: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            margin-left: 32px;
+        }
+
+        .nav-links a {
+            padding: 6px 14px;
+            border-radius: var(--radius);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        /* ── Documentazione ── */
+        .doc {
+            flex: 1;
+            display: flex;
+            gap: 40px;
+            width: 100%;
+            max-width: 1040px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+
+        .doc-menu {
+            flex: 0 0 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            position: sticky;
+            top: 24px;
+            align-self: flex-start;
+        }
+
+        .doc-menu a {
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .doc-menu a:hover {
+            color: var(--text);
+            background: var(--surface);
+        }
+
+        .doc-menu a.active {
+            color: var(--text);
+            background: var(--surface-hover);
+        }
+
+        article {
+            flex: 1;
+            min-width: 0;
+            max-width: 680px;
+            font-size: 16px;
+            line-height: 1.65;
+        }
+
+        article h2 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+            margin-bottom: 20px;
+        }
+
+        article h3 {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 32px 0 8px;
+        }
+
+        article p, article ul, article ol, article table, article .nota {
+            margin-bottom: 14px;
+        }
+
+        article ul, article ol {
+            padding-left: 22px;
+        }
+
+        article li {
+            margin-bottom: 6px;
+        }
+
+        article a {
+            color: var(--accent);
+        }
+
+        article strong {
+            font-weight: 600;
+        }
+
+        article table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        article th, article td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        article th {
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        article td.numero {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        article .nota {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 15px;
+        }
+
+        article .dim {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        @media (max-width: 720px) {
+            .doc {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px 16px 48px;
+            }
+
+            .doc-menu {
+                position: static;
+                flex-direction: row;
+                flex-wrap: wrap;
+                flex-basis: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+{% include "_header.html" %}
+
+<div class="doc">
+    <nav class="doc-menu" aria-label="Argomenti">
+        {% for s, t in pagine.items %}
+        <a href="{% url 'pagine:pagina' s %}" {% if s == slug %}class="active" aria-current="page"{% endif %}>{{ t }}</a>
+        {% endfor %}
+    </nav>
+    <article>
+        <h2>{{ titolo }}</h2>
+        {% block contenuto %}{% endblock %}
+    </article>
+</div>
+
+</body>
+</html>

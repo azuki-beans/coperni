@@ -1,0 +1,56 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    I dati sono le previsioni della qualità dell'aria in Europa del <strong>Copernicus Atmosphere
+    Monitoring Service (CAMS)</strong>, il servizio del programma europeo Copernicus gestito dal
+    Centro europeo per le previsioni meteorologiche a medio termine (ECMWF). Sono dati aperti e
+    gratuiti, scaricati dall'<a href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts" rel="noopener">Atmosphere Data Store</a>.
+</p>
+
+<h3>Che previsione usiamo</h3>
+<ul>
+    <li><strong>Modello "ensemble"</strong>: non un singolo modello, ma la combinazione
+        (mediana) delle previsioni di una decina di modelli europei. È la versione più robusta
+        che CAMS mette a disposizione.</li>
+    <li><strong>Risoluzione</strong>: una cella ogni 0,1 gradi, cioè circa 11 km in direzione
+        nord-sud e 7–9 km in direzione est-ovest alle nostre latitudini. Ogni cella ha un
+        solo valore: le differenze dentro la cella (una strada, un parco) non si vedono.</li>
+    <li><strong>Area coperta</strong>: tutta Europa, dal Nord Africa alla Scandinavia.</li>
+    <li><strong>Livello</strong>: i valori si riferiscono all'aria vicino al suolo, quella che
+        respiriamo.</li>
+    <li><strong>Unità</strong>: microgrammi per metro cubo (µg/m³), valori orari.</li>
+</ul>
+
+<h3>Inquinanti e soglie</h3>
+<p>
+    Per ogni inquinante la mappa confronta il valore con una soglia di riferimento: sotto la
+    soglia i colori vanno dal ciano al verde, alla soglia diventano gialli, oltre passano al rosso
+    e, sopra il doppio, al viola.
+</p>
+<table>
+    <thead>
+        <tr><th>Inquinante</th><th class="numero">Soglia</th></tr>
+    </thead>
+    <tbody>
+        {% for nome, soglia in inquinanti %}
+        <tr><td>{{ nome }}</td><td class="numero">{% if soglia %}{{ soglia|floatformat:"-1" }} µg/m³{% else %}—{% endif %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="dim">
+    Le soglie sono i limiti della normativa europea: per il particolato (PM2,5 e PM10) i limiti
+    giornalieri in vigore dal 2030, per gli altri inquinanti le soglie orarie. I limiti del
+    particolato valgono per la media di un'intera giornata, mentre la mappa mostra il valore di
+    una singola ora: il confronto va inteso come indicativo, non come verifica del rispetto dei
+    limiti di legge.
+</p>
+
+<h3>Crediti</h3>
+<p class="dim">
+    Generato usando informazioni del Copernicus Atmosphere Monitoring Service ({% now "Y" %}).
+    Né la Commissione europea né l'ECMWF sono responsabili dell'uso che può essere fatto delle
+    informazioni o dei dati Copernicus qui contenuti. Mappe di sfondo © OpenStreetMap
+    contributors © CARTO.
+</p>
+{% endblock %}

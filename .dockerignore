@@ -1,0 +1,47 @@
+# Everything below stays out of the image, for good.
+# The places DB is rebuilt at build time from the CSVs in luoghi/dati/ (those are included);
+# CAMS data lives in the bucket, never in the image.
+
+# VCS / CI
+.git
+.github
+.gitignore
+
+# IDE / OS / tool
+.idea
+.vscode
+.claude
+.DS_Store
+**/.DS_Store
+.ruff_cache
+
+# Python environments / bytecode
+.venv
+venv
+**/__pycache__
+**/*.pyc
+
+# Secrets and local configuration
+.env
+.env.*
+stacks
+docker
+
+# Local data, DBs and logs (data/ holds ISTAT sources and development Parquet files)
+data
+temp
+staticfiles
+*.sqlite3
+*.sql
+*.log
+*.nc
+*.parquet
+
+# Documentation
+*.md
+docs
+LICENSE
+
+# Test
+**/tests.py
+tests

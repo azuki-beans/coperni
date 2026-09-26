@@ -1,0 +1,37 @@
+name: CI
+
+# Checks only: no cloud credentials, nothing is published.
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Lint (ruff)
+        run: pipx run ruff check .
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          poetry install --only main --no-interaction --no-ansi --no-root
+
+      - name: Django checks and places DB
+        run: |
+          poetry run python manage.py check
+          poetry run python manage.py makemigrations --check --dry-run
+          poetry run python manage.py migrate --noinput
+          poetry run python manage.py luoghi_load

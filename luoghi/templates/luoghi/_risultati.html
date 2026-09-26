@@ -1,0 +1,7 @@
+{% for r in risultati %}
+<a class="risultato" href="{{ destinazione }}?{{ r.query }}">
+    <span>{{ r.nome }}</span><small>{{ r.dettaglio }}</small>
+</a>
+{% empty %}
+{% if request.GET.q|length >= 2 %}<div class="risultato vuoto">Nessun luogo trovato</div>{% endif %}
+{% endfor %}

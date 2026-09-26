@@ -1,0 +1,655 @@
+{% extends "_base_map.html" %}
+
+{% block extra_css %}
+        /* Pollution control */
+        .pollution-control {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 1000;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            box-shadow: var(--shadow);
+            min-width: 200px;
+        }
+
+        .pollution-control label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .pollution-control select {
+            width: 100%;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .pollution-opacity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .pollution-opacity input[type="range"] {
+            flex: 1;
+            accent-color: var(--text-dim);
+        }
+
+        .pollution-opacity #opacity-value {
+            min-width: 3ch;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pollution-legend {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .pollution-legend .legend-bar {
+            position: relative;
+            height: 14px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .pollution-legend .legend-bar svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        /* tacca della soglia sulla barra */
+        .pollution-legend .legend-tick {
+            position: absolute;
+            top: -4px;
+            width: 2px;
+            height: 22px;
+            background: var(--text);
+            transform: translateX(-1px);
+        }
+
+        .pollution-legend .legend-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 10px;
+            color: var(--text-dim);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pollution-legend .legend-note {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .pollution-legend .legend-note b {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Popup coerente col tema scuro */
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        .leaflet-popup-content {
+            margin: 10px 14px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .leaflet-popup-content .popup-valore {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .leaflet-popup-content .popup-giudizio {
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button {
+            color: var(--text-dim);
+        }
+
+        /* data e ora a cui si riferiscono i colori, sempre in vista sulla mappa */
+        .riferimento-dati {
+            position: absolute;
+            left: 12px;
+            bottom: 24px;
+            z-index: 1000;
+            max-width: calc(100% - 24px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 6px;
+            box-shadow: var(--shadow);
+            font-size: 13px;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .riferimento-dati .testo {
+            padding: 2px 8px;
+            min-width: 0;
+        }
+
+        .riferimento-dati button {
+            flex-shrink: 0;
+            width: 30px;
+            height: 34px;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 15px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .riferimento-dati button:hover:not(:disabled) {
+            background: var(--surface-hover);
+        }
+
+        .riferimento-dati button:disabled {
+            color: var(--border);
+            cursor: default;
+        }
+
+        .riferimento-dati .relativo {
+            color: var(--text-dim);
+        }
+
+        .riferimento-dati button.adesso {
+            width: auto;
+            height: auto;
+            padding: 0 6px;
+            margin-left: 4px;
+            font-size: 11px;
+            color: var(--accent);
+            vertical-align: 1px;
+        }
+
+        .riferimento-dati button.adesso[hidden] {
+            display: none;
+        }
+
+        .riferimento-dati[hidden] {
+            display: none;
+        }
+
+        .riferimento-dati .quando {
+            font-weight: 600;
+        }
+
+        .riferimento-dati .vecchi {
+            color: #ffb454;
+            font-weight: 600;
+        }
+
+        .riferimento-dati .corsa {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .riferimento-dati a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .pollution-timestamp {
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+{% endblock %}
+
+{% block overlay %}
+    <div class="pollution-control" id="pollution-control">
+        <label for="pollutant-select">Qualità dell'aria</label>
+        <select id="pollutant-select">
+            {% for p in copernicus_pollutants %}
+            <option value="{{ p }}">{{ p|upper }}</option>
+            {% endfor %}
+            <option value="">Nessuno</option>
+        </select>
+        <div class="pollution-opacity">
+            <label for="lato-select" style="margin:0">Area</label>
+            <select id="lato-select" style="flex:1">
+                {% for lato, km in lati_km %}<option value="{{ lato }}">{{ lato }} celle · ~{{ km }} km</option>{% endfor %}
+            </select>
+        </div>
+        <div class="pollution-opacity">
+            <label for="resa-select" style="margin:0">Resa</label>
+            <select id="resa-select" style="flex:1">
+                <option value="retino">Retino (punti)</option>
+                <option value="tratteggio">Tratteggio</option>
+                <option value="trasparenza">Trasparenza</option>
+            </select>
+        </div>
+        <div class="pollution-opacity">
+            <label for="sfondo-select" style="margin:0">Sfondo</label>
+            <select id="sfondo-select" style="flex:1">
+                <option value="dark">Scuro</option>
+                <option value="light">Chiaro</option>
+            </select>
+        </div>
+        <div class="pollution-opacity">
+            <label for="opacity-range" style="margin:0">Intensità</label>
+            <input type="range" id="opacity-range" min="0.25" max="2" step="0.05" value="1">
+            <span id="opacity-value">×1.0</span>
+        </div>
+        <div class="pollution-legend" id="pollution-legend">
+            <div class="legend-bar" id="legend-bar"><svg id="legend-svg"></svg><span class="legend-tick" id="legend-tick"></span></div>
+            <div class="legend-scale" id="legend-scale"></div>
+            <div class="legend-note" id="legend-note"></div>
+        </div>
+        <div class="pollution-timestamp" id="pollution-timestamp"></div>
+    </div>
+    <div class="riferimento-dati" id="riferimento-dati" hidden>
+        <button type="button" data-passo="-24" title="24 ore prima" aria-label="24 ore prima">«</button>
+        <button type="button" data-passo="-1" title="Un'ora prima" aria-label="Un'ora prima">‹</button>
+        <div class="testo">
+            <div>Previsione per <span class="quando" id="riferimento-quando"></span>
+                <span class="relativo" id="riferimento-relativo"></span>
+                <button type="button" class="adesso" id="torna-adesso" hidden>adesso</button>
+                <span class="vecchi" id="riferimento-vecchi" hidden>· dati non aggiornati</span></div>
+            <div class="corsa"><span id="riferimento-corsa"></span> ·
+                <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">quando si aggiorna</a></div>
+        </div>
+        <button type="button" data-passo="1" title="Un'ora dopo" aria-label="Un'ora dopo">›</button>
+        <button type="button" data-passo="24" title="24 ore dopo" aria-label="24 ore dopo">»</button>
+    </div>
+    {% comment %}pattern SVG di retino/tratteggio, referenziati dalle celle come fill="url(#…)";
+    niente display:none, altrimenti i browser non li disegnano{% endcomment %}
+    <svg id="trame" width="0" height="0" style="position:absolute" aria-hidden="true"><defs></defs></svg>
+{% endblock %}
+
+{% block script %}
+    // ── Scala colori ──
+    // Rampa continua ispirata all'European Air Quality Index, parametrizzata sul rapporto
+    // valore/soglia: la soglia UE cade nel passaggio giallo → arancio, oltre 2× è viola.
+    const COLOR_STOPS = [
+        [0.00, [80, 240, 230]],   // ciano   — aria pulita
+        [0.50, [80, 204, 170]],   // verde
+        [1.00, [240, 230, 65]],   // giallo  — soglia UE
+        [1.50, [255, 80, 80]],    // rosso
+        [2.00, [150, 0, 50]],     // viola   — oltre il doppio della soglia
+    ];
+    const RATIO_MAX = COLOR_STOPS[COLOR_STOPS.length - 1][0];
+
+    function colorForRatio(ratio) {
+        if (ratio == null || Number.isNaN(ratio)) return '#8b90a5';
+        const r = Math.min(Math.max(ratio, 0), RATIO_MAX);
+        let i = 1;
+        while (i < COLOR_STOPS.length - 1 && COLOR_STOPS[i][0] < r) i++;
+        const [r0, c0] = COLOR_STOPS[i - 1];
+        const [r1, c1] = COLOR_STOPS[i];
+        const t = (r - r0) / (r1 - r0);
+        const rgb = c0.map((v, k) => Math.round(v + (c1[k] - v) * t));
+        return `rgb(${rgb.join(',')})`;
+    }
+
+    // Opacità proporzionale all'inquinamento: le celle pulite sono quasi trasparenti,
+    // quelle oltre la soglia sempre più marcate. Lo slider "Intensità" è un coefficiente
+    // moltiplicativo su questa rampa (×1 = rampa di base).
+    const ALPHA_MIN = 0.08;   // ratio 0
+    const ALPHA_MAX = 0.75;   // ratio >= RATIO_MAX
+    const ALPHA_NO_SOGLIA = 0.3;
+
+    function alphaForRatio(ratio) {
+        if (ratio == null || Number.isNaN(ratio)) return ALPHA_NO_SOGLIA;
+        const r = Math.min(Math.max(ratio, 0), RATIO_MAX) / RATIO_MAX;
+        return ALPHA_MIN + (ALPHA_MAX - ALPHA_MIN) * r;
+    }
+
+    // ── Resa delle celle ──
+    // 'retino': mezzatinta, punti sempre più grandi con l'inquinamento fino a fondersi in un
+    // colore pieno; 'tratteggio': linee diagonali sempre più spesse; 'trasparenza': colore pieno
+    // con opacità proporzionale. Retino e tratteggio sono pattern SVG (creati al bisogno, uno per
+    // gradino): Leaflet scrive fillColor nell'attributo fill, quindi accetta url(#id). Sono in
+    // coordinate schermo (userSpaceOnUse): la grana è la stessa a ogni zoom e la trama continua
+    // senza giunture tra celle adiacenti.
+    const RESE = ['retino', 'tratteggio', 'trasparenza'];
+    const GRADINI = 20;        // gradini di intensità dei pattern (0.1× soglia ciascuno)
+    const PASSO_TRAMA = 8;     // px tra un punto (o una linea) e il successivo
+    const ALPHA_TRAMA = 0.9;   // opacità dei pattern a intensità ×1: l'intensità la dà la trama
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const trameDefs = document.querySelector('#trame defs');
+
+    function trama(resa, ratio) {
+        const senzaSoglia = ratio == null || Number.isNaN(ratio);
+        const gradino = senzaSoglia ? null
+            : Math.round(Math.min(Math.max(ratio, 0), RATIO_MAX) / RATIO_MAX * GRADINI);
+        const id = `trama-${resa}-${gradino ?? 'x'}`;
+        if (!document.getElementById(id)) {
+            const t = senzaSoglia ? 0.3 : gradino / GRADINI;
+            const colore = colorForRatio(senzaSoglia ? null : gradino / GRADINI * RATIO_MAX);
+            const pattern = document.createElementNS(SVG_NS, 'pattern');
+            pattern.id = id;
+            pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+            pattern.setAttribute('width', PASSO_TRAMA);
+            pattern.setAttribute('height', PASSO_TRAMA);
+            pattern.setAttribute('patternTransform', 'rotate(45)');   // angolo classico del retino
+            const segno = document.createElementNS(SVG_NS, resa === 'retino' ? 'circle' : 'rect');
+            if (resa === 'retino') {
+                // raggio massimo oltre la mezza diagonale (PASSO·√2/2): a 2× soglia i punti si fondono
+                const r = 0.7 + t * (PASSO_TRAMA * 0.73 - 0.7);
+                segno.setAttribute('cx', PASSO_TRAMA / 2);
+                segno.setAttribute('cy', PASSO_TRAMA / 2);
+                segno.setAttribute('r', r.toFixed(2));
+            } else {
+                segno.setAttribute('width', (0.6 + t * (PASSO_TRAMA - 0.6)).toFixed(2));
+                segno.setAttribute('height', PASSO_TRAMA);
+            }
+            segno.setAttribute('fill', colore);
+            pattern.appendChild(segno);
+            trameDefs.appendChild(pattern);
+        }
+        return `url(#${id})`;
+    }
+
+    // riempimento e opacità di base (prima dell'intensità) di una cella nella resa corrente
+    function stileCella(ratio) {
+        if (resa === 'trasparenza') return { fillColor: colorForRatio(ratio), alpha: alphaForRatio(ratio) };
+        return { fillColor: trama(resa, ratio), alpha: ALPHA_TRAMA };
+    }
+
+    function giudizio(ratio) {
+        if (ratio == null || Number.isNaN(ratio)) return '';
+        if (ratio < 0.5) return 'aria buona';
+        if (ratio < 1.0) return 'sotto la soglia UE';
+        if (ratio < 1.5) return 'oltre la soglia UE';
+        return 'molto oltre la soglia UE';
+    }
+
+    // ── Legenda ──
+    const pollutionLegend = document.getElementById('pollution-legend');
+    const legendBar = document.getElementById('legend-bar');
+    const legendTick = document.getElementById('legend-tick');
+    const legendScale = document.getElementById('legend-scale');
+    const legendNote = document.getElementById('legend-note');
+    const pollutionTimestamp = document.getElementById('pollution-timestamp');
+    const riferimento = document.getElementById('riferimento-dati');
+
+    // ── Ora mostrata ──
+    // istante = null → "adesso" (l'ora corrente, anche quando scocca la successiva); altrimenti
+    // l'ora scelta con le frecce, in ms. L'intervallo navigabile (primo/ultimo) arriva dall'API:
+    // dall'inizio della corsa più vecchia conservata a +48h dall'ultima.
+    const ORA_MS = 3600e3;
+    let istante = null;
+    let mostrato = null;             // ora effettivamente mostrata (ms), dall'ultima risposta
+    let intervallo = null;           // [primo, ultimo] in ms
+    const oraCorrente = () => Math.floor(Date.now() / ORA_MS) * ORA_MS;
+
+    function formattaOra(ms) {
+        const dt = new Date(ms);
+        const giorno = dt.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+        const ora = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+        return `${giorno}, ore ${ora}`;
+    }
+
+    function relativo(ms) {
+        const ore = Math.round((ms - oraCorrente()) / ORA_MS);
+        if (ore === 0) return '· adesso';
+        const n = Math.abs(ore);
+        const [g, h] = [Math.floor(n / 24), n % 24];
+        const parti = [];
+        if (g) parti.push(`${g} ${g === 1 ? 'giorno' : 'giorni'}`);
+        if (h) parti.push(`${h} ${h === 1 ? 'ora' : 'ore'}`);
+        const testo = parti.join(' e ');
+        return ore > 0 ? `· fra ${testo}` : `· ${testo} fa`;
+    }
+
+    // aggiorna testo e pulsanti; chiamata subito al click (risposta immediata) e poi con i dati
+    function mostraOra(ms) {
+        document.getElementById('riferimento-quando').textContent = formattaOra(ms);
+        document.getElementById('riferimento-relativo').textContent = relativo(ms);
+        // "adesso" = l'ora corrente, o l'ultima disponibile se i dati sono vecchi
+        const adesso = intervallo ? Math.min(oraCorrente(), intervallo[1]) : oraCorrente();
+        document.getElementById('torna-adesso').hidden = ms === adesso;
+        for (const b of riferimento.querySelectorAll('[data-passo]')) {
+            const passo = Number(b.dataset.passo);
+            b.disabled = !intervallo || (passo < 0 ? ms <= intervallo[0] : ms >= intervallo[1]);
+        }
+    }
+
+    function mostraRiferimento(dati) {
+        intervallo = [Date.parse(dati.primo), Date.parse(dati.ultimo)];
+        mostrato = Date.parse(dati.timestamp);
+        mostraOra(mostrato);
+        // l'ultima ora disponibile è già passata: il job non ha girato, i dati sono vecchi
+        document.getElementById('riferimento-vecchi').hidden = Date.now() < intervallo[1] + 2 * ORA_MS;
+        document.getElementById('riferimento-corsa').textContent = dati.corsa
+            ? `Modello CAMS emesso il ${new Date(dati.corsa).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })} alle 00 UTC`
+            : 'Nessuna previsione per quest\'ora';
+        riferimento.hidden = false;
+    }
+
+    // click ravvicinati: il testo si aggiorna subito, i dati si chiedono solo quando ci si ferma
+    let attesaOra = null;
+    function vaiA(ms) {
+        if (intervallo) ms = Math.min(Math.max(ms, intervallo[0]), intervallo[1]);
+        istante = ms === oraCorrente() ? null : ms;
+        mostrato = ms;
+        mostraOra(ms);
+        ultimaRichiesta++;   // una risposta ancora in viaggio riporterebbe l'ora precedente
+        clearTimeout(attesaOra);
+        attesaOra = setTimeout(() => loadPollution(pollutantSelect.value), 250);
+    }
+
+    for (const b of riferimento.querySelectorAll('[data-passo]')) {
+        b.addEventListener('click', () => vaiA((mostrato ?? oraCorrente()) + Number(b.dataset.passo) * ORA_MS));
+    }
+    document.getElementById('torna-adesso').addEventListener('click', () => vaiA(oraCorrente()));
+
+    const legendSvg = document.getElementById('legend-svg');
+
+    // La barra è fatta di segmenti disegnati come le celle (stessa resa, colore e intensità).
+    function renderLegendBar() {
+        const n = resa === 'trasparenza' ? 40 : GRADINI;
+        let html = '';
+        for (let i = 0; i < n; i++) {
+            const { fillColor, alpha } = stileCella((i + 0.5) / n * RATIO_MAX);
+            html += `<rect x="${(i / n * 100).toFixed(3)}%" width="${(100 / n + 0.1).toFixed(3)}%" height="100%" ` +
+                `fill="${fillColor}" fill-opacity="${applicaIntensita(alpha).toFixed(2)}"/>`;
+        }
+        legendSvg.innerHTML = html;
+    }
+    legendTick.style.left = `${(1 / RATIO_MAX) * 100}%`;
+
+    function renderLegend(inquinante, soglia, unita) {
+        if (!soglia) {
+            legendScale.innerHTML = '';
+            legendNote.textContent = 'Nessuna soglia configurata';
+            pollutionLegend.style.display = 'block';
+            return;
+        }
+        const fmt = v => Number.isInteger(v) ? v : v.toFixed(1);
+        legendScale.innerHTML = [0, 0.5, 1, 1.5, 2]
+            .map(r => `<span>${fmt(soglia * r)}</span>`)
+            .join('');
+        legendNote.innerHTML = `${unita} · soglia UE ${inquinante.toUpperCase()} <b>${fmt(soglia)} ${unita}</b>`;
+        pollutionLegend.style.display = 'block';
+    }
+
+    // ── Layer inquinante (Copernicus) ──
+    let pollutionLayer = null;
+    const pollutantSelect = document.getElementById('pollutant-select');
+    pollutantSelect.addEventListener('change', () => loadPollution(pollutantSelect.value));
+
+    // Coefficiente di intensità (slider) applicato all'opacità di ogni cella;
+    // al passaggio del mouse la cella si evidenzia.
+    const opacityRange = document.getElementById('opacity-range');
+    const opacityValue = document.getElementById('opacity-value');
+    let intensita = parseFloat(opacityRange.value);
+    const applicaIntensita = alpha => Math.min(alpha * intensita, 0.95);
+    const hoverOpacity = alpha => Math.min(applicaIntensita(alpha) + 0.3, 1);
+
+    // ── Resa e sfondo (preferenze ricordate nel browser) ──
+    const resaSelect = document.getElementById('resa-select');
+    const sfondoSelect = document.getElementById('sfondo-select');
+    let resa = 'retino';
+    try {
+        const salvata = localStorage.getItem('coperni.resa');
+        if (RESE.includes(salvata)) resa = salvata;
+    } catch (e) { /* storage non disponibile: resta il default */ }
+    resaSelect.value = resa;
+    sfondoSelect.value = sfondo;
+
+    resaSelect.addEventListener('change', () => {
+        resa = resaSelect.value;
+        try { localStorage.setItem('coperni.resa', resa); } catch (e) {}
+        renderLegendBar();
+        if (pollutionLayer) {
+            pollutionLayer.eachLayer(rect => {
+                const { fillColor, alpha } = stileCella(rect.options.ratio);
+                rect.setStyle({ fillColor, alpha, fillOpacity: applicaIntensita(alpha) });
+            });
+        }
+    });
+    sfondoSelect.addEventListener('change', () => impostaSfondo(sfondoSelect.value));
+    opacityRange.addEventListener('input', () => {
+        intensita = parseFloat(opacityRange.value);
+        opacityValue.textContent = `×${intensita.toFixed(1)}`;
+        renderLegendBar();
+        if (pollutionLayer) {
+            pollutionLayer.eachLayer(rect =>
+                rect.setStyle({ fillOpacity: applicaIntensita(rect.options.alpha) }));
+        }
+    });
+    renderLegendBar();
+
+    // ── Area: celle sul lato lungo della viewport (preferenza ricordata nel browser) ──
+    const latoSelect = document.getElementById('lato-select');
+    try {
+        const salvato = localStorage.getItem('coperni.lato');
+        if (salvato && LATI.includes(Number(salvato))) latoSelect.value = salvato;
+    } catch (e) { /* storage non disponibile: resta il default */ }
+    latoSelect.addEventListener('change', () => {
+        try { localStorage.setItem('coperni.lato', latoSelect.value); } catch (e) {}
+        inquadra(limitiStimati(Number(latoSelect.value)));
+        loadPollution(pollutantSelect.value);
+    });
+    inquadra(limitiStimati(Number(latoSelect.value)));
+
+    // ogni caricamento ha un numero: se nel frattempo ne è partito un altro (cambio veloce di
+    // inquinante/area) la risposta vecchia viene scartata, invece di sovrapporre due layer
+    let ultimaRichiesta = 0;
+    let limitiInquadrati = null;
+
+    // il layer vecchio resta visibile finché il nuovo non è pronto: spostandosi di un'ora i
+    // colori cambiano senza che la mappa si svuoti
+    function sostituisciLayer(nuovo) {
+        if (pollutionLayer) map.removeLayer(pollutionLayer);
+        pollutionLayer = nuovo;
+        if (nuovo) nuovo.addTo(map);
+    }
+
+    async function loadPollution(inquinante) {
+        const richiesta = ++ultimaRichiesta;
+        clearTimeout(attesaOra);
+        pollutionTimestamp.textContent = '';
+
+        if (!inquinante) {
+            sostituisciLayer(null);
+            pollutionLegend.style.display = 'none';
+            riferimento.hidden = true;
+            return;
+        }
+
+        showSpinner(true);
+        try {
+            const params = new URLSearchParams({
+                lat: CENTRO[0], lon: CENTRO[1], inquinante,
+                lato: latoSelect.value, aspect: aspectMappa().toFixed(3),
+            });
+            if (istante != null) params.set('istante', new Date(istante).toISOString());
+            const res = await fetch(`{% url 'copernicus:griglia' %}?${params}`);
+            const dati = await res.json();
+            if (richiesta !== ultimaRichiesta) return;
+
+            if (!res.ok) {
+                sostituisciLayer(null);
+                pollutionTimestamp.textContent = dati.error || `Errore ${res.status}`;
+                return;
+            }
+
+            // limiti esatti della finestra, allineati alla griglia CAMS; si reinquadra solo se
+            // la finestra cambia (area), non quando cambia l'ora o l'inquinante
+            const chiaveLimiti = JSON.stringify(dati.limiti);
+            if (chiaveLimiti !== limitiInquadrati) {
+                inquadra(dati.limiti);
+                limitiInquadrati = chiaveLimiti;
+            }
+            if (dati.timestamp) mostraRiferimento(dati);
+            if (dati.celle.length === 0) {
+                sostituisciLayer(null);
+                pollutionTimestamp.textContent = 'Nessun dato disponibile per quest\'area';
+                return;
+            }
+
+            // Ogni valore è una cella della griglia CAMS (0.1°): la disegniamo come rettangolo
+            // centrato sul punto, senza bordo, così le celle adiacenti formano un mosaico continuo.
+            const mezzo = dati.passo / 2;
+            const soglia = dati.soglia;
+            const unita = dati.unita;
+
+            const layer = L.featureGroup();
+            for (const [lat, lon, valore] of dati.celle) {
+                const ratio = soglia ? valore / soglia : null;
+                const { fillColor, alpha } = stileCella(ratio);
+                const rect = L.rectangle(
+                    [[lat - mezzo, lon - mezzo], [lat + mezzo, lon + mezzo]],
+                    { stroke: false, fillColor, fillOpacity: applicaIntensita(alpha), alpha, ratio },
+                );
+                const dettaglio = ratio != null
+                    ? `${ratio.toFixed(1)}× la soglia · ${giudizio(ratio)}`
+                    : 'nessuna soglia configurata';
+                rect.bindPopup(
+                    `<div>${inquinante.toUpperCase()}</div>` +
+                    `<div class="popup-valore">${valore.toFixed(1)} <small>${unita}</small></div>` +
+                    `<div class="popup-giudizio">${dettaglio}</div>`
+                );
+                // alpha letto dalle opzioni: cambia se l'utente cambia resa
+                rect.on('mouseover', () => rect.setStyle({ fillOpacity: hoverOpacity(rect.options.alpha) }));
+                rect.on('mouseout', () => rect.setStyle({ fillOpacity: applicaIntensita(rect.options.alpha) }));
+                layer.addLayer(rect);
+            }
+            sostituisciLayer(layer);
+            renderLegend(inquinante, soglia, unita);
+        } catch (err) {
+            console.error('Pollution layer error:', err);
+            sostituisciLayer(null);
+            pollutionTimestamp.textContent = 'Errore nel caricamento dati';
+        } finally {
+            if (richiesta === ultimaRichiesta) showSpinner(false);
+        }
+    }
+
+    // la mappa apre già con il primo inquinante configurato, non vuota
+    loadPollution(pollutantSelect.value);
+{% endblock %}

@@ -1,0 +1,4 @@
+# Cloud Build upload: same as .gitignore, plus local config
+#!include:.gitignore
+.git
+.claude

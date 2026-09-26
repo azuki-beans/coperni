@@ -1,0 +1,43 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    Coperni mostra <strong>com'è l'aria che respiriamo, ora e nelle prossime ore</strong>, attorno a
+    un comune italiano, a una città europea o alla tua posizione. Su una mappa vedi come sono
+    distribuiti gli inquinanti nella zona; nei grafici vedi com'è andata la settimana passata e
+    cosa è previsto per i prossimi due giorni.
+</p>
+
+<h3>Perché</h3>
+<p>
+    I dati sulla qualità dell'aria esistono e sono pubblici, ma di solito sono difficili da
+    consultare: file tecnici, portali per addetti ai lavori, centraline sparse sul territorio.
+    Coperni prende le previsioni del programma europeo <strong>Copernicus</strong> e le rende
+    leggibili a colpo d'occhio, confrontandole con le soglie di riferimento europee.
+</p>
+
+<h3>Cosa trovi</h3>
+<ul>
+    <li><strong>Mappa</strong>: la zona attorno al luogo scelto, divisa in celle di circa 10 km.
+        Più la cella è intensa, più l'aria è inquinata. Tocca una cella per leggere il valore.</li>
+    <li><strong>Grafici</strong>: l'andamento medio della zona negli ultimi 7 giorni e la
+        previsione fino a 48 ore.</li>
+    <li>Per cambiare zona basta cercare un comune o una città in alto, oppure usare il pulsante
+        ⌖ per la tua posizione.</li>
+</ul>
+
+<div class="nota">
+    <strong>Sono previsioni, non misure.</strong> I valori vengono da un modello matematico
+    dell'atmosfera, non dalle centraline. Sono utili per capire la situazione generale e come
+    evolve, ma possono discostarsi dai valori misurati in un punto preciso (una strada trafficata,
+    il fondo di una valle). Per i dati ufficiali della tua zona fai riferimento all'agenzia
+    ambientale regionale o provinciale.
+</div>
+
+<h3>Privacy</h3>
+<p>
+    Il sito è pubblico e non richiede registrazione. Non usiamo cookie di profilazione: l'unico
+    cookie serve a ricordare l'ultimo luogo che hai guardato. Le tue preferenze (sfondo, resa,
+    dimensione dell'area) restano solo nel tuo browser.
+</p>
+{% endblock %}

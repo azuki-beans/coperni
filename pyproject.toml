@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "coperni"
+version = "0.1.0"
+description = "CAMS air quality forecasts around a place, on a map"
+package-mode = false
+authors = ["Marco Pavanelli <marco.pavanelli@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.14"
+django = "^6.0.2"
+gunicorn = "^25.0.3"
+django-htmx = "^1.29.0"
+duckdb = "^1.5.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+job = [
+    "pyarrow (>=25.0.1,<26.0.0)",
+    "google-cloud-storage (>=3.14.1,<4.0.0)",
+    "cdsapi (>=0.7.7,<0.8.0)",
+    "xarray (>=2026.7.0,<2027.0.0)",
+    "netcdf4 (>=1.7.4,<2.0.0)"
+]
+luoghi = [
+    "pyshp (>=3.1.6,<4.0.0)",
+    "pyproj (>=3.8.0,<4.0.0)"
+]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["data", "stacks"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W"]

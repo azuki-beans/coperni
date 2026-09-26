@@ -1,0 +1,26 @@
+name: Bug report
+description: Something does not work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: The page where it happened (on the demo or your own deployment)
+      placeholder: https://coperni.azukibeans.dev/places/?lat=45.46&lon=9.19
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 142 on Android
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs

@@ -1,0 +1,169 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) and other contributors when working
+with code in this repository.
+
+## What it is
+
+Coperni shows air quality (**CAMS** forecasts, Copernicus Atmosphere Data Store) on a Leaflet map
+centred on an Italian municipality, a European city or any coordinates, plus a chart of the trend.
+Public, read-only site, no users. The UI, code identifiers and code comments are in Italian; the
+repository documentation is in English.
+
+Architecture (see [`docs/architecture.md`](docs/architecture.md)):
+
+```
+Cloud Scheduler (08:30 UTC) → Cloud Run Job (manage.py cams_export)
+    └─ 1 ADS request: all of Europe, 5 pollutants, 49h → gs://<bucket>/cams/YYYY-MM-DD.parquet + indice.json
+Browser → Cloud Run service (Django + DuckDB) → reads over HTTPS only the requested window
+                                  └─ luoghi.sqlite3 (municipalities + cities) built into the image
+```
+
+No Postgres, Redis, Celery or GDAL.
+
+## Commands
+
+```bash
+poetry install --with job,luoghi          # main = web only; job = CAMS export; luoghi = luoghi_build
+
+poetry run python manage.py migrate && poetry run python manage.py luoghi_load   # local places DB
+poetry run python manage.py runserver
+
+poetry run python manage.py cams_export                     # today's run (UTC) → CAMS_STORAGE
+poetry run python manage.py cams_export --date 2026-09-22   # a given day (idempotent)
+poetry run python manage.py cams_export --netcdf file.nc    # reuse an already downloaded NetCDF
+
+poetry run python manage.py luoghi_build --shapefile data/Com01012025/Com01012025_WGS84.shp
+    # regenerates luoghi/dati/*.csv (versioned) from ISTAT + GeoNames; rarely (municipalities: yearly)
+```
+
+Locally `CAMS_STORAGE` defaults to `data/cams` (git-ignored). There are no tests yet.
+
+**Caveats (macOS):** Homebrew's GDAL ships its own libarrow; loaded in the same process as pyarrow
+it raises `ArrowKeyError: ... scheme 'file' already registered`. That is one reason
+`django.contrib.gis` was removed: do not reintroduce it in the job process.
+**DuckDB segfaults under amd64 emulation (QEMU):** `--platform linux/amd64` builds on Apple Silicon
+fail at the DuckDB step. Build natively locally; CI is native amd64.
+
+## CAMS data
+
+- Dataset `cams-europe-air-quality-forecasts`, model `ensemble`, 0.1° grid, domain lat 30–72,
+  lon -25–45 (420×700 ≈ 294k cells). One run per day at 00 UTC; data **guaranteed on ADS by
+  08:00 UTC** (ECMWF knowledge base) → scheduler at 08:30 UTC.
+- **Request parameters (verified):** `time=['00:00']` (run) and `leadtime_hour=0..48` (offset).
+  Beyond 48h the service silently truncates. The opposite (24 values in `time`) yields a single
+  instant.
+- **ADS cost**: the `.../processes/<dataset>/costing` endpoint returns
+  `{"id":"size","cost":…,"limit":5000}`. It is the request size in *fields*
+  (variables × hours × days), a limit **per request**, not a quota nor money. **Area does not
+  count**: all of Europe costs the same as a small box (245 for 5 pollutants × 49h × 1 day).
+  Splitting into geographic tiles would multiply the cost.
+- **CDS NetCDF**: `time` is an offset axis (`timedelta64`), no `forecast_reference_time`; the base
+  date, if needed, is in `time.attrs['long_name']`. **Longitudes are 0..360** (Western Europe at
+  335..360, non-monotonic axis: `sel(method='nearest')` blows up) → converted to -180..180 in
+  `export.netcdf_a_parquet`.
+- Measured: ~275 MB download, ~2 min queue + download, ~0.9 GB peak RAM during conversion,
+  Parquet **~54 MB/day**. Parquet vs NetCDF difference ≤ 0.05 µg/m³ (quantisation).
+
+## Parquet layout (`copernicus/export.py`)
+
+One row per cell/hour, wide format: `lat`, `lon` smallint (degrees ×100, cell centres at x.x5 →
+multiples of 10 + 5), `ora` utinyint (offset from 00 UTC of the file's day, 0..48), one smallint
+column per pollutant (µg/m³ ×10, null if missing). Rows sorted by **1°×1° tiles** → lat → lon →
+hour, 24,500-row row groups, zstd: a local window touches ~4 of ~600 row groups (~0.2 MB per
+pollutant), which DuckDB reads via HTTP range requests.
+
+`indice.json` (`{"giorni": [...], "ore": 49}`) lists the available runs: over HTTPS the bucket
+cannot be listed. The job rewrites it (last `COPERNICUS_RETENTION_DAYS` days); file deletion is
+done by the bucket **lifecycle rule** (21 days).
+
+## Django apps
+
+- `config/`: settings/urls/wsgi. DB = SQLite (`LUOGHI_DB`, default `luoghi.sqlite3`) for places
+  only. No admin/auth/sessions. `/` → redirect to `/places/` keeping the query string.
+  Without `DJANGO_SECRET_KEY` a random per-process key is used (dev, export job).
+- **`copernicus`** (no models):
+  - `export.py` — ADS download (`scarica`), conversion (`netcdf_a_parquet`), `Archivio`
+    (`gs://…` with google-cloud-storage, or a local folder), `esporta` = all of it + index.
+    Management command `cams_export`.
+  - `griglia.py` — web side. `finestra(lat, lon, lato, aspect)`: `lato` (20 or 50, `LATO_CELLE`)
+    cells on the **long side** of the viewport, the other side `ceil(lato·cosφ/aspect)`
+    (landscape) or `ceil(lato·aspect/cosφ)` (portrait), because in Web Mercator a 0.1° cell looks
+    1/cosφ times taller than wide. `celle(..., istante=None)` = one hour (default the current one),
+    clamped to [start of the oldest run, last hour of the newest], read from the **most recent run
+    covering it** (`_corsa_per`); also returns `primo`/`ultimo`/`corsa`. `serie()` = hourly mean
+    over the window, first 24h of each run of the last 7 days + the whole latest run.
+    One DuckDB connection per instance, one cursor per thread (shared metadata cache).
+    `CAMS_STORAGE=gs://b/p` → read as `https://storage.googleapis.com/b/p` (public bucket).
+  - API: `GET /copernicus/api/griglia/?lat&lon&inquinante&lato&aspect[&istante=ISO]` and
+    `GET /copernicus/api/serie/?lat&lon&lato&aspect`, with `Cache-Control` (grid until the top of
+    the hour, series 15 min).
+- **`pagine`**: user documentation at `/info/` ("Info" in the menu). `PAGINE` in `views.py` =
+  `slug -> title`; new page = template `pagine/<slug>.html` + dictionary entry. Thresholds and
+  pollutants read from settings, "latest forecast" from `griglia.indice()`. The update times
+  (08:30 UTC) are written in `aggiornamenti.html`: update them if the scheduler changes.
+- **`luoghi`**: `Comune` (ISTAT code, name possibly bilingual "Bolzano/Bozen", province code,
+  region, DEM 2015 altitudes, population, **centroid** — no boundaries) and `Citta` (GeoNames
+  cities15000 in the CAMS domain, Italy excluded). CSVs versioned in `luoghi/dati/`, loaded by
+  `luoghi_load` at build time. `chiave` = normalised names (lowercase, no accents, alternative
+  Latin names separated by `|`) because SQLite compares case-insensitively only in ASCII. Search
+  `GET /luoghi/cerca/?q=&da=` (htmx fragment) ordered by level (`_livello`: exact name → main name
+  starts with → alternative starts with → contains), then population.
+  - `luoghi_build`: centroids from the ISTAT shapefile with pyshp+pyproj. ISTAT's "WGS84"
+    shapefile is in **UTM 32N (EPSG:32632)**, not degrees. Municipality population from GeoNames
+    (`admin3` = ISTAT code), only above 15,000 inhabitants.
+- **`places`**: pages. `centro.py:centro_da_richiesta` — priority `?comune=` → `?citta=` →
+  `?lat=&lon=` (validated against the CAMS domain) → `centro` cookie (last seen) → env default.
+  - Templates in `places/templates/` (not the conventional `places/templates/places/`).
+    `_header.html` (nav + htmx search + "my position") is included by `_base_map.html` and by
+    `grafici.html` (otherwise standalone).
+  - `map_view.html`: pollutant and area selectors (20/50, remembered in `localStorage`
+    `coperni.lato`). **"Cover"** framing: `getBoundsZoom(box, inside=true) + log2(RIEMPIMENTO=0.95)`,
+    `zoomSnap: 0`; first a client estimate (`limitiStimati`, same formula as the server), then the
+    exact `limiti` from the API. Cells are borderless `L.rectangle`, colour from `valore/soglia`
+    (`COLOR_STOPS`, EU threshold at yellow, purple above 2×). **"Resa"** (rendering) selector
+    (`localStorage` `coperni.resa`): `retino` (default, halftone: dot radius ∝ ratio),
+    `tratteggio` (hatching: line width ∝ ratio) — `userSpaceOnUse` SVG patterns created on demand
+    in `<svg id="trame">` (20 steps) and used as `fillColor: url(#id)` (needs the SVG renderer, not
+    canvas) — or `trasparenza` (opacity `alphaForRatio`, 0.08→0.75). "Intensità" slider multiplies
+    opacity. CARTO basemap split in two (`<style>_nolabels` below, `<style>_only_labels` in the
+    `labels` pane above); dark/light **"Sfondo"** selector (`impostaSfondo` in `_base_map.html`,
+    `localStorage` `coperni.sfondo`, default from `CARTO_BASEMAP_STYLE`). Every load has a number
+    (`ultimaRichiesta`): stale responses are dropped (avoids duplicate layers). Bottom-left box
+    (`riferimento-dati`): shown hour and run used, ±1h/±24h arrows within the API's
+    `primo`/`ultimo` and a "now" button (`istante = null` = current hour). Rapid clicks: text
+    immediately, request after 250 ms. The old layer stays until the new one arrives
+    (`sostituisciLayer`); reframes only if `limiti` change. "Dati non aggiornati" if `ultimo` is
+    more than 2h in the past.
+  - `grafici.html`: Chart.js 4.5.1 from jsdelivr, `linear` X axis in epoch ms (no date adapter),
+    dashed thresholds tied to the main line (`pairedIndex`). Same window as the map (side from
+    `localStorage`, window aspect ratio).
+
+## Deploy
+
+Google Cloud, region `europe-west1`: two images from `docker/Dockerfile` (`--target web`,
+`--target job`) in Artifact Registry, a Cloud Run service, a Cloud Run Job, Cloud Scheduler and a
+public-read bucket. Details and setup commands in [`docs/architecture.md`](docs/architecture.md).
+
+- CI `.github/workflows/deploy.yml`: **only on `v*` tags**, amd64 only, build + push +
+  `gcloud run deploy` / `gcloud run jobs update` (image only; env, secrets and service accounts are
+  configured once on GCP). Runs in the `production` GitHub environment (manual approval) and
+  authenticates with Workload Identity Federation: no keys in the repository. Repository variables
+  `GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`, `GCP_DEPLOY_SA`.
+- `.github/workflows/ci.yml`: checks on pull requests and branches, no cloud permissions.
+- Cloud Run Job args: to run another day, **repeat `--args` in full** (they replace the args):
+  `gcloud run jobs execute <job> --region europe-west1 --args=manage.py,cams_export,--date,2026-09-20`.
+
+## Configuration (env)
+
+See `.env.example`. Worth remembering:
+- **`CARTO_API_KEY`** is required: URL `.../rastertiles/<style>/{z}/{x}/{y}.png?key=...`
+  (`rastertiles/` prefix and **`key`** param, not `api_key`, otherwise an error watermark). The
+  raster service is being phased out in favour of vector basemaps.
+- `CARTO_BASEMAP_STYLE` (default `dark_all`): **initial** background only, `light_*` → light,
+  anything else → dark.
+- `CAMS_STORAGE`, `COPERNICUS_POLLUTANTS`, `COPERNICUS_SOGLIA_*` (EU thresholds),
+  `COPERNICUS_LATITUDE/LONGITUDE` (default centre).
+- **Deliberate choice:** map and popup compare the **current hour's value** with the threshold,
+  including PM2.5/PM10 whose legal limits are daily means. No 24h rolling mean: the latest value is
+  shown on purpose. The `/info/dati/` page calls the comparison "indicative".

@@ -1,0 +1,133 @@
+<style>
+    .cerca-luogo {
+        position: relative;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .cerca-luogo input {
+        width: 260px;
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 7px 12px;
+        font-size: 13px;
+        font-family: inherit;
+    }
+
+    .cerca-luogo input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .cerca-luogo .centro-attuale {
+        font-size: 13px;
+        color: var(--text-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 220px;
+    }
+
+    .cerca-luogo button {
+        background: var(--bg);
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 6px 10px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .cerca-luogo button:hover {
+        color: var(--text);
+    }
+
+    #risultati-luoghi {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        width: 320px;
+        z-index: 2000;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    #risultati-luoghi:empty {
+        display: none;
+    }
+
+    #risultati-luoghi .risultato {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 12px;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 13px;
+    }
+
+    #risultati-luoghi a.risultato:hover {
+        background: var(--surface-hover);
+    }
+
+    #risultati-luoghi .risultato small {
+        color: var(--text-dim);
+        white-space: nowrap;
+    }
+
+    #risultati-luoghi .vuoto {
+        color: var(--text-dim);
+    }
+
+    @media (max-width: 720px) {
+        header { flex-wrap: wrap; gap: 10px; }
+        .nav-links { margin-left: 12px !important; }
+        .cerca-luogo { width: 100%; }
+        .cerca-luogo input { flex: 1; width: auto; }
+        .cerca-luogo .centro-attuale { display: none; }
+        #risultati-luoghi { left: 0; width: auto; }
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+
+<header>
+    <div class="logo">
+        <div class="logo-icon">C</div>
+        <h1>Coperni <span>Qualità dell'aria</span></h1>
+    </div>
+    <nav class="nav-links">
+        <a href="{% url 'places:map' %}?{{ centro.querystring }}" {% if nav_attiva == 'map' %}class="active"{% endif %}>Mappa</a>
+        <a href="{% url 'places:grafici' %}?{{ centro.querystring }}" {% if nav_attiva == 'grafici' %}class="active"{% endif %}>Grafici</a>
+        <a href="{% url 'pagine:indice' %}?{{ centro.querystring }}" {% if nav_attiva == 'info' %}class="active"{% endif %}>Info</a>
+    </nav>
+    <div class="cerca-luogo">
+        <span class="centro-attuale" title="Centro attuale">{{ centro.etichetta }}</span>
+        <input type="search" name="q" placeholder="Cerca comune o città…" autocomplete="off"
+               aria-label="Cerca comune o città"
+               hx-get="{% url 'luoghi:cerca' %}" hx-trigger="input changed delay:250ms, search"
+               hx-vals='{"da": "{{ request.path }}"}' hx-target="#risultati-luoghi">
+        <button type="button" id="mia-posizione" title="Centra sulla mia posizione">⌖</button>
+        <div id="risultati-luoghi"></div>
+    </div>
+</header>
+
+<script>
+    // la posizione del browser diventa un normale URL con le coordinate, condivisibile
+    document.getElementById('mia-posizione').addEventListener('click', () => {
+        navigator.geolocation?.getCurrentPosition(pos => {
+            const { latitude, longitude } = pos.coords;
+            location.search = `?lat=${latitude.toFixed(5)}&lon=${longitude.toFixed(5)}`;
+        });
+    });
+    // chiudi i risultati cliccando altrove
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.cerca-luogo')) document.getElementById('risultati-luoghi').innerHTML = '';
+    });
+</script>

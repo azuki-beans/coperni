@@ -1,0 +1,89 @@
+name: Build & Deploy (Cloud Run)
+
+# Only when a v* tag is pushed (git tag v1.2.3 && git push origin v1.2.3), never on branch pushes.
+on:
+  push:
+    tags:
+      - "v*"
+
+# Repository variables (Settings → Secrets and variables → Actions → Variables):
+#   GCP_PROJECT_ID     GCP project
+#   GCP_WIF_PROVIDER   projects/<number>/locations/global/workloadIdentityPools/github/providers/github
+#   GCP_DEPLOY_SA      deploy service account (github-deploy@<project>.iam.gserviceaccount.com)
+# Workload Identity Federation: no JSON keys anywhere. GCP only accepts tokens issued to this
+# repository's "production" environment, which requires a manual approval (see docs/architecture.md).
+env:
+  REGION: europe-west1
+  REGISTRY: europe-west1-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/coperni
+
+permissions: {}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Log in to Artifact Registry
+        run: gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Cloud Run is amd64 only: no QEMU, no multi-arch
+      - name: Build & push web
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: web
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/web:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/web:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+      - name: Build & push job
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: job
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/job:${{ github.ref_name }}
+            ${{ env.REGISTRY }}/job:latest
+          cache-from: type=gha,scope=job
+          cache-to: type=gha,mode=max,scope=job
+
+      # Configuration (env, secrets, service accounts, scheduler) is set up once on GCP
+      # (docs/architecture.md): here only the image changes
+      - name: Deploy web
+        run: >
+          gcloud run deploy coperni-web
+          --image ${{ env.REGISTRY }}/web:${{ github.ref_name }}
+          --region ${{ env.REGION }} --project ${{ vars.GCP_PROJECT_ID }} --quiet
+
+      - name: Update job
+        run: >
+          gcloud run jobs update coperni-job
+          --image ${{ env.REGISTRY }}/job:${{ github.ref_name }}
+          --region ${{ env.REGION }} --project ${{ vars.GCP_PROJECT_ID }} --quiet

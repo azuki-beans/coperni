@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coperni — Grafici qualità dell'aria</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-hover: #242836;
+            --border: #2e3346;
+            --text: #e1e4ed;
+            --text-dim: #8b90a5;
+            --accent: #6c8cff;
+            --radius: 10px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .logo h1 span {
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-left: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            margin-left: 32px;
+        }
+
+        .nav-links a {
+            padding: 6px 14px;
+            border-radius: var(--radius);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        .nav-links a.active {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        /* ── Content ── */
+        .content {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chart-header h2 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .chart-header .range-info {
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            position: relative;
+            flex: 1;
+            min-height: 420px;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .empty-state, .loading-state {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        .empty-state[hidden], .loading-state[hidden] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+{% include "_header.html" %}
+
+<!-- ── Content ── -->
+<div class="content">
+    <div class="chart-header">
+        <h2>Andamento inquinanti · {{ centro.etichetta }}</h2>
+        <div class="range-info" id="range-info"></div>
+    </div>
+    <div class="chart-card">
+        <div class="loading-state" id="loading-state">Caricamento…</div>
+        <div class="empty-state" id="empty-state" hidden>Nessun dato disponibile per il periodo.</div>
+        <canvas id="pollution-chart"></canvas>
+    </div>
+</div>
+
+<script>
+    // Colori per inquinante — stessa palette usata altrove nel progetto per coerenza visiva.
+    const POLLUTANT_COLORS = {
+        pm2p5: '#f87171',
+        pm10: '#fb923c',
+        no2: '#facc15',
+        o3: '#4ade80',
+        so2: '#38bdf8',
+    };
+    const FALLBACK_COLORS = ['#a78bfa', '#f472b6', '#2dd4bf', '#fbbf24'];
+
+    function colorFor(inquinante, index) {
+        return POLLUTANT_COLORS[inquinante] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+    }
+
+    function formatTick(value) {
+        const d = new Date(value);
+        return d.toLocaleString('it-IT', {
+            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        });
+    }
+
+    let chart = null;
+
+    async function loadSerie() {
+        const loadingState = document.getElementById('loading-state');
+        const emptyState = document.getElementById('empty-state');
+        const rangeInfo = document.getElementById('range-info');
+        loadingState.hidden = false;
+        emptyState.hidden = true;
+
+        try {
+            // stessa finestra della mappa: area scelta lì e proporzioni dello schermo
+            let lato = '{{ lati.0 }}';
+            try { lato = localStorage.getItem('coperni.lato') || lato; } catch (e) {}
+            const params = new URLSearchParams({
+                lat: '{{ centro_latitudine }}', lon: '{{ centro_longitudine }}', lato,
+                aspect: (window.innerWidth / Math.max(window.innerHeight - 60, 1)).toFixed(3),
+            });
+            const res = await fetch(`{% url 'copernicus:serie' %}?${params}`);
+            const data = await res.json();
+            loadingState.hidden = true;
+
+            const inquinanti = Object.keys(data.serie || {});
+            if (inquinanti.length === 0) {
+                emptyState.hidden = false;
+                return;
+            }
+
+            const tempi = inquinanti.flatMap((c) => data.serie[c].punti.map((p) => p.t)).sort();
+            const fmt = (iso) => new Date(iso).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+            rangeInfo.textContent = `${fmt(tempi[0])} — ${fmt(tempi[tempi.length - 1])} · media dell'area mostrata in mappa`;
+
+            // Per ogni inquinante: dataset principale + (se la soglia è configurata) un dataset
+            // "soglia" con una linea tratteggiata dello stesso colore, agganciato al principale
+            // (stesso pairedIndex) così il toggle in legenda nasconde/mostra entrambi insieme.
+            const datasets = [];
+            inquinanti.forEach((inquinante, i) => {
+                const serie = data.serie[inquinante];
+                const color = colorFor(inquinante, i);
+                const punti = serie.punti.map((p) => ({ x: new Date(p.t).getTime(), y: p.v }));
+                const mainIndex = datasets.length;
+
+                datasets.push({
+                    label: `${inquinante.toUpperCase()} (${serie.unita})`,
+                    data: punti,
+                    borderColor: color,
+                    backgroundColor: color,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.15,
+                });
+
+                if (serie.soglia != null && punti.length > 0) {
+                    datasets.push({
+                        label: `Soglia ${inquinante.toUpperCase()}`,
+                        data: [
+                            { x: punti[0].x, y: serie.soglia },
+                            { x: punti[punti.length - 1].x, y: serie.soglia },
+                        ],
+                        borderColor: color,
+                        borderDash: [6, 4],
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0,
+                        isThreshold: true,
+                        pairedIndex: mainIndex,
+                    });
+                    datasets[mainIndex].pairedIndex = datasets.length - 1;
+                }
+            });
+
+            const ctx = document.getElementById('pollution-chart').getContext('2d');
+            if (chart) {
+                chart.destroy();
+            }
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            grid: { color: '#2e3346' },
+                            ticks: {
+                                color: '#8b90a5',
+                                maxTicksLimit: 14,
+                                callback: formatTick,
+                            },
+                        },
+                        y: {
+                            grid: { color: '#2e3346' },
+                            ticks: { color: '#8b90a5' },
+                            title: { display: true, text: 'µg/m³', color: '#8b90a5' },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e1e4ed',
+                                // le soglie non hanno una voce propria in legenda: seguono il
+                                // toggle della linea principale a cui sono agganciate (sotto).
+                                filter: (item, data) => !data.datasets[item.datasetIndex].isThreshold,
+                            },
+                            onClick: (e, legendItem, legend) => {
+                                const chart = legend.chart;
+                                Chart.defaults.plugins.legend.onClick.call(chart, e, legendItem, legend);
+                                const paired = chart.data.datasets[legendItem.datasetIndex].pairedIndex;
+                                if (paired !== undefined) {
+                                    chart.getDatasetMeta(paired).hidden = chart.getDatasetMeta(legendItem.datasetIndex).hidden;
+                                    chart.update();
+                                }
+                            },
+                        },
+                        tooltip: {
+                            filter: (item) => !item.dataset.isThreshold,
+                            callbacks: {
+                                title: (items) => formatTick(items[0].parsed.x),
+                            },
+                        },
+                    },
+                },
+            });
+        } catch (err) {
+            loadingState.hidden = true;
+            emptyState.hidden = false;
+            emptyState.textContent = 'Errore nel caricamento dei dati.';
+        }
+    }
+
+    loadSerie();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+{% if ultima_corsa %}
+<div class="nota">
+    Ultima previsione disponibile: <strong>{{ ultima_corsa|date:"l j F Y"|lower }}</strong>.
+</div>
+{% endif %}
+
+<h3>Una nuova previsione ogni giorno</h3>
+<p>
+    CAMS calcola una nuova previsione ogni giorno, partendo dalla situazione della mezzanotte
+    (ora UTC, cioè le 2 di notte in estate e l'1 in inverno). Ogni previsione copre
+    <strong>le 48 ore successive</strong>, ora per ora.
+</p>
+<p>
+    La previsione è garantita disponibile entro le 8 del mattino UTC. Coperni la scarica
+    subito dopo, alle 8:30 UTC:
+</p>
+<ul>
+    <li>verso le <strong>10:30</strong> con l'ora legale (estate);</li>
+    <li>verso le <strong>9:30</strong> con l'ora solare (inverno).</li>
+</ul>
+<p>
+    Servono pochi minuti per scaricarla e prepararla, poi è subito visibile sul sito.
+</p>
+
+<h3>Cosa mostra la mappa</h3>
+<p>
+    All'apertura la mappa mostra <strong>la previsione per l'ora in corso</strong>, presa dalla
+    previsione più recente: allo scoccare di ogni ora i valori cambiano. In basso a sinistra sulla
+    mappa trovi il giorno e l'ora a cui si riferiscono i colori e la data della previsione usata.
+</p>
+<p>
+    Con le frecce accanto alla data puoi spostarti di un'ora (‹ ›) o di un giorno (« »): in
+    avanti fino alla fine dell'ultima previsione (circa due giorni), indietro fino a
+    {{ giorni_conservati }} giorni fa. Per ogni ora viene usata la previsione più recente che la
+    copre. Il pulsante <strong>adesso</strong> riporta all'ora corrente.
+</p>
+<p>
+    Al mattino, prima dell'aggiornamento, la mappa usa ancora la previsione del giorno prima (che
+    copre comunque anche oggi): è normale.
+</p>
+
+<h3>Cosa mostrano i grafici</h3>
+<ul>
+    <li><strong>Passato</strong>: per ciascuno degli ultimi 7 giorni, le prime 24 ore della
+        previsione di quel giorno (quella più aggiornata per ogni ora).</li>
+    <li><strong>Futuro</strong>: tutta l'ultima previsione, fino a 48 ore.</li>
+</ul>
+<p class="dim">
+    Le previsioni restano disponibili per {{ giorni_conservati }} giorni, poi vengono cancellate.
+</p>
+{% endblock %}
