@@ -131,13 +131,9 @@ CDS_API_KEY = os.environ.get('CDS_API_KEY')
 # (bucket pubblico in lettura, il web lo legge via HTTPS) oppure una cartella locale in sviluppo.
 CAMS_STORAGE = os.environ.get('CAMS_STORAGE', str(BASE_DIR / 'data' / 'cams'))
 
-# CARTO ora richiede una API key anche per i basemap tile gratuiti (dark_all/light_all su
-# basemaps.cartocdn.com) — senza non vengono più serviti. Chiave gratuita da carto.com.
-CARTO_API_KEY = os.environ.get('CARTO_API_KEY')
-
-# Stile basemap CARTO: 'dark_all' o 'light_all' (altri disponibili: light_nolabels,
-# dark_nolabels, light_only_labels, dark_only_labels).
-CARTO_BASEMAP_STYLE = os.environ.get('CARTO_BASEMAP_STYLE', 'dark_all')
+# Sfondo iniziale della mappa (OpenFreeMap, niente chiave): 'dark' o 'light'. L'utente lo cambia
+# dalla mappa e la scelta resta nel browser.
+MAP_BASEMAP = os.environ.get('MAP_BASEMAP', 'dark')
 
 # Centro proposto quando l'URL non ne indica uno. Default: Mezzolombardo (TN)
 COPERNICUS_LATITUDE = float(os.environ.get('COPERNICUS_LATITUDE', '46.215022'))

@@ -134,7 +134,9 @@ the reasoning behind it and how to deploy your own copy.
     the grid, cached until the top of the hour.
   - `GET /copernicus/api/serie/?lat&lon&lato&aspect`: hourly area averages for the charts,
     cached 15 min.
-- Front end: Django templates, htmx (place search), Leaflet with CARTO raster basemaps, Chart.js.
+- Front end: Django templates, htmx (place search), Leaflet, Chart.js. Basemap: [OpenFreeMap](https://openfreemap.org)
+  vector tiles (no key, no usage limits) drawn by MapLibre GL under Leaflet, split in two: the
+  base below the cells, place labels above them, in the page language.
   Cell textures are SVG patterns, so the map uses Leaflet's SVG renderer.
 - Languages: Django i18n with the language in the URL: English without prefix (`/places/`),
   Italian under `/it/` (`/it/places/`), `hreflang` links for search engines. `/` redirects to the
@@ -150,11 +152,10 @@ htmx · Bootstrap · Google Cloud Run, Cloud Scheduler, Cloud Storage.
 ## Running locally
 
 Requirements: Python 3.14, [Poetry](https://python-poetry.org/), an
-[ADS API key](https://ads.atmosphere.copernicus.eu/how-to-api) (for the export only) and a
-[CARTO](https://carto.com/) API key for basemap tiles.
+[ADS API key](https://ads.atmosphere.copernicus.eu/how-to-api) (for the export only).
 
 ```bash
-cp .env.example .env                        # fill in CDS_API_KEY, CARTO_API_KEY, ...
+cp .env.example .env                        # fill in CDS_API_KEY, ...
 poetry install --with job,luoghi            # main = web only; job = CAMS export; luoghi = places build
 
 poetry run python manage.py migrate
@@ -188,8 +189,7 @@ All configuration is done with environment variables (see [`.env.example`](.env.
 |---|---|
 | `CDS_API_URL`, `CDS_API_KEY` | ADS credentials (export job only) |
 | `CAMS_STORAGE` | `gs://bucket/prefix` (read by the web over public HTTPS) or a local folder; default `data/cams` |
-| `CARTO_API_KEY` | required for basemap tiles |
-| `CARTO_BASEMAP_STYLE` | initial basemap, `dark_all` (default) or `light_all` |
+| `MAP_BASEMAP` | initial basemap, `dark` (default) or `light` |
 | `COPERNICUS_POLLUTANTS` | default `pm2p5,pm10,no2,o3,so2` |
 | `COPERNICUS_SOGLIA_*` | thresholds per pollutant (µg/m³) |
 | `COPERNICUS_LATITUDE`, `COPERNICUS_LONGITUDE` | default map centre |
@@ -209,7 +209,7 @@ security problems privately as described in [SECURITY.md](SECURITY.md).
   Data used under the [Copernicus licence](https://apps.ecmwf.int/datasets/licences/copernicus/).
 - **Places**: [ISTAT](https://www.istat.it/) (administrative boundaries and codes) and
   [GeoNames](https://www.geonames.org/) (CC BY 4.0).
-- **Basemaps**: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors ©
-  [CARTO](https://carto.com/attributions).
+- **Basemaps**: [OpenFreeMap](https://openfreemap.org) © [OpenMapTiles](https://openmaptiles.org),
+  data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 
 The code is released under the [Apache License 2.0](LICENSE).

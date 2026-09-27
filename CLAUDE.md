@@ -126,9 +126,9 @@ done by the bucket **lifecycle rule** (21 days).
     `tratteggio` (hatching: line width ∝ ratio) — `userSpaceOnUse` SVG patterns created on demand
     in `<svg id="trame">` (20 steps) and used as `fillColor: url(#id)` (needs the SVG renderer, not
     canvas) — or `trasparenza` (opacity `alphaForRatio`, 0.08→0.75). "Intensità" slider multiplies
-    opacity. CARTO basemap split in two (`<style>_nolabels` below, `<style>_only_labels` in the
+    opacity. OpenFreeMap basemap (see Basemap below) split in two: base below, labels in the
     `labels` pane above); dark/light **"Sfondo"** selector (`impostaSfondo` in `_base_map.html`,
-    `localStorage` `coperni.sfondo`, default from `CARTO_BASEMAP_STYLE`). Every load has a number
+    `localStorage` `coperni.sfondo`, default from `MAP_BASEMAP`). Every load has a number
     (`ultimaRichiesta`): stale responses are dropped (avoids duplicate layers). Bottom-left box
     (`riferimento-dati`): shown hour and run used, ±1h/±24h arrows within the API's
     `primo`/`ultimo` and a "now" button (`istante = null` = current hour). Rapid clicks: text
@@ -160,6 +160,22 @@ done by the bucket **lifecycle rule** (21 days).
   `PAGINE` and pollutant names are `gettext_lazy`.
 - With `runserver --noreload` templates stay cached (cached loader): restart after editing them.
 
+## Basemap (OpenFreeMap)
+
+- Replaced CARTO raster tiles (free tier 5M tiles/month ≈ 80k visits, key exposed in the page) with
+  [OpenFreeMap](https://openfreemap.org) vector tiles: no key, no limits, no SLA (one maintainer,
+  donations). Styles `dark` and `positron`, fetched from `tiles.openfreemap.org/styles/<name>`.
+- Drawn by **MapLibre GL 5.x** under Leaflet with `@maplibre/maplibre-gl-leaflet` (pinned on
+  jsdelivr). MapLibre 6 is ESM-only and the plugin's UMD build needs `window.maplibregl`: stay on
+  5.x unless the plugin changes.
+- `_base_map.html:stiliPer()` splits each style: non-symbol layers → layer in `tilePane`, symbol
+  layers → layer in the `labels` pane (above the cells). Road names/shields
+  (`transportation`, `transportation_name`) are dropped; place labels use
+  `coalesce(name:<page lang>, original)`. `ritoccaScuro()` brightens and enlarges place labels and
+  dims roads in the dark style (`scala()` multiplies sizes inside zoom expressions: MapLibre
+  forbids wrapping `zoom` expressions).
+- If OpenFreeMap disappears: self-host the same styles on PMTiles (a Europe extract on a bucket).
+
 ## Deploy
 
 Google Cloud, region `europe-west1`: two images from `docker/Dockerfile` (`--target web`,
@@ -178,11 +194,7 @@ public-read bucket. Details and setup commands in [`docs/architecture.md`](docs/
 ## Configuration (env)
 
 See `.env.example`. Worth remembering:
-- **`CARTO_API_KEY`** is required: URL `.../rastertiles/<style>/{z}/{x}/{y}.png?key=...`
-  (`rastertiles/` prefix and **`key`** param, not `api_key`, otherwise an error watermark). The
-  raster service is being phased out in favour of vector basemaps.
-- `CARTO_BASEMAP_STYLE` (default `dark_all`): **initial** background only, `light_*` → light,
-  anything else → dark.
+- `MAP_BASEMAP` (default `dark`): **initial** background only, `light` or `dark`; no key needed.
 - `CAMS_STORAGE`, `COPERNICUS_POLLUTANTS`, `COPERNICUS_SOGLIA_*` (EU thresholds),
   `COPERNICUS_LATITUDE/LONGITUDE` (default centre).
 - **Deliberate choice:** map and popup compare the **current hour's value** with the threshold,

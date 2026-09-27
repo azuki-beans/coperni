@@ -59,7 +59,7 @@ Source strings are in English. You need GNU gettext (`brew install gettext`, `ap
 
 Coperni redistributes and displays Copernicus data. Any change must keep the attribution on the
 site ("Generated using Copernicus Atmosphere Monitoring Service information") and the credits for
-ISTAT, GeoNames, OpenStreetMap and CARTO.
+ISTAT, GeoNames, OpenStreetMap, OpenMapTiles and OpenFreeMap.
 
 By contributing you agree that your contributions are licensed under the
 [Apache License 2.0](LICENSE).

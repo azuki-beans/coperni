@@ -23,6 +23,7 @@ bucket, and a stateless web service reads just the slice it needs with DuckDB.
   Browser ─────────►│ Cloud Run service          │  Django + DuckDB + SQLite (places)
                     │ 0–3 instances · 512 MiB    │  no credentials needed
                     └────────────────────────────┘
+  Browser ─────────► OpenFreeMap (basemap vector tiles, public, no key)
 ```
 
 ## Components
@@ -34,7 +35,7 @@ bucket, and a stateless web service reads just the slice it needs with DuckDB.
 | **Cloud Storage** | Stores the Parquet files and `indice.json` | Public read (Copernicus data is open; attribution is on the site). Lifecycle rule deletes old `.parquet` files. |
 | **Cloud Run service** | Serves the site and the JSON APIs | Image `--target web`. Scales to zero; concurrency 8, gunicorn with 1 worker × 8 threads so all requests share one DuckDB metadata cache. |
 | **Artifact Registry** | Hosts the `web` and `job` images | Pushed by GitHub Actions on `v*` tags. |
-| **Secret Manager** | `DJANGO_SECRET_KEY`, `CARTO_API_KEY`, ADS key | Mounted as env vars; nothing secret in the images or the repository. |
+| **Secret Manager** | `DJANGO_SECRET_KEY`, ADS key | Mounted as env vars; nothing secret in the images or the repository. |
 
 ## Why this shape
 
@@ -90,14 +91,13 @@ gcloud storage buckets update gs://BUCKET --lifecycle-file=lifecycle.json
 ```bash
 printf '%s' "<ads-key>"    | gcloud secrets create cds-api-key       --data-file=- --project PROJECT
 printf '%s' "<django-key>" | gcloud secrets create django-secret-key --data-file=- --project PROJECT
-printf '%s' "<carto-key>"  | gcloud secrets create carto-api-key     --data-file=- --project PROJECT
 ```
 
 One service account per role, each with only what it needs:
 
 | Service account | Permissions |
 |---|---|
-| `coperni-web` | `secretAccessor` on `django-secret-key` and `carto-api-key` |
+| `coperni-web` | `secretAccessor` on `django-secret-key` |
 | `coperni-job` | `secretAccessor` on `cds-api-key`, `objectAdmin` on the bucket |
 | `coperni-scheduler` | `run.invoker` on the job |
 | `github-deploy` | deploy rights on the service and the job, `artifactregistry.writer`, `iam.serviceAccountUser` on `coperni-web` and `coperni-job` |
@@ -123,7 +123,7 @@ gcloud run deploy coperni-web --region REGION --project PROJECT \
   --service-account coperni-web@PROJECT.iam.gserviceaccount.com \
   --allow-unauthenticated --memory 512Mi --concurrency 8 --min-instances 0 --max-instances 3 \
   --set-env-vars CAMS_STORAGE=gs://BUCKET/cams,DJANGO_DEBUG=False,DJANGO_ALLOWED_HOSTS=your.domain,CSRF_TRUSTED_ORIGINS=https://your.domain \
-  --set-secrets DJANGO_SECRET_KEY=django-secret-key:latest,CARTO_API_KEY=carto-api-key:latest
+  --set-secrets DJANGO_SECRET_KEY=django-secret-key:latest
 ```
 
 The first images can be built with Cloud Build (`.gcloudignore` is included) or locally on an
