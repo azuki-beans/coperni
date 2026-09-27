@@ -44,4 +44,6 @@ jobs:
             || { echo "::error::locale/ is out of date: run makemessages and translate"; exit 1; }
           untranslated=$(msgattrib --untranslated --no-obsolete locale/it/LC_MESSAGES/django.po | grep -c '^msgid' || true)
           [ "$untranslated" -le 1 ] || { echo "::error::untranslated strings in it/django.po"; exit 1; }
+          fuzzy=$(msgattrib --only-fuzzy --no-obsolete locale/it/LC_MESSAGES/django.po | grep -c '^msgid' || true)
+          [ "$fuzzy" -eq 0 ] || { echo "::error::fuzzy (unchecked) translations in it/django.po"; exit 1; }
           msgfmt --check -o /dev/null locale/it/LC_MESSAGES/django.po

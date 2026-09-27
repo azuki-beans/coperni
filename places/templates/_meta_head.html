@@ -1,0 +1,25 @@
+{% load i18n %}{% comment %}
+Metadati comuni a tutte le pagine (context processor config.sito.sito): descrizione, URL canonico,
+anteprima dei link sui social, favicon, versioni nelle altre lingue, statistiche Umami.
+Si aspetta titolo_pagina dal template che lo include.
+{% endcomment %}
+{% translate "Air quality forecasts from Copernicus on a map, for every town in Italy and every city in Europe: now and for the next 48 hours." as descrizione %}
+    <meta name="description" content="{{ descrizione }}">
+    <link rel="canonical" href="{{ url_canonico }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,{{ favicon_svg|urlencode }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Coperni">
+    <meta property="og:locale" content="{% if LANGUAGE_CODE == 'it' %}it_IT{% else %}en_GB{% endif %}">
+    <meta property="og:title" content="{{ titolo_pagina }}">
+    <meta property="og:description" content="{{ descrizione }}">
+    <meta property="og:url" content="{{ url_canonico }}">
+    <meta property="og:image" content="{{ immagine_anteprima }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{% translate "Map of air quality forecasts over northern Italy" %}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ titolo_pagina }}">
+    <meta name="twitter:description" content="{{ descrizione }}">
+    <meta name="twitter:image" content="{{ immagine_anteprima }}">
+    {% include "_lingue_head.html" %}
+    {% if umami_src and umami_website_id %}<script defer src="{{ umami_src }}" data-website-id="{{ umami_website_id }}"></script>{% endif %}

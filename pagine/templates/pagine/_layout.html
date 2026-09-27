@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titolo }} — Coperni</title>
-    {% include "_lingue_head.html" %}
+    {% with titolo_pagina=titolo %}
+    <title>{{ titolo_pagina }} — Coperni</title>
+    {% include "_meta_head.html" %}
+    {% endwith %}
     <style>
         *, *::before, *::after {
             margin: 0;

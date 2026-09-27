@@ -40,4 +40,10 @@
     remembers the last place you looked at, and one your language if you pick it from the menu.
     Your preferences (basemap, style, area size) stay in your browser.
 </p>
+<p>
+    {% if umami_src and umami_website_id %}We count visits anonymously with
+    <a href="https://umami.is" rel="noopener">Umami</a>, without cookies and without storing personal
+    data. {% endif %}The map background is loaded from OpenFreeMap and the page libraries from
+    jsDelivr: your browser connects to them directly.
+</p>
 {% endblock %}

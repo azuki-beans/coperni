@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coperni — {% translate "Air quality charts" %}</title>
-    {% include "_lingue_head.html" %}
+    {% if centro.e_luogo %}{% blocktranslate with luogo=centro.etichetta asvar titolo_pagina %}Air quality charts: {{ luogo }}{% endblocktranslate %}{% else %}{% translate "Air quality charts" as titolo_pagina %}{% endif %}
+    <title>{{ titolo_pagina }} — Coperni</title>
+    {% include "_meta_head.html" %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <style>
         *, *::before, *::after {

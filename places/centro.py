@@ -29,6 +29,11 @@ class Centro:
     def querystring(self) -> str:
         return urlencode(self.query)
 
+    @property
+    def e_luogo(self) -> bool:
+        """Comune o città con un nome (non semplici coordinate): va nel titolo della pagina."""
+        return 'comune' in self.query or 'citta' in self.query
+
 
 def _coordinate(lat: str | None, lon: str | None) -> Centro | None:
     try:
