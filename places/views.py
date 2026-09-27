@@ -8,14 +8,6 @@ from places.centro import centro_da_richiesta, ricorda
 from places.testi import testi_js
 
 
-def _carto_style_prefix():
-    style = settings.CARTO_BASEMAP_STYLE
-    for suffix in ("_all", "_nolabels", "_only_labels", "_labels_under"):
-        if style.endswith(suffix):
-            return style.removesuffix(suffix)
-    return style
-
-
 def _contesto(request, nav_attiva):
     centro = centro_da_richiesta(request)
     return centro, {
@@ -35,11 +27,8 @@ def _contesto(request, nav_attiva):
 
 def map_view(request):
     centro, context = _contesto(request, "map")
-    context |= {
-        "carto_api_key": settings.CARTO_API_KEY,
-        # sfondo iniziale (dark/light): l'utente lo cambia dalla mappa, la scelta resta nel browser
-        "carto_sfondo": "light" if _carto_style_prefix() == "light" else "dark",
-    }
+    # sfondo iniziale (dark/light): l'utente lo cambia dalla mappa, la scelta resta nel browser
+    context["sfondo"] = "light" if settings.MAP_BASEMAP == "light" else "dark"
     return ricorda(render(request, "map_view.html", context), centro)
 
 
