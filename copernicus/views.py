@@ -30,14 +30,14 @@ def api_griglia(request):
     parametri = _finestra(request)
     inquinante = request.GET.get('inquinante', '')
     if parametri is None or inquinante not in settings.COPERNICUS_POLLUTANTS:
-        return JsonResponse({'error': 'parametri non validi'}, status=400)
+        return JsonResponse({'error': 'invalid parameters'}, status=400)
 
     istante = None
     if request.GET.get('istante'):
         try:
             istante = datetime.fromisoformat(request.GET['istante'])
         except ValueError:
-            return JsonResponse({'error': 'istante non valido'}, status=400)
+            return JsonResponse({'error': 'invalid istante'}, status=400)
         if istante.tzinfo is None:
             istante = istante.replace(tzinfo=UTC)
 
@@ -55,7 +55,7 @@ def api_serie(request):
     """Media oraria della finestra per ogni inquinante: storico 7 giorni + previsione 48h."""
     parametri = _finestra(request)
     if parametri is None:
-        return JsonResponse({'error': 'parametri non validi'}, status=400)
+        return JsonResponse({'error': 'invalid parameters'}, status=400)
 
     risposta = JsonResponse(griglia.serie(*parametri))
     risposta['Cache-Control'] = 'public, max-age=900'

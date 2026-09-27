@@ -82,6 +82,25 @@
         white-space: nowrap;
     }
 
+    .lingue {
+        display: flex;
+        gap: 2px;
+        margin-left: 8px;
+    }
+
+    .lingue a {
+        padding: 5px 7px;
+        border-radius: 6px;
+        color: var(--text-dim);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .lingue a:hover { color: var(--text); }
+    .lingue a.active { color: var(--text); background: var(--surface-hover); }
+
     #risultati-luoghi .vuoto {
         color: var(--text-dim);
     }
@@ -89,33 +108,41 @@
     @media (max-width: 720px) {
         header { flex-wrap: wrap; gap: 10px; }
         .nav-links { margin-left: 12px !important; }
-        .cerca-luogo { width: 100%; }
+        .cerca-luogo { width: 100%; order: 2; }
+        .lingue { order: 1; margin-left: auto; }
         .cerca-luogo input { flex: 1; width: auto; }
         .cerca-luogo .centro-attuale { display: none; }
         #risultati-luoghi { left: 0; width: auto; }
     }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+{% load i18n %}
 
 <header>
     <div class="logo">
         <div class="logo-icon">C</div>
-        <h1>Coperni <span>Qualità dell'aria</span></h1>
+        <h1>Coperni <span>{% translate "Air quality" %}</span></h1>
     </div>
     <nav class="nav-links">
-        <a href="{% url 'places:map' %}?{{ centro.querystring }}" {% if nav_attiva == 'map' %}class="active"{% endif %}>Mappa</a>
-        <a href="{% url 'places:grafici' %}?{{ centro.querystring }}" {% if nav_attiva == 'grafici' %}class="active"{% endif %}>Grafici</a>
-        <a href="{% url 'pagine:indice' %}?{{ centro.querystring }}" {% if nav_attiva == 'info' %}class="active"{% endif %}>Info</a>
+        <a href="{% url 'places:map' %}?{{ centro.querystring }}" {% if nav_attiva == 'map' %}class="active"{% endif %}>{% translate "Map" %}</a>
+        <a href="{% url 'places:grafici' %}?{{ centro.querystring }}" {% if nav_attiva == 'grafici' %}class="active"{% endif %}>{% translate "Charts" %}</a>
+        <a href="{% url 'pagine:indice' %}?{{ centro.querystring }}" {% if nav_attiva == 'info' %}class="active"{% endif %}>{% translate "About" %}</a>
     </nav>
     <div class="cerca-luogo">
-        <span class="centro-attuale" title="Centro attuale">{{ centro.etichetta }}</span>
-        <input type="search" name="q" placeholder="Cerca comune o città…" autocomplete="off"
-               aria-label="Cerca comune o città"
+        <span class="centro-attuale" title="{% translate "Current centre" %}">{{ centro.etichetta }}</span>
+        <input type="search" name="q" placeholder="{% translate "Search a town or city…" %}" autocomplete="off"
+               aria-label="{% translate "Search a town or city" %}"
                hx-get="{% url 'luoghi:cerca' %}" hx-trigger="input changed delay:250ms, search"
                hx-vals='{"da": "{{ request.path }}"}' hx-target="#risultati-luoghi">
-        <button type="button" id="mia-posizione" title="Centra sulla mia posizione">⌖</button>
+        <button type="button" id="mia-posizione" title="{% translate "Centre on my location" %}">⌖</button>
         <div id="risultati-luoghi"></div>
     </div>
+    <nav class="lingue" aria-label="{% translate "Language" %}">
+        {% for l in lingue_alternative %}
+        <a href="{% url 'lingua' l.codice %}?next={{ request.get_full_path|urlencode }}" hreflang="{{ l.codice }}" lang="{{ l.codice }}"
+           title="{{ l.nome }}" {% if l.attiva %}class="active" aria-current="true"{% endif %}>{{ l.codice }}</a>
+        {% endfor %}
+    </nav>
 </header>
 
 <script>

@@ -7,8 +7,8 @@ with code in this repository.
 
 Coperni shows air quality (**CAMS** forecasts, Copernicus Atmosphere Data Store) on a Leaflet map
 centred on an Italian municipality, a European city or any coordinates, plus a chart of the trend.
-Public, read-only site, no users. The UI, code identifiers and code comments are in Italian; the
-repository documentation is in English.
+Public, read-only site, no users. UI in English (default) and Italian; code identifiers and code
+comments are in Italian; the repository documentation is in English.
 
 Architecture (see [`docs/architecture.md`](docs/architecture.md)):
 
@@ -98,10 +98,10 @@ done by the bucket **lifecycle rule** (21 days).
   - API: `GET /copernicus/api/griglia/?lat&lon&inquinante&lato&aspect[&istante=ISO]` and
     `GET /copernicus/api/serie/?lat&lon&lato&aspect`, with `Cache-Control` (grid until the top of
     the hour, series 15 min).
-- **`pagine`**: user documentation at `/info/` ("Info" in the menu). `PAGINE` in `views.py` =
-  `slug -> title`; new page = template `pagine/<slug>.html` + dictionary entry. Thresholds and
+- **`pagine`**: user documentation at `/info/` ("About" / "Info" in the menu). `PAGINE` in `views.py` =
+  `slug -> title`; new page = template `pagine/<lang>/<slug>.html` for every language + dictionary entry. Thresholds and
   pollutants read from settings, "latest forecast" from `griglia.indice()`. The update times
-  (08:30 UTC) are written in `aggiornamenti.html`: update them if the scheduler changes.
+  (08:30 UTC) are written in `<lang>/aggiornamenti.html`: update them if the scheduler changes.
 - **`luoghi`**: `Comune` (ISTAT code, name possibly bilingual "Bolzano/Bozen", province code,
   region, DEM 2015 altitudes, population, **centroid** — no boundaries) and `Citta` (GeoNames
   cities15000 in the CAMS domain, Italy excluded). CSVs versioned in `luoghi/dati/`, loaded by
@@ -133,11 +133,32 @@ done by the bucket **lifecycle rule** (21 days).
     (`riferimento-dati`): shown hour and run used, ±1h/±24h arrows within the API's
     `primo`/`ultimo` and a "now" button (`istante = null` = current hour). Rapid clicks: text
     immediately, request after 250 ms. The old layer stays until the new one arrives
-    (`sostituisciLayer`); reframes only if `limiti` change. "Dati non aggiornati" if `ultimo` is
+    (`sostituisciLayer`); reframes only if `limiti` change. "Data not up to date" if `ultimo` is
     more than 2h in the past.
   - `grafici.html`: Chart.js 4.5.1 from jsdelivr, `linear` X axis in epoch ms (no date adapter),
     dashed thresholds tied to the main line (`pairedIndex`). Same window as the map (side from
     `localStorage`, window aspect ratio).
+
+## Languages (i18n)
+
+- `LANGUAGE_CODE = 'en'`, `LANGUAGES` en/it, `LocaleMiddleware`. Pages under `i18n_patterns`
+  with `prefix_default_language=False`: English at `/places/`, Italian at `/it/places/`
+  (`/en/…` does not exist). The JSON APIs (`/copernicus/api/…`) are outside, same in every
+  language, errors in English.
+- `config/lingue.py`: `home` (`/` → map in the language from the `django_language` cookie or
+  `Accept-Language`, query string kept), `cambia` (`/lingua/<code>/?next=` sets the cookie and
+  redirects to the translated URL), context processor `lingue` (`lingue_alternative` for the
+  EN/IT switcher in `_header.html` and the `hreflang` links in `_lingue_head.html`).
+- Source strings in English with `{% translate %}`; Italian in `locale/it/LC_MESSAGES/django.po`.
+  `.mo` are git-ignored: compiled in the `translations` stage of the Dockerfile (gettext stays out
+  of the final image) or locally with `compilemessages`. CI checks the `.po` is up to date and
+  complete.
+- JavaScript texts: `places/testi.py:testi_js()` (gettext, `{placeholder}` syntax) → view context
+  `testi` → `json_script` → `T` and `testo(key, values)` in the templates. Dates and numbers with
+  `LOCALE` (`it-IT` or `en-GB`) from `<html lang>`; Chart.js gets `locale` too.
+- About pages: one template per language, `pagine/templates/pagine/<lang>/<slug>.html`; titles in
+  `PAGINE` and pollutant names are `gettext_lazy`.
+- With `runserver --noreload` templates stay cached (cached loader): restart after editing them.
 
 ## Deploy
 

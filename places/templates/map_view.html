@@ -1,4 +1,5 @@
 {% extends "_base_map.html" %}
+{% load i18n %}
 
 {% block extra_css %}
         /* Pollution control */
@@ -229,36 +230,36 @@
 
 {% block overlay %}
     <div class="pollution-control" id="pollution-control">
-        <label for="pollutant-select">Qualità dell'aria</label>
+        <label for="pollutant-select">{% translate "Air quality" %}</label>
         <select id="pollutant-select">
             {% for p in copernicus_pollutants %}
             <option value="{{ p }}">{{ p|upper }}</option>
             {% endfor %}
-            <option value="">Nessuno</option>
+            <option value="">{% translate "None" %}</option>
         </select>
         <div class="pollution-opacity">
-            <label for="lato-select" style="margin:0">Area</label>
+            <label for="lato-select" style="margin:0">{% translate "Area" %}</label>
             <select id="lato-select" style="flex:1">
-                {% for lato, km in lati_km %}<option value="{{ lato }}">{{ lato }} celle · ~{{ km }} km</option>{% endfor %}
+                {% for lato, km in lati_km %}<option value="{{ lato }}">{% blocktranslate %}{{ lato }} cells · ~{{ km }} km{% endblocktranslate %}</option>{% endfor %}
             </select>
         </div>
         <div class="pollution-opacity">
-            <label for="resa-select" style="margin:0">Resa</label>
+            <label for="resa-select" style="margin:0">{% translate "Style" %}</label>
             <select id="resa-select" style="flex:1">
-                <option value="retino">Retino (punti)</option>
-                <option value="tratteggio">Tratteggio</option>
-                <option value="trasparenza">Trasparenza</option>
+                <option value="retino">{% translate "Halftone (dots)" %}</option>
+                <option value="tratteggio">{% translate "Hatching" %}</option>
+                <option value="trasparenza">{% translate "Transparency" %}</option>
             </select>
         </div>
         <div class="pollution-opacity">
-            <label for="sfondo-select" style="margin:0">Sfondo</label>
+            <label for="sfondo-select" style="margin:0">{% translate "Basemap" %}</label>
             <select id="sfondo-select" style="flex:1">
-                <option value="dark">Scuro</option>
-                <option value="light">Chiaro</option>
+                <option value="dark">{% translate "Dark" %}</option>
+                <option value="light">{% translate "Light" %}</option>
             </select>
         </div>
         <div class="pollution-opacity">
-            <label for="opacity-range" style="margin:0">Intensità</label>
+            <label for="opacity-range" style="margin:0">{% translate "Intensity" %}</label>
             <input type="range" id="opacity-range" min="0.25" max="2" step="0.05" value="1">
             <span id="opacity-value">×1.0</span>
         </div>
@@ -270,18 +271,20 @@
         <div class="pollution-timestamp" id="pollution-timestamp"></div>
     </div>
     <div class="riferimento-dati" id="riferimento-dati" hidden>
-        <button type="button" data-passo="-24" title="24 ore prima" aria-label="24 ore prima">«</button>
-        <button type="button" data-passo="-1" title="Un'ora prima" aria-label="Un'ora prima">‹</button>
+        {% translate "24 hours earlier" as prima24 %}{% translate "One hour earlier" as prima1 %}
+        {% translate "One hour later" as dopo1 %}{% translate "24 hours later" as dopo24 %}
+        <button type="button" data-passo="-24" title="{{ prima24 }}" aria-label="{{ prima24 }}">«</button>
+        <button type="button" data-passo="-1" title="{{ prima1 }}" aria-label="{{ prima1 }}">‹</button>
         <div class="testo">
-            <div>Previsione per <span class="quando" id="riferimento-quando"></span>
+            <div>{% translate "Forecast for" %} <span class="quando" id="riferimento-quando"></span>
                 <span class="relativo" id="riferimento-relativo"></span>
-                <button type="button" class="adesso" id="torna-adesso" hidden>adesso</button>
-                <span class="vecchi" id="riferimento-vecchi" hidden>· dati non aggiornati</span></div>
+                <button type="button" class="adesso" id="torna-adesso" hidden>{% translate "now" %}</button>
+                <span class="vecchi" id="riferimento-vecchi" hidden>· {% translate "data not up to date" %}</span></div>
             <div class="corsa"><span id="riferimento-corsa"></span> ·
-                <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">quando si aggiorna</a></div>
+                <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">{% translate "when it updates" %}</a></div>
         </div>
-        <button type="button" data-passo="1" title="Un'ora dopo" aria-label="Un'ora dopo">›</button>
-        <button type="button" data-passo="24" title="24 ore dopo" aria-label="24 ore dopo">»</button>
+        <button type="button" data-passo="1" title="{{ dopo1 }}" aria-label="{{ dopo1 }}">›</button>
+        <button type="button" data-passo="24" title="{{ dopo24 }}" aria-label="{{ dopo24 }}">»</button>
     </div>
     {% comment %}pattern SVG di retino/tratteggio, referenziati dalle celle come fill="url(#…)";
     niente display:none, altrimenti i browser non li disegnano{% endcomment %}
@@ -380,10 +383,10 @@
 
     function giudizio(ratio) {
         if (ratio == null || Number.isNaN(ratio)) return '';
-        if (ratio < 0.5) return 'aria buona';
-        if (ratio < 1.0) return 'sotto la soglia UE';
-        if (ratio < 1.5) return 'oltre la soglia UE';
-        return 'molto oltre la soglia UE';
+        if (ratio < 0.5) return T.buona;
+        if (ratio < 1.0) return T.sotto;
+        if (ratio < 1.5) return T.oltre;
+        return T.molto_oltre;
     }
 
     // ── Legenda ──
@@ -407,21 +410,20 @@
 
     function formattaOra(ms) {
         const dt = new Date(ms);
-        const giorno = dt.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-        const ora = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-        return `${giorno}, ore ${ora}`;
+        const day = dt.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
+        const time = dt.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
+        return testo('giorno_ora', { day, time });
     }
 
     function relativo(ms) {
         const ore = Math.round((ms - oraCorrente()) / ORA_MS);
-        if (ore === 0) return '· adesso';
+        if (ore === 0) return `· ${T.adesso}`;
         const n = Math.abs(ore);
         const [g, h] = [Math.floor(n / 24), n % 24];
         const parti = [];
-        if (g) parti.push(`${g} ${g === 1 ? 'giorno' : 'giorni'}`);
-        if (h) parti.push(`${h} ${h === 1 ? 'ora' : 'ore'}`);
-        const testo = parti.join(' e ');
-        return ore > 0 ? `· fra ${testo}` : `· ${testo} fa`;
+        if (g) parti.push(`${g} ${g === 1 ? T.giorno : T.giorni}`);
+        if (h) parti.push(`${h} ${h === 1 ? T.ora : T.ore}`);
+        return `· ${testo(ore > 0 ? 'fra' : 'fa', { t: parti.join(T.e) })}`;
     }
 
     // aggiorna testo e pulsanti; chiamata subito al click (risposta immediata) e poi con i dati
@@ -444,8 +446,8 @@
         // l'ultima ora disponibile è già passata: il job non ha girato, i dati sono vecchi
         document.getElementById('riferimento-vecchi').hidden = Date.now() < intervallo[1] + 2 * ORA_MS;
         document.getElementById('riferimento-corsa').textContent = dati.corsa
-            ? `Modello CAMS emesso il ${new Date(dati.corsa).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })} alle 00 UTC`
-            : 'Nessuna previsione per quest\'ora';
+            ? testo('corsa', { date: new Date(dati.corsa).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }) })
+            : T.nessuna_corsa;
         riferimento.hidden = false;
     }
 
@@ -484,15 +486,15 @@
     function renderLegend(inquinante, soglia, unita) {
         if (!soglia) {
             legendScale.innerHTML = '';
-            legendNote.textContent = 'Nessuna soglia configurata';
+            legendNote.textContent = T.legenda_nessuna_soglia;
             pollutionLegend.style.display = 'block';
             return;
         }
-        const fmt = v => Number.isInteger(v) ? v : v.toFixed(1);
+        const fmt = v => v.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
         legendScale.innerHTML = [0, 0.5, 1, 1.5, 2]
             .map(r => `<span>${fmt(soglia * r)}</span>`)
             .join('');
-        legendNote.innerHTML = `${unita} · soglia UE ${inquinante.toUpperCase()} <b>${fmt(soglia)} ${unita}</b>`;
+        legendNote.innerHTML = `${unita} · ${testo('soglia_ue', { pollutant: inquinante.toUpperCase() })} <b>${fmt(soglia)} ${unita}</b>`;
         pollutionLegend.style.display = 'block';
     }
 
@@ -503,9 +505,11 @@
 
     // Coefficiente di intensità (slider) applicato all'opacità di ogni cella;
     // al passaggio del mouse la cella si evidenzia.
+    const numero = v => v.toLocaleString(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     const opacityRange = document.getElementById('opacity-range');
     const opacityValue = document.getElementById('opacity-value');
     let intensita = parseFloat(opacityRange.value);
+    opacityValue.textContent = `×${numero(intensita)}`;
     const applicaIntensita = alpha => Math.min(alpha * intensita, 0.95);
     const hoverOpacity = alpha => Math.min(applicaIntensita(alpha) + 0.3, 1);
 
@@ -534,7 +538,7 @@
     sfondoSelect.addEventListener('change', () => impostaSfondo(sfondoSelect.value));
     opacityRange.addEventListener('input', () => {
         intensita = parseFloat(opacityRange.value);
-        opacityValue.textContent = `×${intensita.toFixed(1)}`;
+        opacityValue.textContent = `×${numero(intensita)}`;
         renderLegendBar();
         if (pollutionLayer) {
             pollutionLayer.eachLayer(rect =>
@@ -594,7 +598,7 @@
 
             if (!res.ok) {
                 sostituisciLayer(null);
-                pollutionTimestamp.textContent = dati.error || `Errore ${res.status}`;
+                pollutionTimestamp.textContent = T.errore;
                 return;
             }
 
@@ -608,7 +612,7 @@
             if (dati.timestamp) mostraRiferimento(dati);
             if (dati.celle.length === 0) {
                 sostituisciLayer(null);
-                pollutionTimestamp.textContent = 'Nessun dato disponibile per quest\'area';
+                pollutionTimestamp.textContent = T.nessun_dato_area;
                 return;
             }
 
@@ -627,11 +631,11 @@
                     { stroke: false, fillColor, fillOpacity: applicaIntensita(alpha), alpha, ratio },
                 );
                 const dettaglio = ratio != null
-                    ? `${ratio.toFixed(1)}× la soglia · ${giudizio(ratio)}`
-                    : 'nessuna soglia configurata';
+                    ? `${testo('volte_soglia', { ratio: numero(ratio) })} · ${giudizio(ratio)}`
+                    : T.nessuna_soglia;
                 rect.bindPopup(
                     `<div>${inquinante.toUpperCase()}</div>` +
-                    `<div class="popup-valore">${valore.toFixed(1)} <small>${unita}</small></div>` +
+                    `<div class="popup-valore">${numero(valore)} <small>${unita}</small></div>` +
                     `<div class="popup-giudizio">${dettaglio}</div>`
                 );
                 // alpha letto dalle opzioni: cambia se l'utente cambia resa
@@ -644,7 +648,7 @@
         } catch (err) {
             console.error('Pollution layer error:', err);
             sostituisciLayer(null);
-            pollutionTimestamp.textContent = 'Errore nel caricamento dati';
+            pollutionTimestamp.textContent = T.errore;
         } finally {
             if (richiesta === ultimaRichiesta) showSpinner(false);
         }

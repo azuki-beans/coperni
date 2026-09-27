@@ -1,0 +1,53 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+{% if ultima_corsa %}
+<div class="nota">
+    Latest forecast available: <strong>{{ ultima_corsa|date:"l j F Y" }}</strong>.
+</div>
+{% endif %}
+
+<h3>A new forecast every day</h3>
+<p>
+    CAMS computes a new forecast every day, starting from the situation at midnight UTC. Each
+    forecast covers <strong>the next 48 hours</strong>, hour by hour.
+</p>
+<p>
+    The forecast is guaranteed to be available by 8:00 UTC. Coperni downloads it right after, at
+    8:30 UTC:
+</p>
+<ul>
+    <li>around <strong>10:30</strong> Central European Summer Time;</li>
+    <li>around <strong>9:30</strong> Central European Time (winter).</li>
+</ul>
+<p>
+    It takes a few minutes to download and prepare it, then it is immediately visible on the site.
+</p>
+
+<h3>What the map shows</h3>
+<p>
+    When it opens, the map shows <strong>the forecast for the current hour</strong>, taken from
+    the most recent forecast: values change at the top of every hour. At the bottom left of the
+    map you will find the day and hour the colours refer to and the date of the forecast used.
+</p>
+<p>
+    With the arrows next to the date you can move by one hour (‹ ›) or one day (« »): forward up
+    to the end of the latest forecast (about two days), back up to {{ giorni_conservati }} days
+    ago. For every hour the most recent forecast covering it is used. The <strong>now</strong>
+    button takes you back to the current hour.
+</p>
+<p>
+    In the morning, before the update, the map still uses the previous day's forecast (which also
+    covers today): this is normal.
+</p>
+
+<h3>What the charts show</h3>
+<ul>
+    <li><strong>Past</strong>: for each of the last 7 days, the first 24 hours of that day's
+        forecast (the most up-to-date one for every hour).</li>
+    <li><strong>Future</strong>: the whole latest forecast, up to 48 hours.</li>
+</ul>
+<p class="dim">
+    Forecasts remain available for {{ giorni_conservati }} days, then they are deleted.
+</p>
+{% endblock %}

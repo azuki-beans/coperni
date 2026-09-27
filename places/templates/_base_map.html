@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html lang="it">
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Coperni — Qualità dell'aria{% endblock %}</title>
+    <title>{% block title %}Coperni — {% translate "Air quality" %}{% endblock %}</title>
+    {% include "_lingue_head.html" %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -203,7 +204,13 @@
     <div id="map"></div>
 </div>
 
+{{ testi|json_script:"testi" }}
 <script>
+    // ── Testi tradotti (places/testi.py) e formati di data/numero della lingua della pagina ──
+    const T = JSON.parse(document.getElementById('testi').textContent);
+    const testo = (chiave, valori = {}) => T[chiave].replace(/\{(\w+)\}/g, (_, k) => valori[k] ?? '');
+    const LOCALE = document.documentElement.lang === 'it' ? 'it-IT' : 'en-GB';
+
     // ── Map initialization ──
     // La mappa inquadra la finestra di celle CAMS attorno al centro scelto (dall'URL): LATO celle
     // sul lato lungo della viewport, l'altro lato in proporzione (calcolato dal server, vedi

@@ -1,0 +1,43 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    Coperni shows <strong>the air we breathe, now and over the next hours</strong>, around an
+    Italian municipality, a European city or your own location. The map shows how pollutants are
+    spread across the area; the charts show how the past week went and what is forecast for the
+    next two days.
+</p>
+
+<h3>Why</h3>
+<p>
+    Air quality data exists and is public, but it is usually hard to consult: technical files,
+    expert portals, monitoring stations scattered across the territory. Coperni takes the
+    forecasts of the European <strong>Copernicus</strong> programme and makes them readable at a
+    glance, comparing them with the European reference thresholds.
+</p>
+
+<h3>What you will find</h3>
+<ul>
+    <li><strong>Map</strong>: the area around the chosen place, divided into cells of about
+        10 km. The stronger the cell, the more polluted the air. Tap a cell to read its value.</li>
+    <li><strong>Charts</strong>: the average trend of the area over the last 7 days and the
+        forecast up to 48 hours ahead.</li>
+    <li>To change area, search for a town or city at the top, or use the ⌖ button to go to your
+        location.</li>
+</ul>
+
+<div class="nota">
+    <strong>These are forecasts, not measurements.</strong> The values come from a mathematical
+    model of the atmosphere, not from monitoring stations. They are useful to understand the
+    overall situation and how it evolves, but they can differ from what is measured at a precise
+    spot (a busy street, the bottom of a valley). For official data about your area, refer to
+    your regional or national environmental agency.
+</div>
+
+<h3>Privacy</h3>
+<p>
+    The site is public and requires no registration. We use no profiling cookies: one cookie
+    remembers the last place you looked at, and one your language if you pick it from the menu.
+    Your preferences (basemap, style, area size) stay in your browser.
+</p>
+{% endblock %}

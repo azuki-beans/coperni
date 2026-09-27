@@ -1,6 +1,7 @@
 """Documentazione per l'utente: pagine statiche, una per argomento.
 
-Aggiungere una pagina = creare il template `pagine/<slug>.html` e una voce in PAGINE.
+Aggiungere una pagina = creare il template `pagine/<lingua>/<slug>.html` per ogni lingua e una
+voce in PAGINE. Il testo lungo sta nei template (uno per lingua), non nei file .po.
 """
 
 from datetime import date
@@ -8,24 +9,26 @@ from datetime import date
 from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render
+from django.utils.translation import get_language
+from django.utils.translation import gettext_lazy as _
 
 from copernicus import griglia
 from places.centro import centro_da_richiesta
 
 # slug -> titolo, nell'ordine del menu laterale
 PAGINE = {
-    "progetto": "Il progetto",
-    "dati": "Da dove vengono i dati",
-    "aggiornamenti": "Quando si aggiornano",
-    "mappa": "Come leggere la mappa",
+    "progetto": _("The project"),
+    "dati": _("Where the data comes from"),
+    "aggiornamenti": _("When it updates"),
+    "mappa": _("How to read the map"),
 }
 
 NOMI_INQUINANTI = {
-    "pm2p5": "Particolato fine (PM2,5)",
-    "pm10": "Particolato (PM10)",
-    "no2": "Biossido di azoto (NO₂)",
-    "o3": "Ozono (O₃)",
-    "so2": "Biossido di zolfo (SO₂)",
+    "pm2p5": _("Fine particulate matter (PM2.5)"),
+    "pm10": _("Particulate matter (PM10)"),
+    "no2": _("Nitrogen dioxide (NO₂)"),
+    "o3": _("Ozone (O₃)"),
+    "so2": _("Sulphur dioxide (SO₂)"),
 }
 
 
@@ -55,4 +58,4 @@ def pagina(request, slug="progetto"):
     }
     if slug == "aggiornamenti":
         context["ultima_corsa"] = _ultima_corsa()
-    return render(request, f"pagine/{slug}.html", context)
+    return render(request, f"pagine/{get_language()}/{slug}.html", context)

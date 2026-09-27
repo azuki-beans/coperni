@@ -53,6 +53,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # lingua dal prefisso dell'URL (/it/…); senza prefisso inglese
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -69,6 +71,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
+                'config.lingue.lingue',
             ],
         },
     },
@@ -93,7 +97,16 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'it-it'
+# Inglese di default (URL senza prefisso), italiano sotto /it/. Testi sorgente in inglese,
+# traduzioni in locale/<lingua>/LC_MESSAGES/django.po (i .mo si compilano, non si versionano).
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('it', 'Italiano'),
+]
+
+LOCALE_PATHS = [BASE_DIR / 'locale']
 
 TIME_ZONE = 'Europe/Rome'
 

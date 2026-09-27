@@ -16,6 +16,18 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 
 
+# Translations: .po → .mo with gettext, only in this stage (it does not reach the final image)
+FROM python:3.14-slim AS translations
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY locale ./locale
+RUN find locale -name '*.po' -exec sh -c 'msgfmt --check -o "${1%.po}.mo" "$1"' _ {} \;
+
+
 FROM base AS job
 
 RUN pip install poetry \
@@ -38,6 +50,7 @@ RUN pip install poetry \
     && python -c "import duckdb; duckdb.connect().install_extension('httpfs')"
 
 COPY . .
+COPY --from=translations /app/locale ./locale
 
 # SQLite places DB (municipalities + cities) built here from the versioned CSVs, read-only at runtime
 RUN python manage.py migrate --noinput \

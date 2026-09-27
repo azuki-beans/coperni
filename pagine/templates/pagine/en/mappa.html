@@ -1,0 +1,50 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    The map is centred on the place you chose and shows the surrounding area divided into square
+    cells of about 10 km: each cell has a single value, the one forecast for the hour shown at the
+    bottom left (when the map opens, the current hour).
+</p>
+
+<h3>Colours</h3>
+<p>
+    The colour tells how close the value is to the reference threshold of the selected pollutant:
+</p>
+<ul>
+    <li><strong>cyan and green</strong>: good air, well below the threshold;</li>
+    <li><strong>yellow</strong>: around the threshold;</li>
+    <li><strong>orange and red</strong>: above the threshold;</li>
+    <li><strong>purple</strong>: above twice the threshold.</li>
+</ul>
+<p>
+    The bar in the top-right panel is the legend: the numbers below it are values in µg/m³ and
+    the white tick marks the threshold.
+</p>
+
+<h3>Style</h3>
+<p>You can choose how cells are drawn:</p>
+<ul>
+    <li><strong>Halftone (dots)</strong>: the more polluted the air, the bigger the dots, until
+        they merge into a solid colour.</li>
+    <li><strong>Hatching</strong>: like halftone, but with lines that get thicker.</li>
+    <li><strong>Transparency</strong>: solid colour, more opaque where the air is more
+        polluted.</li>
+</ul>
+<p>
+    The <strong>Intensity</strong> slider makes everything stronger or lighter, useful to read the
+    streets and place names underneath.
+</p>
+
+<h3>Other controls</h3>
+<ul>
+    <li><strong>Arrows next to the date</strong> (bottom left): look at earlier or later hours,
+        one hour (‹ ›) or one day (« ») at a time; <strong>now</strong> takes you back to the
+        current hour.</li>
+    <li><strong>Area</strong>: how many cells to show, i.e. how wide the area around the centre
+        is.</li>
+    <li><strong>Basemap</strong>: dark or light map.</li>
+    <li><strong>Tap a cell</strong> to read the exact value and how far it is from the
+        threshold.</li>
+</ul>
+{% endblock %}

@@ -9,7 +9,7 @@ pollutants evolved over the past week and what is expected for the next 48 hours
 
 **Live demo: <https://coperni.azukibeans.dev>**
 
-The user interface is in Italian.
+Available in **English** and **Italian** (`/it/…`).
 
 ![Map of NO₂ over the Po Valley, dark background](docs/screenshots/map.jpg)
 
@@ -134,8 +134,13 @@ the reasoning behind it and how to deploy your own copy.
     the grid, cached until the top of the hour.
   - `GET /copernicus/api/serie/?lat&lon&lato&aspect`: hourly area averages for the charts,
     cached 15 min.
-- Front end: Django templates, Bootstrap, htmx (place search), Leaflet with CARTO raster basemaps,
-  Chart.js. Cell textures are SVG patterns, so the map uses Leaflet's SVG renderer.
+- Front end: Django templates, htmx (place search), Leaflet with CARTO raster basemaps, Chart.js.
+  Cell textures are SVG patterns, so the map uses Leaflet's SVG renderer.
+- Languages: Django i18n with the language in the URL: English without prefix (`/places/`),
+  Italian under `/it/` (`/it/places/`), `hreflang` links for search engines. `/` redirects to the
+  visitor's language (language switcher cookie, then browser). Short strings live in
+  `locale/it/LC_MESSAGES/django.po`, the longer About pages are one template per language.
+  See [Translations](CONTRIBUTING.md#translations) to add a language.
 
 ### Stack
 

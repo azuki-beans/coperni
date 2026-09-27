@@ -1,0 +1,4 @@
+{% comment %}stessa pagina nelle altre lingue, per i motori di ricerca; x-default = inglese{% endcomment %}
+{% for l in lingue_alternative %}<link rel="alternate" hreflang="{{ l.codice }}" href="{{ request.scheme }}://{{ request.get_host }}{{ l.url }}">
+{% if l.codice == 'en' %}<link rel="alternate" hreflang="x-default" href="{{ request.scheme }}://{{ request.get_host }}{{ l.url }}">
+{% endif %}{% endfor %}

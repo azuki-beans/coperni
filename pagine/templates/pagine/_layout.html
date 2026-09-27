@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html lang="it">
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titolo }} — Coperni</title>
+    {% include "_lingue_head.html" %}
     <style>
         *, *::before, *::after {
             margin: 0;
@@ -232,7 +233,7 @@
 {% include "_header.html" %}
 
 <div class="doc">
-    <nav class="doc-menu" aria-label="Argomenti">
+    <nav class="doc-menu" aria-label="{% translate "Topics" %}">
         {% for s, t in pagine.items %}
         <a href="{% url 'pagine:pagina' s %}" {% if s == slug %}class="active" aria-current="page"{% endif %}>{{ t }}</a>
         {% endfor %}

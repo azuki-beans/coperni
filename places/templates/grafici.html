@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html lang="it">
+{% load i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coperni — Grafici qualità dell'aria</title>
+    <title>Coperni — {% translate "Air quality charts" %}</title>
+    {% include "_lingue_head.html" %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <style>
         *, *::before, *::after {
@@ -166,17 +167,22 @@
 <!-- ── Content ── -->
 <div class="content">
     <div class="chart-header">
-        <h2>Andamento inquinanti · {{ centro.etichetta }}</h2>
+        <h2>{% translate "Pollutant trends" %} · {{ centro.etichetta }}</h2>
         <div class="range-info" id="range-info"></div>
     </div>
     <div class="chart-card">
-        <div class="loading-state" id="loading-state">Caricamento…</div>
-        <div class="empty-state" id="empty-state" hidden>Nessun dato disponibile per il periodo.</div>
+        <div class="loading-state" id="loading-state">{% translate "Loading…" %}</div>
+        <div class="empty-state" id="empty-state" hidden>{% translate "No data available for this period." %}</div>
         <canvas id="pollution-chart"></canvas>
     </div>
 </div>
 
+{{ testi|json_script:"testi" }}
 <script>
+    const T = JSON.parse(document.getElementById('testi').textContent);
+    const testo = (chiave, valori = {}) => T[chiave].replace(/\{(\w+)\}/g, (_, k) => valori[k] ?? '');
+    const LOCALE = document.documentElement.lang === 'it' ? 'it-IT' : 'en-GB';
+
     // Colori per inquinante — stessa palette usata altrove nel progetto per coerenza visiva.
     const POLLUTANT_COLORS = {
         pm2p5: '#f87171',
@@ -193,7 +199,7 @@
 
     function formatTick(value) {
         const d = new Date(value);
-        return d.toLocaleString('it-IT', {
+        return d.toLocaleString(LOCALE, {
             day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
         });
     }
@@ -226,8 +232,8 @@
             }
 
             const tempi = inquinanti.flatMap((c) => data.serie[c].punti.map((p) => p.t)).sort();
-            const fmt = (iso) => new Date(iso).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
-            rangeInfo.textContent = `${fmt(tempi[0])} — ${fmt(tempi[tempi.length - 1])} · media dell'area mostrata in mappa`;
+            const fmt = (iso) => new Date(iso).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit' });
+            rangeInfo.textContent = `${fmt(tempi[0])} — ${fmt(tempi[tempi.length - 1])} · ${T.media_area}`;
 
             // Per ogni inquinante: dataset principale + (se la soglia è configurata) un dataset
             // "soglia" con una linea tratteggiata dello stesso colore, agganciato al principale
@@ -251,7 +257,7 @@
 
                 if (serie.soglia != null && punti.length > 0) {
                     datasets.push({
-                        label: `Soglia ${inquinante.toUpperCase()}`,
+                        label: testo('soglia', { pollutant: inquinante.toUpperCase() }),
                         data: [
                             { x: punti[0].x, y: serie.soglia },
                             { x: punti[punti.length - 1].x, y: serie.soglia },
@@ -276,6 +282,7 @@
                 type: 'line',
                 data: { datasets },
                 options: {
+                    locale: LOCALE,
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'nearest', axis: 'x', intersect: false },
@@ -325,7 +332,7 @@
         } catch (err) {
             loadingState.hidden = true;
             emptyState.hidden = false;
-            emptyState.textContent = 'Errore nel caricamento dei dati.';
+            emptyState.textContent = T.errore;
         }
     }
 

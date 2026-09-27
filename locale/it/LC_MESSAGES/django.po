@@ -1,0 +1,287 @@
+# Coperni: traduzione italiana.
+# This file is distributed under the same license as the Coperni project (Apache 2.0).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: coperni\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 00:48+0200\n"
+"PO-Revision-Date: 2026-09-27 01:00+0200\n"
+"Last-Translator: Azuki Beans\n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: luoghi/templates/luoghi/_risultati.html:6
+msgid "No place found"
+msgstr "Nessun luogo trovato"
+
+#: pagine/templates/pagine/_layout.html:236
+msgid "Topics"
+msgstr "Argomenti"
+
+#: pagine/views.py:20
+msgid "The project"
+msgstr "Il progetto"
+
+#: pagine/views.py:21
+msgid "Where the data comes from"
+msgstr "Da dove vengono i dati"
+
+#: pagine/views.py:22
+msgid "When it updates"
+msgstr "Quando si aggiornano"
+
+#: pagine/views.py:23
+msgid "How to read the map"
+msgstr "Come leggere la mappa"
+
+#: pagine/views.py:27
+msgid "Fine particulate matter (PM2.5)"
+msgstr "Particolato fine (PM2,5)"
+
+#: pagine/views.py:28
+msgid "Particulate matter (PM10)"
+msgstr "Particolato (PM10)"
+
+#: pagine/views.py:29
+msgid "Nitrogen dioxide (NO₂)"
+msgstr "Biossido di azoto (NO₂)"
+
+#: pagine/views.py:30
+msgid "Ozone (O₃)"
+msgstr "Ozono (O₃)"
+
+#: pagine/views.py:31
+msgid "Sulphur dioxide (SO₂)"
+msgstr "Biossido di zolfo (SO₂)"
+
+#: places/templates/_base_map.html:6 places/templates/_header.html:124
+#: places/templates/map_view.html:233
+msgid "Air quality"
+msgstr "Qualità dell'aria"
+
+#: places/templates/_header.html:127
+msgid "Map"
+msgstr "Mappa"
+
+#: places/templates/_header.html:128
+msgid "Charts"
+msgstr "Grafici"
+
+#: places/templates/_header.html:129
+msgid "About"
+msgstr "Info"
+
+#: places/templates/_header.html:132
+msgid "Current centre"
+msgstr "Centro attuale"
+
+#: places/templates/_header.html:133
+msgid "Search a town or city…"
+msgstr "Cerca comune o città…"
+
+#: places/templates/_header.html:134
+msgid "Search a town or city"
+msgstr "Cerca comune o città"
+
+#: places/templates/_header.html:137
+msgid "Centre on my location"
+msgstr "Centra sulla mia posizione"
+
+#: places/templates/_header.html:140
+msgid "Language"
+msgstr "Lingua"
+
+#: places/templates/grafici.html:6
+msgid "Air quality charts"
+msgstr "Grafici qualità dell'aria"
+
+#: places/templates/grafici.html:170
+msgid "Pollutant trends"
+msgstr "Andamento inquinanti"
+
+#: places/templates/grafici.html:174
+msgid "Loading…"
+msgstr "Caricamento…"
+
+#: places/templates/grafici.html:175
+msgid "No data available for this period."
+msgstr "Nessun dato disponibile per il periodo."
+
+#: places/templates/map_view.html:238
+msgid "None"
+msgstr "Nessuno"
+
+#: places/templates/map_view.html:241
+msgid "Area"
+msgstr "Area"
+
+#: places/templates/map_view.html:243
+#, python-format
+msgid "%(lato)s cells · ~%(km)s km"
+msgstr "%(lato)s celle · ~%(km)s km"
+
+#: places/templates/map_view.html:247
+msgid "Style"
+msgstr "Resa"
+
+#: places/templates/map_view.html:249
+msgid "Halftone (dots)"
+msgstr "Retino (punti)"
+
+#: places/templates/map_view.html:250
+msgid "Hatching"
+msgstr "Tratteggio"
+
+#: places/templates/map_view.html:251
+msgid "Transparency"
+msgstr "Trasparenza"
+
+#: places/templates/map_view.html:255
+msgid "Basemap"
+msgstr "Sfondo"
+
+#: places/templates/map_view.html:257
+msgid "Dark"
+msgstr "Scuro"
+
+#: places/templates/map_view.html:258
+msgid "Light"
+msgstr "Chiaro"
+
+#: places/templates/map_view.html:262
+msgid "Intensity"
+msgstr "Intensità"
+
+#: places/templates/map_view.html:274
+msgid "24 hours earlier"
+msgstr "24 ore prima"
+
+#: places/templates/map_view.html:274
+msgid "One hour earlier"
+msgstr "Un'ora prima"
+
+#: places/templates/map_view.html:275
+msgid "One hour later"
+msgstr "Un'ora dopo"
+
+#: places/templates/map_view.html:275
+msgid "24 hours later"
+msgstr "24 ore dopo"
+
+#: places/templates/map_view.html:279
+msgid "Forecast for"
+msgstr "Previsione per"
+
+#: places/templates/map_view.html:281 places/testi.py:14
+msgid "now"
+msgstr "adesso"
+
+#: places/templates/map_view.html:282
+msgid "data not up to date"
+msgstr "dati non aggiornati"
+
+#: places/templates/map_view.html:284
+msgid "when it updates"
+msgstr "quando si aggiorna"
+
+#: places/testi.py:13
+#, python-brace-format
+msgid "{day}, {time}"
+msgstr "{day}, ore {time}"
+
+#: places/testi.py:15
+#, python-brace-format
+msgid "in {t}"
+msgstr "fra {t}"
+
+#: places/testi.py:16
+#, python-brace-format
+msgid "{t} ago"
+msgstr "{t} fa"
+
+#: places/testi.py:17
+msgid " and "
+msgstr " e "
+
+#: places/testi.py:18
+msgid "day"
+msgstr "giorno"
+
+#: places/testi.py:19
+msgid "days"
+msgstr "giorni"
+
+#: places/testi.py:20
+msgctxt "unit of time"
+msgid "hour"
+msgstr "ora"
+
+#: places/testi.py:21
+msgctxt "unit of time"
+msgid "hours"
+msgstr "ore"
+
+#: places/testi.py:22
+#, python-brace-format
+msgid "CAMS model run of {date} at 00 UTC"
+msgstr "Modello CAMS emesso il {date} alle 00 UTC"
+
+#: places/testi.py:23
+msgid "No forecast for this hour"
+msgstr "Nessuna previsione per quest'ora"
+
+#: places/testi.py:25
+msgid "good air"
+msgstr "aria buona"
+
+#: places/testi.py:26
+msgid "below the EU threshold"
+msgstr "sotto la soglia UE"
+
+#: places/testi.py:27
+msgid "above the EU threshold"
+msgstr "oltre la soglia UE"
+
+#: places/testi.py:28
+msgid "well above the EU threshold"
+msgstr "molto oltre la soglia UE"
+
+#: places/testi.py:29
+#, python-brace-format
+msgid "{ratio}× the threshold"
+msgstr "{ratio}× la soglia"
+
+#: places/testi.py:30
+msgid "no threshold configured"
+msgstr "nessuna soglia configurata"
+
+#: places/testi.py:32
+#, python-brace-format
+msgid "EU threshold {pollutant}"
+msgstr "soglia UE {pollutant}"
+
+#: places/testi.py:33
+msgid "No threshold configured"
+msgstr "Nessuna soglia configurata"
+
+#: places/testi.py:35
+msgid "No data available for this area"
+msgstr "Nessun dato disponibile per quest'area"
+
+#: places/testi.py:36
+msgid "Error loading data"
+msgstr "Errore nel caricamento dei dati"
+
+#: places/testi.py:38
+msgid "average of the area shown on the map"
+msgstr "media dell'area mostrata in mappa"
+
+#: places/testi.py:39
+#, python-brace-format
+msgid "Threshold {pollutant}"
+msgstr "Soglia {pollutant}"

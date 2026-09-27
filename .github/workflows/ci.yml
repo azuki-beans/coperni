@@ -35,3 +35,13 @@ jobs:
           poetry run python manage.py makemigrations --check --dry-run
           poetry run python manage.py migrate --noinput
           poetry run python manage.py luoghi_load
+
+      - name: Translations up to date and complete
+        run: |
+          sudo apt-get install -y --no-install-recommends gettext
+          poetry run python manage.py makemessages -l it --ignore=data --ignore=stacks --ignore=docs
+          git diff -I 'POT-Creation-Date' --exit-code locale/ \
+            || { echo "::error::locale/ is out of date: run makemessages and translate"; exit 1; }
+          untranslated=$(msgattrib --untranslated --no-obsolete locale/it/LC_MESSAGES/django.po | grep -c '^msgid' || true)
+          [ "$untranslated" -le 1 ] || { echo "::error::untranslated strings in it/django.po"; exit 1; }
+          msgfmt --check -o /dev/null locale/it/LC_MESSAGES/django.po

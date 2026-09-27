@@ -1,0 +1,52 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    The data is the European air quality forecast of the <strong>Copernicus Atmosphere
+    Monitoring Service (CAMS)</strong>, the service of the European Union's Copernicus programme
+    operated by the European Centre for Medium-Range Weather Forecasts (ECMWF). It is open and
+    free data, downloaded from the <a href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts" rel="noopener">Atmosphere Data Store</a>.
+</p>
+
+<h3>Which forecast we use</h3>
+<ul>
+    <li><strong>"Ensemble" model</strong>: not a single model, but the combination (median) of the
+        forecasts of about ten European models. It is the most robust version CAMS provides.</li>
+    <li><strong>Resolution</strong>: one cell every 0.1 degrees, i.e. about 11 km north-south and
+        7–9 km east-west at Italian latitudes. Each cell has a single value: differences within
+        the cell (a street, a park) are not visible.</li>
+    <li><strong>Area covered</strong>: all of Europe, from North Africa to Scandinavia.</li>
+    <li><strong>Level</strong>: values refer to the air near the ground, the air we breathe.</li>
+    <li><strong>Unit</strong>: micrograms per cubic metre (µg/m³), hourly values.</li>
+</ul>
+
+<h3>Pollutants and thresholds</h3>
+<p>
+    For each pollutant the map compares the value with a reference threshold: below the threshold
+    colours go from cyan to green, at the threshold they turn yellow, above it they move to red
+    and, above twice the threshold, to purple.
+</p>
+<table>
+    <thead>
+        <tr><th>Pollutant</th><th class="numero">Threshold</th></tr>
+    </thead>
+    <tbody>
+        {% for nome, soglia in inquinanti %}
+        <tr><td>{{ nome }}</td><td class="numero">{% if soglia %}{{ soglia|floatformat:"-1" }} µg/m³{% else %}—{% endif %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="dim">
+    The thresholds are the limits of European legislation: for particulate matter (PM2.5 and
+    PM10) the daily limits in force from 2030, for the other pollutants the hourly thresholds.
+    Particulate limits apply to the average of a whole day, while the map shows the value of a
+    single hour: the comparison is indicative, not a check of compliance with legal limits.
+</p>
+
+<h3>Credits</h3>
+<p class="dim">
+    Generated using Copernicus Atmosphere Monitoring Service information ({% now "Y" %}).
+    Neither the European Commission nor ECMWF is responsible for any use that may be made of the
+    Copernicus information or data it contains. Basemaps © OpenStreetMap contributors © CARTO.
+</p>
+{% endblock %}

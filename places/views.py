@@ -5,6 +5,7 @@ from django.shortcuts import render
 
 from copernicus.griglia import LATO_CELLE, PASSO
 from places.centro import centro_da_richiesta, ricorda
+from places.testi import testi_js
 
 
 def _carto_style_prefix():
@@ -20,14 +21,15 @@ def _contesto(request, nav_attiva):
     return centro, {
         "nav_attiva": nav_attiva,
         "centro": centro,
-        # stringhe, non float: con LANGUAGE_CODE='it-it' Django localizza i numeri con la
-        # virgola come separatore decimale, che nel JS del template spacca [lat, lon]
+        # stringhe, non float: in italiano Django localizza i numeri con la virgola come
+        # separatore decimale, che nel JS del template spacca [lat, lon]
         "centro_latitudine": f"{centro.lat:.6f}",
         "centro_longitudine": f"{centro.lon:.6f}",
         "lati": LATO_CELLE,
         # larghezza indicativa della finestra in orizzontale: le celle sono 0.1° di longitudine
         "lati_km": [(lato, round(lato * PASSO * 111.32 * math.cos(math.radians(centro.lat)))) for lato in LATO_CELLE],
         "copernicus_pollutants": settings.COPERNICUS_POLLUTANTS,
+        "testi": testi_js(),
     }
 
 
