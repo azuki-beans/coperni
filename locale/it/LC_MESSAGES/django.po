@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 00:48+0200\n"
+"POT-Creation-Date: 2026-09-27 22:01+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -19,7 +19,7 @@ msgstr ""
 msgid "No place found"
 msgstr "Nessun luogo trovato"
 
-#: pagine/templates/pagine/_layout.html:236
+#: pagine/templates/pagine/_layout.html:238
 msgid "Topics"
 msgstr "Argomenti"
 
@@ -59,8 +59,16 @@ msgstr "Ozono (O₃)"
 msgid "Sulphur dioxide (SO₂)"
 msgstr "Biossido di zolfo (SO₂)"
 
-#: places/templates/_base_map.html:6 places/templates/_header.html:124
-#: places/templates/map_view.html:233
+#: places/templates/_base_map.html:6
+#, python-format
+msgid "Air quality forecast: %(luogo)s"
+msgstr "Previsione qualità dell'aria: %(luogo)s"
+
+#: places/templates/_base_map.html:6
+msgid "Air quality forecasts on a map"
+msgstr "Previsioni della qualità dell'aria su mappa"
+
+#: places/templates/_header.html:124 places/templates/map_view.html:233
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
@@ -96,19 +104,36 @@ msgstr "Centra sulla mia posizione"
 msgid "Language"
 msgstr "Lingua"
 
+#: places/templates/_meta_head.html:6
+msgid ""
+"Air quality forecasts from Copernicus on a map, for every town in Italy and "
+"every city in Europe: now and for the next 48 hours."
+msgstr ""
+"Previsioni della qualità dell'aria di Copernicus su mappa, per ogni comune "
+"italiano e ogni città europea: ora e per le prossime 48 ore."
+
+#: places/templates/_meta_head.html:19
+msgid "Map of air quality forecasts over northern Italy"
+msgstr "Mappa delle previsioni di qualità dell'aria sul Nord Italia"
+
+#: places/templates/grafici.html:6
+#, python-format
+msgid "Air quality charts: %(luogo)s"
+msgstr "Grafici qualità dell'aria: %(luogo)s"
+
 #: places/templates/grafici.html:6
 msgid "Air quality charts"
 msgstr "Grafici qualità dell'aria"
 
-#: places/templates/grafici.html:170
+#: places/templates/grafici.html:171
 msgid "Pollutant trends"
 msgstr "Andamento inquinanti"
 
-#: places/templates/grafici.html:174
+#: places/templates/grafici.html:175
 msgid "Loading…"
 msgstr "Caricamento…"
 
-#: places/templates/grafici.html:175
+#: places/templates/grafici.html:176
 msgid "No data available for this period."
 msgstr "Nessun dato disponibile per il periodo."
 

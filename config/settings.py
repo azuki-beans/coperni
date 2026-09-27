@@ -44,6 +44,7 @@ USE_X_FORWARDED_HOST = True
 INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'luoghi',
     'places',
     'copernicus',
@@ -76,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.template.context_processors.i18n',
                 'config.lingue.lingue',
+                'config.sito.sito',
             ],
         },
     },
@@ -133,6 +135,10 @@ CDS_API_KEY = os.environ.get('CDS_API_KEY')
 # Dove il job pubblica i Parquet giornalieri e da dove il web li legge: `gs://bucket/prefisso`
 # (bucket pubblico in lettura, il web lo legge via HTTPS) oppure una cartella locale in sviluppo.
 CAMS_STORAGE = os.environ.get('CAMS_STORAGE', str(BASE_DIR / 'data' / 'cams'))
+
+# Statistiche Umami, senza cookie (come p7m-apri): attive solo se entrambe le variabili sono valorizzate
+UMAMI_SRC = os.environ.get('UMAMI_SRC', '')
+UMAMI_WEBSITE_ID = os.environ.get('UMAMI_WEBSITE_ID', '')
 
 # Sfondo iniziale della mappa (OpenFreeMap, niente chiave): 'dark' o 'light'. L'utente lo cambia
 # dalla mappa e la scelta resta nel browser.

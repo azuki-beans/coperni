@@ -11,7 +11,7 @@ pollutants evolved over the past week and what is expected for the next 48 hours
 
 Available in **English** and **Italian** (`/it/…`).
 
-![Map of NO₂ over the Po Valley, dark background](docs/screenshots/map.jpg)
+![Searching a place, moving through the forecast hours, switching pollutant and basemap](docs/screenshots/demo.gif)
 
 ## Why
 
@@ -35,6 +35,8 @@ the last place you looked at.
   with the thresholds drawn as dashed lines.
 - **Search**: Italian municipalities (including bilingual names such as *Bolzano/Bozen*) and
   European cities above 15,000 inhabitants, or your current position.
+
+![Map of NO₂ over the Po Valley, dark background](docs/screenshots/map.jpg)
 
 ![Ozone in the afternoon, hatching on a light background](docs/screenshots/map-light.jpg)
 
@@ -190,6 +192,7 @@ All configuration is done with environment variables (see [`.env.example`](.env.
 | `CDS_API_URL`, `CDS_API_KEY` | ADS credentials (export job only) |
 | `CAMS_STORAGE` | `gs://bucket/prefix` (read by the web over public HTTPS) or a local folder; default `data/cams` |
 | `MAP_BASEMAP` | initial basemap, `dark` (default) or `light` |
+| `UMAMI_SRC`, `UMAMI_WEBSITE_ID` | optional cookieless analytics with [Umami](https://umami.is); both empty = off |
 | `COPERNICUS_POLLUTANTS` | default `pm2p5,pm10,no2,o3,so2` |
 | `COPERNICUS_SOGLIA_*` | thresholds per pollutant (µg/m³) |
 | `COPERNICUS_LATITUDE`, `COPERNICUS_LONGITUDE` | default map centre |

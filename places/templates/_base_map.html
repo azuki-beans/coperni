@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Coperni — {% translate "Air quality" %}{% endblock %}</title>
-    {% include "_lingue_head.html" %}
+    {% if centro.e_luogo %}{% blocktranslate with luogo=centro.etichetta asvar titolo_pagina %}Air quality forecast: {{ luogo }}{% endblocktranslate %}{% else %}{% translate "Air quality forecasts on a map" as titolo_pagina %}{% endif %}
+    <title>{{ titolo_pagina }} — Coperni</title>
+    {% include "_meta_head.html" %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -49,7 +50,10 @@
             background: var(--surface);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
-            z-index: 1000;
+            /* sopra i controlli della mappa (z-index 1000): i risultati della ricerca, che stanno
+               dentro l'header, altrimenti finiscono sotto il pannello dell'inquinante */
+            position: relative;
+            z-index: 1100;
         }
 
         .logo {

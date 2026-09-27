@@ -160,6 +160,18 @@ done by the bucket **lifecycle rule** (21 days).
   `PAGINE` and pollutant names are `gettext_lazy`.
 - With `runserver --noreload` templates stay cached (cached loader): restart after editing them.
 
+## Search engines and sharing (`config/sito.py`)
+
+- Context processor `sito` + `places/templates/_meta_head.html` (included in every `<head>`, expects
+  `titolo_pagina`): description, canonical URL, Open Graph/Twitter preview, inline SVG favicon,
+  `hreflang` links, Umami script if `UMAMI_SRC` and `UMAMI_WEBSITE_ID` are both set.
+- Map and chart titles include the place name when the centre is a municipality or city
+  (`Centro.e_luogo`): "Air quality forecast: Milano (MI)", good for shared links and search.
+- Preview image `docs/og-image.png` (1200×630), served from raw.githubusercontent.com like p7m-apri.
+- `/favicon.ico` (the same SVG), `/robots.txt` (API, search fragment and language switch excluded),
+  `/sitemap.xml` (`django.contrib.sitemaps`, i18n with alternates and x-default, cached 24h): the
+  pages plus the maps of municipalities ≥ 50k and cities ≥ 500k inhabitants (~570 URLs).
+
 ## Basemap (OpenFreeMap)
 
 - Replaced CARTO raster tiles (free tier 5M tiles/month ≈ 80k visits, key exposed in the page) with
