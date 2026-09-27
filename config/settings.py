@@ -52,6 +52,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # risposte compresse (Cloud Run non comprime): JSON della griglia e pagine ~70% in meno.
+    # Niente rischio BREACH: il sito non ha form, sessioni né segreti nelle pagine.
+    'django.middleware.gzip.GZipMiddleware',
     'django.middleware.security.SecurityMiddleware',
     # lingua dal prefisso dell'URL (/it/…); senza prefisso inglese
     'django.middleware.locale.LocaleMiddleware',
