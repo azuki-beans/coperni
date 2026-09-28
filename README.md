@@ -192,7 +192,7 @@ All configuration is done with environment variables (see [`.env.example`](.env.
 | `CDS_API_URL`, `CDS_API_KEY` | ADS credentials (export job only) |
 | `CAMS_STORAGE` | `gs://bucket/prefix` (read by the web over public HTTPS) or a local folder; default `data/cams` |
 | `MAP_BASEMAP` | initial basemap, `dark` (default) or `light` |
-| `UMAMI_SRC`, `UMAMI_WEBSITE_ID` | optional cookieless analytics with [Umami](https://umami.is); both empty = off |
+| `CLOUDFLARE_ANALYTICS_TOKEN` | optional cookieless analytics with [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/); empty = off |
 | `COPERNICUS_POLLUTANTS` | default `pm2p5,pm10,no2,o3,so2` |
 | `COPERNICUS_SOGLIA_*` | thresholds per pollutant (µg/m³) |
 | `COPERNICUS_LATITUDE`, `COPERNICUS_LONGITUDE` | default map centre |

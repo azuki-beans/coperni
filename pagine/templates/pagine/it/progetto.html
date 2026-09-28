@@ -41,9 +41,9 @@
     dimensione dell'area) restano solo nel tuo browser.
 </p>
 <p>
-    {% if umami_src and umami_website_id %}Contiamo le visite in forma anonima con
-    <a href="https://umami.is" rel="noopener">Umami</a>, senza cookie e senza salvare dati personali.
-    {% endif %}Lo sfondo della mappa arriva da OpenFreeMap e le librerie della pagina da jsDelivr: il
+    {% if cf_analytics_token %}Contiamo le visite in forma anonima con
+    <a href="https://www.cloudflare.com/web-analytics/" rel="noopener">Cloudflare Web Analytics</a>,
+    senza cookie e senza salvare dati personali. {% endif %}Lo sfondo della mappa arriva da OpenFreeMap e le librerie della pagina da jsDelivr: il
     tuo browser si collega direttamente a loro.
 </p>
 {% endblock %}

@@ -136,9 +136,9 @@ CDS_API_KEY = os.environ.get('CDS_API_KEY')
 # (bucket pubblico in lettura, il web lo legge via HTTPS) oppure una cartella locale in sviluppo.
 CAMS_STORAGE = os.environ.get('CAMS_STORAGE', str(BASE_DIR / 'data' / 'cams'))
 
-# Statistiche Umami, senza cookie (come p7m-apri): attive solo se entrambe le variabili sono valorizzate
-UMAMI_SRC = os.environ.get('UMAMI_SRC', '')
-UMAMI_WEBSITE_ID = os.environ.get('UMAMI_WEBSITE_ID', '')
+# Statistiche Cloudflare Web Analytics, senza cookie: token dello snippet JS (vuoto = disattivate).
+# Il dominio è solo DNS su Cloudflare, quindi l'inserimento automatico non funzionerebbe.
+CLOUDFLARE_ANALYTICS_TOKEN = os.environ.get('CLOUDFLARE_ANALYTICS_TOKEN', '')
 
 # Sfondo iniziale della mappa (OpenFreeMap, niente chiave): 'dark' o 'light'. L'utente lo cambia
 # dalla mappa e la scelta resta nel browser.
