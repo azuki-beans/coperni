@@ -1,5 +1,5 @@
 """Metadati del sito per motori di ricerca e condivisione: anteprime dei link (Open Graph),
-favicon, robots.txt, sitemap con le due lingue e i luoghi più popolosi, statistiche Umami.
+favicon, robots.txt, sitemap con le due lingue e i luoghi più popolosi, statistiche Cloudflare Web Analytics.
 """
 
 from django.conf import settings
@@ -28,13 +28,12 @@ POPOLAZIONE_MIN_CITTA = 500_000
 
 
 def sito(request):
-    """Context processor: URL canonico, immagine di anteprima, favicon e Umami (se configurato)."""
+    """Context processor: URL canonico, immagine di anteprima, favicon e statistiche (se configurate)."""
     return {
         'url_canonico': request.build_absolute_uri(),
         'immagine_anteprima': IMMAGINE_ANTEPRIMA,
         'favicon_svg': FAVICON_SVG,
-        'umami_src': settings.UMAMI_SRC,
-        'umami_website_id': settings.UMAMI_WEBSITE_ID,
+        'cf_analytics_token': settings.CLOUDFLARE_ANALYTICS_TOKEN,
     }
 
 
