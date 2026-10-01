@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-27 22:01+0200\n"
+"POT-Creation-Date: 2026-10-01 22:05+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -19,9 +19,13 @@ msgstr ""
 msgid "No place found"
 msgstr "Nessun luogo trovato"
 
-#: pagine/templates/pagine/_layout.html:238
+#: pagine/templates/pagine/_layout.html:257
 msgid "Topics"
 msgstr "Argomenti"
+
+#: pagine/templates/pagine/_layout.html:263 places/templates/_header.html:159
+msgid "Source code on GitHub"
+msgstr "Codice sorgente su GitHub"
 
 #: pagine/views.py:20
 msgid "The project"
@@ -68,39 +72,40 @@ msgstr "Previsione qualità dell'aria: %(luogo)s"
 msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
-#: places/templates/_header.html:124 places/templates/map_view.html:233
+#: places/templates/_base_map.html:280 places/templates/_header.html:136
+#: places/templates/map_view.html:233
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
-#: places/templates/_header.html:127
+#: places/templates/_header.html:139
 msgid "Map"
 msgstr "Mappa"
 
-#: places/templates/_header.html:128
+#: places/templates/_header.html:140
 msgid "Charts"
 msgstr "Grafici"
 
-#: places/templates/_header.html:129
+#: places/templates/_header.html:141
 msgid "About"
 msgstr "Info"
 
-#: places/templates/_header.html:132
+#: places/templates/_header.html:144
 msgid "Current centre"
 msgstr "Centro attuale"
 
-#: places/templates/_header.html:133
+#: places/templates/_header.html:145
 msgid "Search a town or city…"
 msgstr "Cerca comune o città…"
 
-#: places/templates/_header.html:134
+#: places/templates/_header.html:146
 msgid "Search a town or city"
 msgstr "Cerca comune o città"
 
-#: places/templates/_header.html:137
+#: places/templates/_header.html:149
 msgid "Centre on my location"
 msgstr "Centra sulla mia posizione"
 
-#: places/templates/_header.html:140
+#: places/templates/_header.html:152
 msgid "Language"
 msgstr "Lingua"
 

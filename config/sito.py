@@ -11,6 +11,8 @@ from django.views.decorators.http import require_GET
 
 from luoghi.models import Citta, Comune
 
+URL_REPO = 'https://github.com/azuki-beans/coperni'
+
 # Immagine per le anteprime dei link (1200×630), servita da GitHub come in p7m-apri
 IMMAGINE_ANTEPRIMA = 'https://raw.githubusercontent.com/azuki-beans/coperni/main/docs/og-image.png'
 
@@ -28,9 +30,10 @@ POPOLAZIONE_MIN_CITTA = 500_000
 
 
 def sito(request):
-    """Context processor: URL canonico, immagine di anteprima, favicon e statistiche (se configurate)."""
+    """Context processor: URL canonico, repository, immagine di anteprima, favicon e statistiche (se configurate)."""
     return {
         'url_canonico': request.build_absolute_uri(),
+        'url_repo': URL_REPO,
         'immagine_anteprima': IMMAGINE_ANTEPRIMA,
         'favicon_svg': FAVICON_SVG,
         'cf_analytics_token': settings.CLOUDFLARE_ANALYTICS_TOKEN,

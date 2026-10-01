@@ -274,6 +274,11 @@
         if (SFONDI.includes(salvato)) sfondo = salvato;
     } catch (e) { /* storage non disponibile: resta il default */ }
 
+    // in testa: chi ha fatto il sito e da dove vengono i dati (resta negli screenshot condivisi)
+    map.attributionControl.addAttribution(
+        '<a href="{{ url_repo }}" target="_blank">Coperni</a> by azuki-beans · ' +
+        '{% translate "Air quality" as qualita %}{{ qualita|escapejs }}: ' +
+        '<a href="https://atmosphere.copernicus.eu/" target="_blank">Copernicus CAMS</a>');
     map.attributionControl.addAttribution(
         '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> ' +
         '<a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> ' +
