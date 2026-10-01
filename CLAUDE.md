@@ -211,5 +211,8 @@ See `.env.example`. Worth remembering:
 - `CAMS_STORAGE`, `COPERNICUS_POLLUTANTS`, `COPERNICUS_SOGLIA_*` (EU thresholds),
   `COPERNICUS_LATITUDE/LONGITUDE` (default centre).
 - **Deliberate choice:** map and popup compare the **current hour's value** with the threshold,
-  including PM2.5/PM10 whose legal limits are daily means. No 24h rolling mean: the latest value is
+  although the legal limits are daily (O₃: 8-hour) means. No 24h rolling mean: the latest value is
   shown on purpose. The `/info/dati/` page calls the comparison "indicative".
+- **Deliberate choice:** thresholds are the strictest EU references of Directive 2024/2881 (2030):
+  daily limits PM2.5 25, PM10 45, NO₂ 50, SO₂ 50, O₃ target value 120 (8h). The hourly limits
+  (NO₂ 200, SO₂ 350) left the map empty: the project aims at awareness, not emergency alerts.

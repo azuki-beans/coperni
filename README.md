@@ -66,14 +66,17 @@ for Medium-Range Weather Forecasts (ECMWF).
 |---|---|---|
 | PM2.5 | 25 | EU daily limit value from 2030 |
 | PM10 | 45 | EU daily limit value from 2030 |
-| NO₂ | 200 | EU hourly limit value |
-| O₃ | 180 | EU information threshold (hourly) |
-| SO₂ | 350 | EU hourly limit value |
+| NO₂ | 50 | EU daily limit value from 2030 |
+| O₃ | 120 | EU target value (maximum daily 8-hour mean) |
+| SO₂ | 50 | EU daily limit value from 2030 |
 
-Thresholds are configurable through environment variables. The map compares each **hourly**
-value with the threshold, including particulate matter, whose legal limits apply to daily
-means. This is intentional (the site always shows the latest hour) and the comparison is
-meant as **indicative**, not as a check of legal compliance.
+All thresholds are the strictest EU references of Directive 2024/2881 and apply to daily (O₃:
+8-hour) means, so every pollutant is judged on the same footing. The hourly limits (NO₂ 200, SO₂
+350) are meant for acute episodes and would leave the map almost always empty: the project aims
+at awareness, not at signalling emergencies. Thresholds are configurable through environment
+variables. The map compares each **hourly** value with the threshold: this is intentional (the
+site always shows the latest hour) and the comparison is meant as **indicative**, not as a check
+of legal compliance.
 
 **These are forecasts, not measurements.** They come from a numerical model of the atmosphere,
 not from monitoring stations. They describe the overall situation and its evolution well, but can

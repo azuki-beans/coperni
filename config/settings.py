@@ -157,12 +157,13 @@ COPERNICUS_POLLUTANTS = [
 COPERNICUS_RETENTION_DAYS = int(os.environ.get('COPERNICUS_RETENTION_DAYS', '21'))
 
 # Soglie di allarme qualità dell'aria (µg/m³)
-# Valori di default = soglie UE (per PM2,5/PM10 i limiti giornalieri dal 2030); regolabili via env senza
-# toccare codice (es. se le normative cambiano o si vuole una soglia più conservativa).
+# Valori di default = limiti UE dal 2030 (Dir. 2024/2881) sulla media giornaliera, per l'ozono il valore
+# obiettivo sulla media di 8 ore: soglie severe di proposito, per un confronto coerente tra inquinanti.
+# Regolabili via env senza toccare codice (es. se le normative cambiano).
 COPERNICUS_SOGLIE_ALLARME = {
     'pm2p5': float(os.environ.get('COPERNICUS_SOGLIA_PM2P5', '25.0')),  # limite giornaliero UE dal 2030 (Dir. 2024/2881)
     'pm10': float(os.environ.get('COPERNICUS_SOGLIA_PM10', '45.0')),    # limite giornaliero UE dal 2030 (Dir. 2024/2881)
-    'no2': float(os.environ.get('COPERNICUS_SOGLIA_NO2', '200.0')),     # soglia oraria UE
-    'o3': float(os.environ.get('COPERNICUS_SOGLIA_O3', '180.0')),       # soglia oraria UE
-    'so2': float(os.environ.get('COPERNICUS_SOGLIA_SO2', '350.0')),     # soglia oraria UE
+    'no2': float(os.environ.get('COPERNICUS_SOGLIA_NO2', '50.0')),      # limite giornaliero UE dal 2030 (Dir. 2024/2881)
+    'o3': float(os.environ.get('COPERNICUS_SOGLIA_O3', '120.0')),       # valore obiettivo UE, media massima su 8 ore
+    'so2': float(os.environ.get('COPERNICUS_SOGLIA_SO2', '50.0')),      # limite giornaliero UE dal 2030 (Dir. 2024/2881)
 }
