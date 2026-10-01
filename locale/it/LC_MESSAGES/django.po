@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 22:02+0200\n"
+"POT-Creation-Date: 2026-10-01 22:05+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -19,11 +19,11 @@ msgstr ""
 msgid "No place found"
 msgstr "Nessun luogo trovato"
 
-#: pagine/templates/pagine/_layout.html:256
+#: pagine/templates/pagine/_layout.html:257
 msgid "Topics"
 msgstr "Argomenti"
 
-#: pagine/templates/pagine/_layout.html:262 places/templates/_header.html:159
+#: pagine/templates/pagine/_layout.html:263 places/templates/_header.html:159
 msgid "Source code on GitHub"
 msgstr "Codice sorgente su GitHub"
 
