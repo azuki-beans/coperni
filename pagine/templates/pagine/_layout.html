@@ -214,7 +214,26 @@
             font-size: 14px;
         }
 
+        .firma {
+            margin-top: 20px;
+            padding: 14px 12px 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-dim);
+        }
+
+        .firma svg { flex: 0 0 28px; height: 28px; }
+        /* non è una voce del menu: niente padding e sfondo di .doc-menu a */
+        .doc-menu .firma a { padding: 0; color: var(--text-dim); }
+        .doc-menu .firma a:hover { color: var(--text); background: none; }
+
         @media (max-width: 720px) {
+            .firma { flex-basis: 100%; margin-top: 8px; }
+
             .doc {
                 flex-direction: column;
                 gap: 20px;
@@ -239,6 +258,10 @@
         {% for s, t in pagine.items %}
         <a href="{% url 'pagine:pagina' s %}" {% if s == slug %}class="active" aria-current="page"{% endif %}>{{ t }}</a>
         {% endfor %}
+        <div class="firma">
+            {% include "pagine/_logo_azuki.html" %}
+            <span>© azuki-beans<br><a href="{{ url_repo }}" target="_blank" rel="noopener">{% translate "Source code on GitHub" %}</a></span>
+        </div>
     </nav>
     <article>
         <h2>{{ titolo }}</h2>
