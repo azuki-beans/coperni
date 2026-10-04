@@ -36,14 +36,8 @@
 
 <h3>Privacy</h3>
 <p>
-    The site is public and requires no registration. We use no profiling cookies: one cookie
-    remembers the last place you looked at, and one your language if you pick it from the menu.
-    Your preferences (basemap, style, area size) stay in your browser.
-</p>
-<p>
-    {% if cf_analytics_token %}We count visits anonymously with
-    <a href="https://www.cloudflare.com/web-analytics/" rel="noopener">Cloudflare Web Analytics</a>,
-    without cookies and without storing personal data. {% endif %}The map background is loaded from OpenFreeMap and the page libraries from
-    jsDelivr: your browser connects to them directly.
+    The site is public and requires no registration. We use no profiling cookies and no
+    advertising: only two technical cookies (last place viewed and language) and the map
+    preferences stored in your browser. Details are on the <a href="{% url 'pagine:pagina' 'privacy' %}">Privacy</a> page.
 </p>
 {% endblock %}

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 22:05+0200\n"
+"POT-Creation-Date: 2026-10-03 19:28+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -43,23 +43,27 @@ msgstr "Quando si aggiornano"
 msgid "How to read the map"
 msgstr "Come leggere la mappa"
 
-#: pagine/views.py:27
+#: pagine/views.py:24
+msgid "Privacy"
+msgstr "Privacy"
+
+#: pagine/views.py:28
 msgid "Fine particulate matter (PM2.5)"
 msgstr "Particolato fine (PM2,5)"
 
-#: pagine/views.py:28
+#: pagine/views.py:29
 msgid "Particulate matter (PM10)"
 msgstr "Particolato (PM10)"
 
-#: pagine/views.py:29
+#: pagine/views.py:30
 msgid "Nitrogen dioxide (NO₂)"
 msgstr "Biossido di azoto (NO₂)"
 
-#: pagine/views.py:30
+#: pagine/views.py:31
 msgid "Ozone (O₃)"
 msgstr "Ozono (O₃)"
 
-#: pagine/views.py:31
+#: pagine/views.py:32
 msgid "Sulphur dioxide (SO₂)"
 msgstr "Biossido di zolfo (SO₂)"
 

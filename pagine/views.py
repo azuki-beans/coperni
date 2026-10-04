@@ -21,6 +21,7 @@ PAGINE = {
     "dati": _("Where the data comes from"),
     "aggiornamenti": _("When it updates"),
     "mappa": _("How to read the map"),
+    "privacy": _("Privacy"),
 }
 
 NOMI_INQUINANTI = {

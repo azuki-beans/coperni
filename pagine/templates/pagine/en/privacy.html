@@ -1,0 +1,81 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    Coperni is a public, free site: no registration, no advertising and no profiling, and we do
+    not ask for cookie consent because we only use the cookies needed for the site to work. Below
+    you find in detail which data is involved when you use it.
+</p>
+
+<h3>Data controller</h3>
+<p>
+    Marco Pavanelli (azuki-beans). For any request about your data write to
+    <a href="mailto:privacy@azukibeans.dev">privacy@azukibeans.dev</a>.
+</p>
+
+<h3>Cookies and data stored in the browser</h3>
+<p>Only technical cookies, which require no consent. None is shared with third parties.</p>
+<table>
+    <thead>
+        <tr><th>Name</th><th>Purpose</th><th>Duration</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>centro</code> (cookie)</td><td>the last place you looked at, to start again from there</td><td>1 year</td></tr>
+        <tr><td><code>django_language</code> (cookie)</td><td>your language, if you pick it from the menu</td><td>1 year</td></tr>
+        <tr><td><code>coperni.lato</code>, <code>coperni.resa</code>, <code>coperni.sfondo</code> (browser storage)</td><td>map preferences: area, style, background</td><td>until you delete them</td></tr>
+    </tbody>
+</table>
+<p>
+    If you use the ⌖ "my position" button, the browser asks for your permission and rounds the
+    coordinates to about 1 km before sending them: your exact position never leaves your device.
+    The rounded coordinates end up in the page address and in the <code>centro</code> cookie.
+</p>
+
+<h3>Data collected by the server</h3>
+<p>
+    Like any website, the server receives your IP address, browser type, the requested page (with
+    the place or coordinates) and the referring page. This data goes into the technical logs of
+    Google Cloud (Cloud Run, data centre in Belgium), is used only to run the site and fix
+    problems, and is deleted automatically after 30 days.
+</p>
+{% if cf_analytics_token %}
+<p>
+    We count visits with <a href="https://www.cloudflare.com/web-analytics/" rel="noopener">Cloudflare Web Analytics</a>:
+    it uses no cookies or device identifiers and only returns aggregate statistics (page views,
+    country, browser type).
+</p>
+{% endif %}
+
+<h3>External services</h3>
+<p>
+    To show the map your browser connects directly to some external services, which therefore
+    receive your IP address like any website does:
+</p>
+<ul>
+    <li><a href="https://openfreemap.org" rel="noopener">OpenFreeMap</a>: the map background;</li>
+    <li><a href="https://www.jsdelivr.com" rel="noopener">jsDelivr</a> and <a href="https://unpkg.com" rel="noopener">unpkg</a>: the page libraries (map, charts);</li>
+    {% if cf_analytics_token %}<li><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare</a>: visit counting.</li>{% endif %}
+</ul>
+<p>
+    Google and Cloudflare may also process data in the United States: both are certified under
+    the EU-U.S. Data Privacy Framework, recognised as adequate by the European Commission.
+</p>
+
+<h3>Legal basis</h3>
+<p>
+    Legitimate interest in running the site, keeping it secure and knowing how much it is used
+    (Art. 6(1)(f) GDPR). We do not use the data for other purposes, do not sell it and do not
+    combine it with other sources.
+</p>
+
+<h3>Your rights</h3>
+<p>
+    You can request access, rectification, erasure, restriction or object to the processing
+    (Arts. 15–22 GDPR) by writing to the address above. You can delete cookies and preferences at
+    any time from your browser settings. You also have the right to lodge a complaint with the
+    data protection authority of your country or with the Italian
+    <a href="https://www.garanteprivacy.it/home_en" rel="noopener">Garante per la protezione dei dati personali</a>.
+</p>
+
+<p class="dim">Last updated: 3 October 2026.</p>
+{% endblock %}

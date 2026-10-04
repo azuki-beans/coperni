@@ -1,0 +1,80 @@
+{% extends "pagine/_layout.html" %}
+
+{% block contenuto %}
+<p>
+    Coperni è un sito pubblico e gratuito: non serve registrarsi, non ci sono pubblicità né
+    profilazione e non chiediamo il consenso ai cookie perché usiamo solo quelli necessari al
+    funzionamento. Qui sotto trovi in dettaglio quali dati passano quando lo usi.
+</p>
+
+<h3>Titolare del trattamento</h3>
+<p>
+    Marco Pavanelli (azuki-beans). Per qualsiasi richiesta sui tuoi dati scrivi a
+    <a href="mailto:privacy@azukibeans.dev">privacy@azukibeans.dev</a>.
+</p>
+
+<h3>Cookie e dati salvati nel browser</h3>
+<p>Solo cookie tecnici, che non richiedono consenso. Nessuno viene condiviso con terzi.</p>
+<table>
+    <thead>
+        <tr><th>Nome</th><th>A cosa serve</th><th>Durata</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>centro</code> (cookie)</td><td>l'ultimo luogo guardato, per ripartire da lì</td><td>1 anno</td></tr>
+        <tr><td><code>django_language</code> (cookie)</td><td>la lingua, se la scegli dal menu</td><td>1 anno</td></tr>
+        <tr><td><code>coperni.lato</code>, <code>coperni.resa</code>, <code>coperni.sfondo</code> (memoria del browser)</td><td>le preferenze della mappa: area, resa, sfondo</td><td>finché non le cancelli</td></tr>
+    </tbody>
+</table>
+<p>
+    Se usi il pulsante ⌖ "la mia posizione", il browser ti chiede il permesso e arrotonda le
+    coordinate a circa 1 km prima di inviarle: la posizione esatta non lascia il tuo dispositivo.
+    Le coordinate arrotondate finiscono nell'indirizzo della pagina e nel cookie <code>centro</code>.
+</p>
+
+<h3>Dati raccolti dal server</h3>
+<p>
+    Come ogni sito web, il server riceve l'indirizzo IP, il tipo di browser, la pagina richiesta
+    (con il luogo o le coordinate) e la pagina di provenienza. Questi dati finiscono nei log
+    tecnici di Google Cloud (Cloud Run, data center in Belgio), servono solo a far funzionare il
+    sito e a risolvere i problemi e vengono cancellati automaticamente dopo 30 giorni.
+</p>
+{% if cf_analytics_token %}
+<p>
+    Contiamo le visite con <a href="https://www.cloudflare.com/web-analytics/" rel="noopener">Cloudflare Web Analytics</a>:
+    non usa cookie né identificatori del dispositivo e restituisce solo statistiche aggregate
+    (pagine viste, paese, tipo di browser).
+</p>
+{% endif %}
+
+<h3>Servizi esterni</h3>
+<p>
+    Per mostrare la mappa il tuo browser si collega direttamente ad alcuni servizi esterni, che
+    ricevono quindi il tuo indirizzo IP come qualsiasi sito:
+</p>
+<ul>
+    <li><a href="https://openfreemap.org" rel="noopener">OpenFreeMap</a>: lo sfondo della mappa;</li>
+    <li><a href="https://www.jsdelivr.com" rel="noopener">jsDelivr</a> e <a href="https://unpkg.com" rel="noopener">unpkg</a>: le librerie della pagina (mappa, grafici);</li>
+    {% if cf_analytics_token %}<li><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare</a>: il conteggio delle visite.</li>{% endif %}
+</ul>
+<p>
+    Google e Cloudflare possono trattare dati anche negli Stati Uniti: entrambe aderiscono
+    all'EU-U.S. Data Privacy Framework, riconosciuto adeguato dalla Commissione europea.
+</p>
+
+<h3>Base giuridica</h3>
+<p>
+    Il legittimo interesse a far funzionare il sito, a tenerlo sicuro e a sapere quanto viene
+    usato (art. 6, par. 1, lett. f del GDPR). Non usiamo i dati per altri scopi, non li vendiamo
+    e non li incrociamo con altre fonti.
+</p>
+
+<h3>I tuoi diritti</h3>
+<p>
+    Puoi chiedere accesso, rettifica, cancellazione, limitazione od opporti al trattamento
+    (artt. 15–22 del GDPR) scrivendo all'indirizzo sopra. Cookie e preferenze puoi cancellarli
+    in qualsiasi momento dalle impostazioni del browser. Hai anche il diritto di proporre reclamo
+    al <a href="https://www.garanteprivacy.it" rel="noopener">Garante per la protezione dei dati personali</a>.
+</p>
+
+<p class="dim">Ultimo aggiornamento: 3 ottobre 2026.</p>
+{% endblock %}

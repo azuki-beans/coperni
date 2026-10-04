@@ -102,6 +102,11 @@ done by the bucket **lifecycle rule** (21 days).
   `slug -> title`; new page = template `pagine/<lang>/<slug>.html` for every language + dictionary entry. Thresholds and
   pollutants read from settings, "latest forecast" from `griglia.indice()`. The update times
   (08:30 UTC) are written in `<lang>/aggiornamenti.html`: update them if the scheduler changes.
+  `<lang>/privacy.html` is the GDPR notice (no cookie banner: only technical cookies): **update it**
+  when adding a cookie, a `localStorage` key, an external script/CDN or tracking, or when log
+  retention changes (Cloud Logging `_Default` = 30 days). Contact `privacy@azukibeans.dev`
+  (Cloudflare Email Routing forward). "My position" rounds coordinates to 2 decimals (~1 km) in
+  the browser on purpose: the page promises the exact position never leaves the device.
 - **`luoghi`**: `Comune` (ISTAT code, name possibly bilingual "Bolzano/Bozen", province code,
   region, DEM 2015 altitudes, population, **centroid** — no boundaries) and `Citta` (GeoNames
   cities15000 in the CAMS domain, Italy excluded). CSVs versioned in `luoghi/dati/`, loaded by
@@ -216,3 +221,6 @@ See `.env.example`. Worth remembering:
 - **Deliberate choice:** thresholds are the strictest EU references of Directive 2024/2881 (2030):
   daily limits PM2.5 25, PM10 45, NO₂ 50, SO₂ 50, O₃ target value 120 (8h). The hourly limits
   (NO₂ 200, SO₂ 350) left the map empty: the project aims at awareness, not emergency alerts.
+  Consequence: O₃ has a regional background of ~60–100 µg/m³ (ratio 0.5–0.9), so its map is
+  green→yellow almost everywhere. That is real, not a bug; explained on `/info/dati/`. Do not
+  raise the O₃ threshold back to 180 (hourly information threshold) without a deliberate decision.

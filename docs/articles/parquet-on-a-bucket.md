@@ -1,6 +1,6 @@
 ---
 title: Serving Europe-wide air quality forecasts from a Parquet file on a bucket
-published: false
+published: true
 description: How Coperni serves the Copernicus air quality forecast for all of Europe with one daily Parquet file, DuckDB and HTTP range requests, for well under a euro a month.
 tags: python, duckdb, parquet, django
 cover_image: https://raw.githubusercontent.com/azuki-beans/coperni/main/docs/og-image.png

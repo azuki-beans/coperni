@@ -165,8 +165,9 @@
     // la posizione del browser diventa un normale URL con le coordinate, condivisibile
     document.getElementById('mia-posizione').addEventListener('click', () => {
         navigator.geolocation?.getCurrentPosition(pos => {
+            // arrotondata a ~1 km (le celle CAMS sono di ~10 km): la posizione esatta resta nel browser
             const { latitude, longitude } = pos.coords;
-            location.search = `?lat=${latitude.toFixed(5)}&lon=${longitude.toFixed(5)}`;
+            location.search = `?lat=${latitude.toFixed(2)}&lon=${longitude.toFixed(2)}`;
         });
     });
     // chiudi i risultati cliccando altrove

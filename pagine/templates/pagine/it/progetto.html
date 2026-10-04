@@ -36,14 +36,8 @@
 
 <h3>Privacy</h3>
 <p>
-    Il sito è pubblico e non richiede registrazione. Non usiamo cookie di profilazione: un cookie
-    ricorda l'ultimo luogo che hai guardato e uno la lingua, se la scegli dal menu. Le tue preferenze (sfondo, resa,
-    dimensione dell'area) restano solo nel tuo browser.
-</p>
-<p>
-    {% if cf_analytics_token %}Contiamo le visite in forma anonima con
-    <a href="https://www.cloudflare.com/web-analytics/" rel="noopener">Cloudflare Web Analytics</a>,
-    senza cookie e senza salvare dati personali. {% endif %}Lo sfondo della mappa arriva da OpenFreeMap e le librerie della pagina da jsDelivr: il
-    tuo browser si collega direttamente a loro.
+    Il sito è pubblico e non richiede registrazione. Non usiamo cookie di profilazione né
+    pubblicità: solo due cookie tecnici (ultimo luogo guardato e lingua) e le preferenze della
+    mappa salvate nel tuo browser. I dettagli sono nella pagina <a href="{% url 'pagine:pagina' 'privacy' %}">Privacy</a>.
 </p>
 {% endblock %}
