@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 23:23+0200\n"
+"POT-Creation-Date: 2026-10-07 23:39+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -77,7 +77,7 @@ msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
 #: places/templates/_base_map.html:313 places/templates/_header.html:136
-#: places/templates/map_view.html:292
+#: places/templates/map_view.html:293
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
@@ -155,8 +155,8 @@ msgid ""
 "Values in µg/m³; the dot compares them with the EU threshold, with the "
 "colours of the map."
 msgstr ""
-"Valori in µg/m³; il pallino li confronta con la soglia UE, con i colori della "
-"mappa."
+"Valori in µg/m³; il pallino li confronta con la soglia UE, con i colori "
+"della mappa."
 
 #: places/templates/classifica.html:226
 msgid "About the data"
@@ -232,55 +232,55 @@ msgstr "Caricamento…"
 msgid "No data available for this period."
 msgstr "Nessun dato disponibile per il periodo."
 
-#: places/templates/map_view.html:289
+#: places/templates/map_view.html:290
 msgid "Hide panel"
 msgstr "Nascondi pannello"
 
-#: places/templates/map_view.html:289
+#: places/templates/map_view.html:290
 msgid "Show panel"
 msgstr "Mostra pannello"
 
-#: places/templates/map_view.html:296
+#: places/templates/map_view.html:297
 msgid "None"
 msgstr "Nessuno"
 
-#: places/templates/map_view.html:307
+#: places/templates/map_view.html:308
 msgid "Intensity"
 msgstr "Intensità"
 
-#: places/templates/map_view.html:316
+#: places/templates/map_view.html:317
 msgid "24 hours earlier"
 msgstr "24 ore prima"
 
-#: places/templates/map_view.html:316
+#: places/templates/map_view.html:317
 msgid "One hour earlier"
 msgstr "Un'ora prima"
 
-#: places/templates/map_view.html:317
+#: places/templates/map_view.html:318
 msgid "One hour later"
 msgstr "Un'ora dopo"
 
-#: places/templates/map_view.html:317
+#: places/templates/map_view.html:318
 msgid "24 hours later"
 msgstr "24 ore dopo"
 
-#: places/templates/map_view.html:321
+#: places/templates/map_view.html:322
 msgid "Forecast for"
 msgstr "Previsione per"
 
-#: places/templates/map_view.html:323 places/testi.py:14
+#: places/templates/map_view.html:324 places/testi.py:14
 msgid "now"
 msgstr "adesso"
 
-#: places/templates/map_view.html:324
+#: places/templates/map_view.html:325
 msgid "data not up to date"
 msgstr "dati non aggiornati"
 
-#: places/templates/map_view.html:326
+#: places/templates/map_view.html:327
 msgid "when it updates"
 msgstr "quando si aggiorna"
 
-#: places/templates/map_view.html:580
+#: places/templates/map_view.html:581
 msgid "Area"
 msgstr "Area"
 
