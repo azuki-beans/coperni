@@ -137,6 +137,7 @@
     </div>
     <nav class="nav-links">
         <a href="{% url 'places:map' %}?{{ centro.querystring }}" {% if nav_attiva == 'map' %}class="active"{% endif %}>{% translate "Map" %}</a>
+        <a href="{% url 'places:classifica' %}?{{ centro.querystring }}" {% if nav_attiva == 'classifica' %}class="active"{% endif %}>{% translate "Ranking" %}</a>
         <a href="{% url 'places:grafici' %}?{{ centro.querystring }}" {% if nav_attiva == 'grafici' %}class="active"{% endif %}>{% translate "Charts" %}</a>
         <a href="{% url 'pagine:indice' %}?{{ centro.querystring }}" {% if nav_attiva == 'info' %}class="active"{% endif %}>{% translate "About" %}</a>
     </nav>

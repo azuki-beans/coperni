@@ -9,6 +9,7 @@ import json
 import math
 import threading
 import time
+import urllib.error
 import urllib.request
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -46,23 +47,40 @@ def url_base() -> str:
     return base
 
 
-_indice = {'valore': None, 'letto_il': 0.0}
+_json = {}  # nome file -> (valore, letto_il)
 _locale = threading.local()
 _connessione = None
 _lock = threading.Lock()
 
 
+def _leggi_json(nome: str, assente=None):
+    """File JSON piccolo scritto dal job, tenuto in memoria per INDICE_TTL secondi."""
+    valore, letto_il = _json.get(nome, (None, 0.0))
+    if valore is None or time.monotonic() - letto_il > INDICE_TTL:
+        url = f'{url_base()}/{nome}'
+        try:
+            if url.startswith('https://'):
+                with urllib.request.urlopen(url, timeout=10) as risposta:
+                    valore = json.load(risposta)
+            else:
+                valore = json.loads(Path(url).read_text())
+        except FileNotFoundError, urllib.error.HTTPError:
+            if assente is None:
+                raise
+            valore = assente
+        _json[nome] = (valore, time.monotonic())
+    return valore
+
+
 def indice() -> dict:
     """{'giorni': [...iso...], 'ore': 49} — quali corse esistono (su HTTP il bucket non si lista)."""
-    if _indice['valore'] is None or time.monotonic() - _indice['letto_il'] > INDICE_TTL:
-        url = f'{url_base()}/indice.json'
-        if url.startswith('https://'):
-            with urllib.request.urlopen(url, timeout=10) as risposta:
-                valore = json.load(risposta)
-        else:
-            valore = json.loads(Path(url).read_text())
-        _indice.update(valore=valore, letto_il=time.monotonic())
-    return _indice['valore']
+    return _leggi_json('indice.json')
+
+
+def classifica() -> dict:
+    """Media del giorno per luogo sull'ultima corsa (vedi export.classifica); {} se il job non
+    l'ha ancora prodotta."""
+    return _leggi_json('classifica.json', assente={})
 
 
 def _cursore():

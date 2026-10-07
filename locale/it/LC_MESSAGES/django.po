@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-03 19:28+0200\n"
+"POT-Creation-Date: 2026-10-07 10:14+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -23,7 +23,7 @@ msgstr "Nessun luogo trovato"
 msgid "Topics"
 msgstr "Argomenti"
 
-#: pagine/templates/pagine/_layout.html:263 places/templates/_header.html:159
+#: pagine/templates/pagine/_layout.html:263 places/templates/_header.html:160
 msgid "Source code on GitHub"
 msgstr "Codice sorgente su GitHub"
 
@@ -86,30 +86,34 @@ msgid "Map"
 msgstr "Mappa"
 
 #: places/templates/_header.html:140
+msgid "Ranking"
+msgstr "Classifica"
+
+#: places/templates/_header.html:141
 msgid "Charts"
 msgstr "Grafici"
 
-#: places/templates/_header.html:141
+#: places/templates/_header.html:142
 msgid "About"
 msgstr "Info"
 
-#: places/templates/_header.html:144
+#: places/templates/_header.html:145
 msgid "Current centre"
 msgstr "Centro attuale"
 
-#: places/templates/_header.html:145
+#: places/templates/_header.html:146
 msgid "Search a town or city…"
 msgstr "Cerca comune o città…"
 
-#: places/templates/_header.html:146
+#: places/templates/_header.html:147
 msgid "Search a town or city"
 msgstr "Cerca comune o città"
 
-#: places/templates/_header.html:149
+#: places/templates/_header.html:150
 msgid "Centre on my location"
 msgstr "Centra sulla mia posizione"
 
-#: places/templates/_header.html:152
+#: places/templates/_header.html:153
 msgid "Language"
 msgstr "Lingua"
 
@@ -124,6 +128,80 @@ msgstr ""
 #: places/templates/_meta_head.html:19
 msgid "Map of air quality forecasts over northern Italy"
 msgstr "Mappa delle previsioni di qualità dell'aria sul Nord Italia"
+
+#: places/templates/classifica.html:6
+msgid "Air quality ranking"
+msgstr "Classifica della qualità dell'aria"
+
+#: places/templates/classifica.html:224
+#, python-format
+msgid ""
+"Daily average (00–24 UTC) of the CAMS forecast of %(data)s, over an area "
+"about %(km)s km wide around each place: the same area as the charts."
+msgstr ""
+"Media del giorno (00–24 UTC) della previsione CAMS del %(data)s, su un'area "
+"larga circa %(km)s km attorno a ogni luogo: la stessa area dei grafici."
+
+#: places/templates/classifica.html:225
+msgid ""
+"Values in µg/m³; the dot compares them with the EU threshold, with the "
+"colours of the map."
+msgstr ""
+"Valori in µg/m³; il pallino li confronta con la soglia UE, con i colori della "
+"mappa."
+
+#: places/templates/classifica.html:226
+msgid "About the data"
+msgstr "Informazioni sui dati"
+
+#: places/templates/classifica.html:232
+msgid "Filter by name or country…"
+msgstr "Filtra per nome o paese…"
+
+#: places/templates/classifica.html:233
+msgid "Filter by name or country"
+msgstr "Filtra per nome o paese"
+
+#: places/templates/classifica.html:234
+msgid "Places"
+msgstr "Luoghi"
+
+#: places/templates/classifica.html:235
+msgid "All places"
+msgstr "Tutti i luoghi"
+
+#: places/templates/classifica.html:236
+msgid "Italian municipalities"
+msgstr "Comuni italiani"
+
+#: places/templates/classifica.html:237
+msgid "Other cities"
+msgstr "Altre città"
+
+#: places/templates/classifica.html:246
+msgid "Place"
+msgstr "Luogo"
+
+#: places/templates/classifica.html:247
+msgid "Country"
+msgstr "Paese"
+
+#: places/templates/classifica.html:251
+#, python-format
+msgid "threshold %(soglia)s"
+msgstr "soglia %(soglia)s"
+
+#: places/templates/classifica.html:269
+msgid "No place matches the filter."
+msgstr "Nessun luogo corrisponde al filtro."
+
+#: places/templates/classifica.html:272
+msgid ""
+"The ranking is not available yet: it is computed with the next forecast "
+"update."
+msgstr ""
+"La classifica non è ancora disponibile: viene calcolata al prossimo "
+"aggiornamento delle previsioni."
 
 #: places/templates/grafici.html:6
 #, python-format
