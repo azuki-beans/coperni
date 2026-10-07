@@ -1,0 +1,337 @@
+{% load i18n l10n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% translate "Air quality ranking" as titolo_pagina %}
+    <title>{{ titolo_pagina }} — Coperni</title>
+    {% include "_meta_head.html" %}
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface-hover: #242836;
+            --border: #2e3346;
+            --text: #e1e4ed;
+            --text-dim: #8b90a5;
+            --accent: #6c8cff;
+            --radius: 10px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .logo h1 {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .logo h1 span {
+            color: var(--text-dim);
+            font-weight: 400;
+            margin-left: 6px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            margin-left: 32px;
+        }
+
+        .nav-links a {
+            padding: 6px 14px;
+            border-radius: var(--radius);
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        .nav-links a.active {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        /* ── Content ── */
+        .content {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .intro h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .intro p {
+            color: var(--text-dim);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .intro a { color: var(--accent); }
+
+        .filtri {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filtri input, .filtri select {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 7px 12px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .filtri input { flex: 1; min-width: 180px; max-width: 320px; }
+        .filtri input:focus, .filtri select:focus { outline: none; border-color: var(--accent); }
+
+        .tabella {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        thead th {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        th button {
+            background: none;
+            border: 0;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        th button:hover, th[aria-sort] button { color: var(--text); }
+        th[aria-sort="descending"] button::after { content: " ↓"; }
+        th[aria-sort="ascending"] button::after { content: " ↑"; }
+        th small { display: block; font-weight: 400; font-size: 11px; }
+
+        tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+        tbody tr:hover { background: var(--surface-hover); }
+        td a { color: var(--text); text-decoration: none; }
+        td a:hover { color: var(--accent); }
+        .numero { text-align: right; font-variant-numeric: tabular-nums; }
+        th.numero { text-align: right; }
+        .dim { color: var(--text-dim); }
+
+        .pallino {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-left: 6px;
+            vertical-align: baseline;
+        }
+
+        .vuoto {
+            padding: 32px;
+            text-align: center;
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+{% include "_header.html" %}
+
+<!-- ── Content ── -->
+<div class="content">
+    <div class="intro">
+        <h2>{{ titolo_pagina }}</h2>
+        <p>
+            {% if corsa %}{% blocktranslate with data=corsa|date:"DATE_FORMAT" km=km %}Daily average (00–24 UTC) of the CAMS forecast of {{ data }}, over an area about {{ km }} km wide around each place: the same area as the charts.{% endblocktranslate %}{% endif %}
+            {% translate "Values in µg/m³; the dot compares them with the EU threshold, with the colours of the map." %}
+            <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">{% translate "About the data" %}</a>
+        </p>
+    </div>
+
+    {% if righe %}
+    <div class="filtri">
+        <input type="search" id="filtro" placeholder="{% translate "Filter by name or country…" %}"
+               aria-label="{% translate "Filter by name or country" %}" autocomplete="off">
+        <select id="tipo" aria-label="{% translate "Places" %}">
+            <option value="">{% translate "All places" %}</option>
+            <option value="comune">{% translate "Italian municipalities" %}</option>
+            <option value="citta">{% translate "Other cities" %}</option>
+        </select>
+    </div>
+
+    <div class="tabella">
+        <table id="classifica">
+            <thead>
+            <tr>
+                <th class="numero">#</th>
+                <th><button type="button" data-colonna="1">{% translate "Place" %}</button></th>
+                <th><button type="button" data-colonna="2">{% translate "Country" %}</button></th>
+                {% for c in colonne %}
+                <th class="numero" {% if forloop.first %}aria-sort="descending"{% endif %}>
+                    <button type="button" data-colonna="{{ forloop.counter|add:2 }}" data-numerica>{{ c.codice|upper }}</button>
+                    {% if c.soglia %}<small>{% blocktranslate with soglia=c.soglia|floatformat:"-1" %}threshold {{ soglia }}{% endblocktranslate %}</small>{% endif %}
+                </th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for r in righe %}
+            <tr data-tipo="{{ r.tipo }}">
+                <td class="numero dim">{{ forloop.counter }}</td>
+                <td><a href="{% url 'places:map' %}?{{ r.query }}">{{ r.nome }}</a></td>
+                <td class="dim">{{ r.paese }}</td>
+                {% for v in r.valori %}
+                <td class="numero" data-valore="{{ v.valore|default_if_none:''|unlocalize }}">{% if v.valore is None %}—{% else %}{{ v.valore|floatformat:1 }}{% endif %}{% if v.colore %}<i class="pallino" style="background:{{ v.colore }}"></i>{% endif %}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="vuoto" id="nessun-risultato" hidden>{% translate "No place matches the filter." %}</div>
+    </div>
+    {% else %}
+    <div class="tabella"><div class="vuoto">{% translate "The ranking is not available yet: it is computed with the next forecast update." %}</div></div>
+    {% endif %}
+</div>
+
+<script>
+    // Ordinamento e filtro nel browser: le righe sono poche centinaia e arrivano già nell'HTML.
+    (() => {
+        const tabella = document.getElementById('classifica');
+        if (!tabella) return;
+        const corpo = tabella.tBodies[0];
+        const righe = [...corpo.rows];
+        const filtro = document.getElementById('filtro');
+        const tipo = document.getElementById('tipo');
+        const nessuno = document.getElementById('nessun-risultato');
+        // senza maiuscole né accenti: "munchen" trova München
+        const normalizza = (testo) => testo.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
+        const confronto = new Intl.Collator(document.documentElement.lang, { sensitivity: 'base' });
+
+        function numera() {
+            let n = 0;
+            for (const riga of corpo.rows) if (!riga.hidden) riga.cells[0].textContent = ++n;
+            nessuno.hidden = n > 0;
+        }
+
+        tabella.querySelectorAll('th button').forEach((bottone) => {
+            bottone.addEventListener('click', () => {
+                const th = bottone.closest('th');
+                const colonna = Number(bottone.dataset.colonna);
+                const numerica = 'numerica' in bottone.dataset;
+                // primo clic: i valori più alti (o i nomi dalla A) in cima; poi si inverte
+                const iniziale = numerica ? 'descending' : 'ascending';
+                const verso = th.getAttribute('aria-sort') === iniziale
+                    ? (iniziale === 'descending' ? 'ascending' : 'descending') : iniziale;
+                tabella.querySelectorAll('th[aria-sort]').forEach((t) => t.removeAttribute('aria-sort'));
+                th.setAttribute('aria-sort', verso);
+                const segno = verso === 'ascending' ? 1 : -1;
+
+                const chiave = (riga) => numerica
+                    ? (riga.cells[colonna].dataset.valore === '' ? null : Number(riga.cells[colonna].dataset.valore))
+                    : riga.cells[colonna].textContent.trim();
+                righe.sort((a, b) => {
+                    const [x, y] = [chiave(a), chiave(b)];
+                    if (x === null || y === null) return (x === null) - (y === null);  // vuoti in fondo
+                    return segno * (numerica ? x - y : confronto.compare(x, y));
+                });
+                corpo.append(...righe);
+                numera();
+            });
+        });
+
+        function filtra() {
+            const testo = normalizza(filtro.value.trim());
+            for (const riga of righe) {
+                const nome = normalizza(`${riga.cells[1].textContent} ${riga.cells[2].textContent}`);
+                riga.hidden = (tipo.value && riga.dataset.tipo !== tipo.value) || !nome.includes(testo);
+            }
+            numera();
+        }
+
+        filtro.addEventListener('input', filtra);
+        tipo.addEventListener('change', filtra);
+    })();
+</script>
+
+</body>
+</html>

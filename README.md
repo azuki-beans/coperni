@@ -31,6 +31,8 @@ the last place you looked at.
   renderings are available: *halftone* (dot size ∝ concentration), *hatching* (line width ∝
   concentration) and *transparency*. Dark or light basemap. Click a cell to read its value.
 - **Time navigation**: step ±1 h / ±24 h through the past days and the next 48 h of the forecast.
+- **Ranking**: the most populous places (Italian municipalities ≥ 50k, other cities ≥ 500k)
+  ranked by the daily average of each pollutant over the chart area, sortable and filterable.
 - **Charts**: hourly average over the same area for the last 7 days and the latest 48 h forecast,
   with the thresholds drawn as dashed lines.
 - **Search**: Italian municipalities (including bilingual names such as *Bolzano/Bozen*) and
@@ -125,6 +127,9 @@ the reasoning behind it and how to deploy your own copy.
   compression. A local window touches ~4 of ~600 row groups (~0.2 MB per pollutant), which is
   all DuckDB downloads thanks to Parquet statistics and HTTP range requests.
 - `indice.json` lists the available runs, because a bucket served over HTTPS cannot be listed.
+- `classifica.json` (~10 KB): for the places of the ranking, the daily average (hours 0–23) of each
+  pollutant over the 20-cell window with aspect 1:1. Computed with 2D prefix sums (summed-area
+  table), so every window costs 4 lookups: ~0.2 s for the whole run.
   Old files are removed by a bucket lifecycle rule (21 days).
 
 ### Web (`copernicus/griglia.py`, `places/`)

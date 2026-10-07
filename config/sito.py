@@ -24,7 +24,7 @@ FAVICON_SVG = (
     'fill="#fff" text-anchor="middle">C</text></svg>'
 )
 
-# nella sitemap: le mappe dei luoghi più cercati (nome del luogo nel titolo della pagina)
+# nella sitemap (mappe con il nome del luogo nel titolo) e nella classifica: i luoghi più cercati
 POPOLAZIONE_MIN_COMUNI = 50_000
 POPOLAZIONE_MIN_CITTA = 500_000
 
@@ -77,7 +77,7 @@ class SitemapPagine(SitemapBase):
     def items(self):
         from pagine.views import PAGINE
 
-        return ['places:map', 'places:grafici', *(f'pagine:{slug}' for slug in PAGINE)]
+        return ['places:map', 'places:classifica', 'places:grafici', *(f'pagine:{slug}' for slug in PAGINE)]
 
     def location(self, item):
         if item.startswith('pagine:'):

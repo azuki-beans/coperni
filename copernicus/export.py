@@ -13,19 +13,25 @@ locale tocca pochi row group e DuckDB legge solo quelli via HTTP range request (
 50x10 celle -> 4 row group su ~600, ~0.2 MB per inquinante).
 """
 
+import csv
 import json
 import tempfile
 from datetime import date, timedelta
 from pathlib import Path
 
 import cdsapi
+import duckdb
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 import xarray as xr
 from django.conf import settings
 
-from copernicus.griglia import POLLUTANT_VARIABLES, SCALA_COORD, SCALA_VALORE
+from config.sito import POPOLAZIONE_MIN_CITTA, POPOLAZIONE_MIN_COMUNI
+from copernicus.griglia import (
+    LATO_CELLE, ORE_STORICO, PASSO_INT, POLLUTANT_VARIABLES, SCALA_COORD, SCALA_VALORE, finestra,
+)
+from luoghi.management.commands.luoghi_build import DATI
 
 DATASET = 'cams-europe-air-quality-forecasts'
 ORE_PREVISIONE = 49  # 0..48: massimo offerto dal modello 'ensemble' (oltre viene troncato)
@@ -85,6 +91,67 @@ def netcdf_a_parquet(sorgente: Path, destinazione: Path) -> int:
     return tabella.num_rows
 
 
+def _luoghi_classifica() -> dict[str, list[tuple[str, float, float]]]:
+    """Stessi luoghi della sitemap, dai CSV versionati: il job non ha il DB dei luoghi."""
+    def leggi(nome, chiave, minimo):
+        with open(DATI / nome, newline='') as f:
+            return [(r[chiave], float(r['lat']), float(r['lon']))
+                    for r in csv.DictReader(f) if int(r['popolazione']) >= minimo]
+
+    return {
+        'comuni': leggi('comuni.csv', 'codice', POPOLAZIONE_MIN_COMUNI),
+        'citta': leggi('citta.csv', 'geonameid', POPOLAZIONE_MIN_CITTA),
+    }
+
+
+def classifica(parquet: Path, giorno: date) -> dict:
+    """Media del giorno (prime ORE_STORICO ore della corsa) di ogni inquinante sulla finestra di
+    LATO_CELLE[0] celle attorno a ogni luogo: la stessa area dei grafici, con proporzioni 1:1.
+
+    Somme e conteggi per cella vanno in un'immagine integrale (somme cumulate 2D): la somma di
+    qualunque finestra costa 4 letture, quindi il calcolo è O(celle + luoghi). Media di tutti i
+    valori cella/ora non nulli della finestra.
+    """
+    inquinanti = [c for c in settings.COPERNICUS_POLLUTANTS if c in POLLUTANT_VARIABLES]
+    colonne = ', '.join(f'sum("{c}")::DOUBLE, count("{c}")' for c in inquinanti)
+    righe = duckdb.execute(
+        f'SELECT lat, lon, {colonne} FROM read_parquet(?) WHERE ora < ? GROUP BY lat, lon',
+        [str(parquet), ORE_STORICO],
+    ).fetchnumpy()
+    lat0, lon0 = int(righe['lat'].min()), int(righe['lon'].min())
+    i = (righe['lat'].astype(int) - lat0) // PASSO_INT
+    j = (righe['lon'].astype(int) - lon0) // PASSO_INT
+    forma = (i.max() + 1, j.max() + 1)
+
+    def integrale(valori) -> np.ndarray:
+        g = np.zeros(forma)
+        g[i, j] = np.nan_to_num(np.asarray(valori, dtype=float))
+        return np.pad(g.cumsum(0).cumsum(1), ((1, 0), (1, 0)))
+
+    colonne_valori = list(righe.values())[2:]
+    integrali = [(integrale(colonne_valori[2 * k]), integrale(colonne_valori[2 * k + 1]))
+                 for k in range(len(inquinanti))]
+
+    def media(lat: float, lon: float) -> list[float | None]:
+        f = finestra(lat, lon, LATO_CELLE[0], 1.0)
+        # indici della finestra nella griglia, ritagliati al dominio (estremi esclusivi)
+        i0 = max((f['lat_min'] - lat0) // PASSO_INT, 0)
+        i1 = min((f['lat_max'] - lat0) // PASSO_INT + 1, forma[0])
+        j0 = max((f['lon_min'] - lon0) // PASSO_INT, 0)
+        j1 = min((f['lon_max'] - lon0) // PASSO_INT + 1, forma[1])
+        valori = []
+        for somme, conteggi in integrali:
+            s, n = (a[i1, j1] - a[i0, j1] - a[i1, j0] + a[i0, j0] for a in (somme, conteggi))
+            valori.append(round(float(s / n) / SCALA_VALORE, 1) if n > 0 and i1 > i0 and j1 > j0 else None)
+        return valori
+
+    return {
+        'corsa': giorno.isoformat(), 'ore': ORE_STORICO, 'lato': LATO_CELLE[0], 'inquinanti': inquinanti,
+        **{tipo: {chiave: media(lat, lon) for chiave, lat, lon in luoghi}
+           for tipo, luoghi in _luoghi_classifica().items()},
+    }
+
+
 class Archivio:
     """Dove vivono i Parquet: bucket GCS (`gs://bucket/prefisso`) o cartella locale (sviluppo)."""
 
@@ -138,5 +205,11 @@ def esporta(giorno: date, netcdf: Path | None = None) -> dict:
         indice = tmp / 'indice.json'
         indice.write_text(json.dumps({'giorni': giorni, 'ore': ORE_PREVISIONE}))
         archivio.carica(indice, 'indice.json', 'application/json', 'public, max-age=300')
+
+        # classifica dei luoghi sull'ultima corsa: rigenerare un giorno passato la sovrascriverebbe
+        if giorni and giorni[-1] == giorno.isoformat():
+            file_classifica = tmp / 'classifica.json'
+            file_classifica.write_text(json.dumps(classifica(parquet, giorno), separators=(',', ':')))
+            archivio.carica(file_classifica, 'classifica.json', 'application/json', 'public, max-age=300')
 
     return {'giorno': giorno.isoformat(), 'righe': righe, 'dimensione_mb': dimensione_mb, 'giorni': len(giorni)}

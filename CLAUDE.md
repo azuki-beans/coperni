@@ -15,6 +15,7 @@ Architecture (see [`docs/architecture.md`](docs/architecture.md)):
 ```
 Cloud Scheduler (08:30 UTC) → Cloud Run Job (manage.py cams_export)
     └─ 1 ADS request: all of Europe, 5 pollutants, 49h → gs://<bucket>/cams/YYYY-MM-DD.parquet + indice.json
+                                                                                    + classifica.json
 Browser → Cloud Run service (Django + DuckDB) → reads over HTTPS only the requested window
                                   └─ luoghi.sqlite3 (municipalities + cities) built into the image
 ```
@@ -77,6 +78,13 @@ pollutant), which DuckDB reads via HTTP range requests.
 cannot be listed. The job rewrites it (last `COPERNICUS_RETENTION_DAYS` days); file deletion is
 done by the bucket **lifecycle rule** (21 days).
 
+`classifica.json` (`export.classifica`, written only when the exported day is the newest run):
+`{"corsa", "ore": 24, "lato": 20, "inquinanti": [...], "comuni": {codice: [v…]}, "citta": {geonameid: [v…]}}`,
+µg/m³ with 1 decimal, null if missing. Places = the sitemap set (`config/sito.py`
+`POPOLAZIONE_MIN_*`, ~280), read from `luoghi/dati/*.csv` (the job image has no places DB). Value =
+mean of all non-null cell/hour values for hours 0–23 over `finestra(lat, lon, 20, aspect=1)`, i.e.
+the same number the charts average for that day in a square viewport; summed-area tables → ~0.2 s.
+
 ## Django apps
 
 - `config/`: settings/urls/wsgi. DB = SQLite (`LUOGHI_DB`, default `luoghi.sqlite3`) for places
@@ -94,6 +102,8 @@ done by the bucket **lifecycle rule** (21 days).
     covering it** (`_corsa_per`); also returns `primo`/`ultimo`/`corsa`. `serie()` = hourly mean
     over the window, first 24h of each run of the last 7 days + the whole latest run.
     One DuckDB connection per instance, one cursor per thread (shared metadata cache).
+    `indice()` and `classifica()` read the job's small JSON files via `_leggi_json` (5 min cache;
+    `classifica()` returns `{}` if the file does not exist yet).
     `CAMS_STORAGE=gs://b/p` → read as `https://storage.googleapis.com/b/p` (public bucket).
   - API: `GET /copernicus/api/griglia/?lat&lon&inquinante&lato&aspect[&istante=ISO]` and
     `GET /copernicus/api/serie/?lat&lon&lato&aspect`, with `Cache-Control` (grid until the top of
@@ -140,6 +150,10 @@ done by the bucket **lifecycle rule** (21 days).
     immediately, request after 250 ms. The old layer stays until the new one arrives
     (`sostituisciLayer`); reframes only if `limiti` change. "Data not up to date" if `ultimo` is
     more than 2h in the past.
+  - `classifica.html` (`/places/classifica/`, menu "Ranking" before "Charts"): server-rendered
+    table from `griglia.classifica()` joined with `Comune`/`Citta`; dot colour from `views.COLORI`
+    (copy of `COLOR_STOPS` in `map_view.html`: keep them in sync). Sorting/filtering in ~50 lines of
+    vanilla JS, no table library. Does not set the `centro` cookie.
   - `grafici.html`: Chart.js 4.5.1 from jsdelivr, `linear` X axis in epoch ms (no date adapter),
     dashed thresholds tied to the main line (`pairedIndex`). Same window as the map (side from
     `localStorage`, window aspect ratio).

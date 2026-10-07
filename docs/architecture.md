@@ -14,7 +14,7 @@ bucket, and a stateless web service reads just the slice it needs with DuckDB.
                     │ manage.py cams_export      │◄─────│ 1 request, NetCDF ~275 MB    │
                     │ 1 vCPU · 2 GiB · ≤1 h      │      └──────────────────────────────┘
                     └─────────────┬──────────────┘
-                                  │ writes YYYY-MM-DD.parquet (~54 MB) + indice.json
+                                  │ writes YYYY-MM-DD.parquet (~54 MB) + indice.json + classifica.json
                     ┌─────────────▼──────────────┐
                     │ Cloud Storage bucket       │  public read · lifecycle: delete after 21 days
                     └─────────────▲──────────────┘
@@ -32,7 +32,7 @@ bucket, and a stateless web service reads just the slice it needs with DuckDB.
 |---|---|---|
 | **Cloud Run Job** | Downloads the daily CAMS run and converts it to Parquet | Image `--target job`. Retries 3×. Needs the ADS key (Secret Manager) and write access to the bucket. |
 | **Cloud Scheduler** | Triggers the job at 08:30 UTC | CAMS guarantees the 00 UTC run on the ADS by 08:00 UTC. |
-| **Cloud Storage** | Stores the Parquet files and `indice.json` | Public read (Copernicus data is open; attribution is on the site). Lifecycle rule deletes old `.parquet` files. |
+| **Cloud Storage** | Stores the Parquet files, `indice.json` and `classifica.json` (ranking) | Public read (Copernicus data is open; attribution is on the site). Lifecycle rule deletes old `.parquet` files. |
 | **Cloud Run service** | Serves the site and the JSON APIs | Image `--target web`. Scales to zero; concurrency 8, gunicorn with 1 worker × 8 threads so all requests share one DuckDB metadata cache. |
 | **Artifact Registry** | Hosts the `web` and `job` images | Pushed by GitHub Actions on `v*` tags. |
 | **Secret Manager** | `DJANGO_SECRET_KEY`, ADS key | Mounted as env vars; nothing secret in the images or the repository. |
