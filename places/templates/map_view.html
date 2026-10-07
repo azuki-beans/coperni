@@ -188,7 +188,7 @@
         .riferimento-dati {
             position: absolute;
             left: 12px;
-            bottom: 24px;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px));
             z-index: 1000;
             max-width: calc(100% - 24px);
             background: var(--surface);
