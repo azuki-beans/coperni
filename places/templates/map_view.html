@@ -5,28 +5,29 @@
         /* Pollution control */
         .pollution-control {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 10px;
+            right: 10px;
             z-index: 1000;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 12px 14px;
+            padding: 8px 10px;
             box-shadow: var(--shadow);
-            min-width: 200px;
+            width: 210px;
         }
 
-        .pollution-control label {
-            display: block;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-dim);
-            margin-bottom: 6px;
+        .pollution-control[hidden], .pannello-apri[hidden] {
+            display: none;
+        }
+
+        .pannello-testa {
+            display: flex;
+            gap: 6px;
         }
 
         .pollution-control select {
-            width: 100%;
+            flex: 1;
+            min-width: 0;
             background: var(--bg);
             color: var(--text);
             border: 1px solid var(--border);
@@ -45,8 +46,14 @@
             color: var(--text-dim);
         }
 
+        .pollution-opacity label {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
         .pollution-opacity input[type="range"] {
             flex: 1;
+            min-width: 0;
             accent-color: var(--text-dim);
         }
 
@@ -58,7 +65,51 @@
 
         .pollution-legend {
             display: none;
-            margin-top: 12px;
+            margin-top: 10px;
+        }
+
+        /* pulsante che chiude il pannello e pulsante (al suo posto) che lo riapre */
+        .pannello-chiudi, .pannello-apri {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        .pannello-chiudi {
+            flex-shrink: 0;
+            width: 30px;
+            font-size: 14px;
+        }
+
+        .pannello-apri {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 7px 12px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .pannello-chiudi:hover, .pannello-apri:hover {
+            background: var(--surface-hover);
+        }
+
+        /* area (celle sul lato lungo) al posto dei pulsanti + e − */
+        .area-control a {
+            width: 38px !important;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .area-control a.attiva {
+            background: var(--accent) !important;
+            color: #fff !important;
         }
 
         .pollution-legend .legend-bar {
@@ -152,6 +203,13 @@
             gap: 4px;
         }
 
+        @media (max-width: 600px) {
+            .riferimento-dati {
+                max-width: calc(100% - 70px);
+                font-size: 12px;
+            }
+        }
+
         .riferimento-dati .testo {
             padding: 2px 8px;
             min-width: 0;
@@ -229,47 +287,32 @@
 {% endblock %}
 
 {% block overlay %}
+    {% translate "Hide panel" as nascondi %}{% translate "Show panel" as mostra %}
     <div class="pollution-control" id="pollution-control">
-        <label for="pollutant-select">{% translate "Air quality" %}</label>
-        <select id="pollutant-select">
-            {% for p in copernicus_pollutants %}
-            <option value="{{ p }}">{{ p|upper }}</option>
-            {% endfor %}
-            <option value="">{% translate "None" %}</option>
-        </select>
-        <div class="pollution-opacity">
-            <label for="lato-select" style="margin:0">{% translate "Area" %}</label>
-            <select id="lato-select" style="flex:1">
-                {% for lato, km in lati_km %}<option value="{{ lato }}">{% blocktranslate %}{{ lato }} cells · ~{{ km }} km{% endblocktranslate %}</option>{% endfor %}
+        <div class="pannello-testa">
+            <select id="pollutant-select" aria-label="{% translate "Air quality" %}">
+                {% for p in copernicus_pollutants %}
+                <option value="{{ p }}">{{ p|upper }}</option>
+                {% endfor %}
+                <option value="">{% translate "None" %}</option>
             </select>
-        </div>
-        <div class="pollution-opacity">
-            <label for="resa-select" style="margin:0">{% translate "Style" %}</label>
-            <select id="resa-select" style="flex:1">
-                <option value="retino">{% translate "Halftone (dots)" %}</option>
-                <option value="tratteggio">{% translate "Hatching" %}</option>
-                <option value="trasparenza">{% translate "Transparency" %}</option>
-            </select>
-        </div>
-        <div class="pollution-opacity">
-            <label for="sfondo-select" style="margin:0">{% translate "Basemap" %}</label>
-            <select id="sfondo-select" style="flex:1">
-                <option value="dark">{% translate "Dark" %}</option>
-                <option value="light">{% translate "Light" %}</option>
-            </select>
-        </div>
-        <div class="pollution-opacity">
-            <label for="opacity-range" style="margin:0">{% translate "Intensity" %}</label>
-            <input type="range" id="opacity-range" min="0.25" max="2" step="0.05" value="1">
-            <span id="opacity-value">×1.0</span>
+            <button type="button" class="pannello-chiudi" id="pannello-chiudi" title="{{ nascondi }}"
+                    aria-label="{{ nascondi }}" aria-controls="pollution-control" aria-expanded="true">▴</button>
         </div>
         <div class="pollution-legend" id="pollution-legend">
             <div class="legend-bar" id="legend-bar"><svg id="legend-svg"></svg><span class="legend-tick" id="legend-tick"></span></div>
             <div class="legend-scale" id="legend-scale"></div>
             <div class="legend-note" id="legend-note"></div>
         </div>
+        <div class="pollution-opacity">
+            <label for="opacity-range">{% translate "Intensity" %}</label>
+            <input type="range" id="opacity-range" min="0.25" max="2" step="0.05" value="1">
+            <span id="opacity-value">×1.0</span>
+        </div>
         <div class="pollution-timestamp" id="pollution-timestamp"></div>
     </div>
+    <button type="button" class="pannello-apri" id="pannello-apri" title="{{ mostra }}"
+            aria-controls="pollution-control" aria-expanded="false" hidden><span id="pannello-apri-nome"></span> ▾</button>
     <div class="riferimento-dati" id="riferimento-dati" hidden>
         {% translate "24 hours earlier" as prima24 %}{% translate "One hour earlier" as prima1 %}
         {% translate "One hour later" as dopo1 %}{% translate "24 hours later" as dopo24 %}
@@ -316,69 +359,40 @@
         return `rgb(${rgb.join(',')})`;
     }
 
-    // Opacità proporzionale all'inquinamento: le celle pulite sono quasi trasparenti,
-    // quelle oltre la soglia sempre più marcate. Lo slider "Intensità" è un coefficiente
-    // moltiplicativo su questa rampa (×1 = rampa di base).
-    const ALPHA_MIN = 0.08;   // ratio 0
-    const ALPHA_MAX = 0.75;   // ratio >= RATIO_MAX
-    const ALPHA_NO_SOGLIA = 0.3;
-
-    function alphaForRatio(ratio) {
-        if (ratio == null || Number.isNaN(ratio)) return ALPHA_NO_SOGLIA;
-        const r = Math.min(Math.max(ratio, 0), RATIO_MAX) / RATIO_MAX;
-        return ALPHA_MIN + (ALPHA_MAX - ALPHA_MIN) * r;
-    }
-
-    // ── Resa delle celle ──
-    // 'retino': mezzatinta, punti sempre più grandi con l'inquinamento fino a fondersi in un
-    // colore pieno; 'tratteggio': linee diagonali sempre più spesse; 'trasparenza': colore pieno
-    // con opacità proporzionale. Retino e tratteggio sono pattern SVG (creati al bisogno, uno per
-    // gradino): Leaflet scrive fillColor nell'attributo fill, quindi accetta url(#id). Sono in
-    // coordinate schermo (userSpaceOnUse): la grana è la stessa a ogni zoom e la trama continua
-    // senza giunture tra celle adiacenti.
-    const RESE = ['retino', 'tratteggio', 'trasparenza'];
+    // ── Resa delle celle: retino ──
+    // Mezzatinta: punti sempre più grandi con l'inquinamento fino a fondersi in un colore pieno.
+    // Sono pattern SVG (creati al bisogno, uno per gradino): Leaflet scrive fillColor
+    // nell'attributo fill, quindi accetta url(#id). Sono in coordinate schermo (userSpaceOnUse):
+    // la grana è la stessa a ogni zoom e la trama continua senza giunture tra celle adiacenti.
     const GRADINI = 20;        // gradini di intensità dei pattern (0.1× soglia ciascuno)
-    const PASSO_TRAMA = 8;     // px tra un punto (o una linea) e il successivo
-    const ALPHA_TRAMA = 0.9;   // opacità dei pattern a intensità ×1: l'intensità la dà la trama
+    const PASSO_TRAMA = 8;     // px tra un punto e il successivo
+    const ALPHA_TRAMA = 0.9;   // opacità a intensità ×1: l'intensità la dà la grandezza dei punti
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const trameDefs = document.querySelector('#trame defs');
 
-    function trama(resa, ratio) {
+    function trama(ratio) {
         const senzaSoglia = ratio == null || Number.isNaN(ratio);
         const gradino = senzaSoglia ? null
             : Math.round(Math.min(Math.max(ratio, 0), RATIO_MAX) / RATIO_MAX * GRADINI);
-        const id = `trama-${resa}-${gradino ?? 'x'}`;
+        const id = `trama-${gradino ?? 'x'}`;
         if (!document.getElementById(id)) {
             const t = senzaSoglia ? 0.3 : gradino / GRADINI;
-            const colore = colorForRatio(senzaSoglia ? null : gradino / GRADINI * RATIO_MAX);
             const pattern = document.createElementNS(SVG_NS, 'pattern');
             pattern.id = id;
             pattern.setAttribute('patternUnits', 'userSpaceOnUse');
             pattern.setAttribute('width', PASSO_TRAMA);
             pattern.setAttribute('height', PASSO_TRAMA);
             pattern.setAttribute('patternTransform', 'rotate(45)');   // angolo classico del retino
-            const segno = document.createElementNS(SVG_NS, resa === 'retino' ? 'circle' : 'rect');
-            if (resa === 'retino') {
-                // raggio massimo oltre la mezza diagonale (PASSO·√2/2): a 2× soglia i punti si fondono
-                const r = 0.7 + t * (PASSO_TRAMA * 0.73 - 0.7);
-                segno.setAttribute('cx', PASSO_TRAMA / 2);
-                segno.setAttribute('cy', PASSO_TRAMA / 2);
-                segno.setAttribute('r', r.toFixed(2));
-            } else {
-                segno.setAttribute('width', (0.6 + t * (PASSO_TRAMA - 0.6)).toFixed(2));
-                segno.setAttribute('height', PASSO_TRAMA);
-            }
-            segno.setAttribute('fill', colore);
-            pattern.appendChild(segno);
+            // raggio massimo oltre la mezza diagonale (PASSO·√2/2): a 2× soglia i punti si fondono
+            const punto = document.createElementNS(SVG_NS, 'circle');
+            punto.setAttribute('cx', PASSO_TRAMA / 2);
+            punto.setAttribute('cy', PASSO_TRAMA / 2);
+            punto.setAttribute('r', (0.7 + t * (PASSO_TRAMA * 0.73 - 0.7)).toFixed(2));
+            punto.setAttribute('fill', colorForRatio(senzaSoglia ? null : gradino / GRADINI * RATIO_MAX));
+            pattern.appendChild(punto);
             trameDefs.appendChild(pattern);
         }
         return `url(#${id})`;
-    }
-
-    // riempimento e opacità di base (prima dell'intensità) di una cella nella resa corrente
-    function stileCella(ratio) {
-        if (resa === 'trasparenza') return { fillColor: colorForRatio(ratio), alpha: alphaForRatio(ratio) };
-        return { fillColor: trama(resa, ratio), alpha: ALPHA_TRAMA };
     }
 
     function giudizio(ratio) {
@@ -472,12 +486,11 @@
 
     // La barra è fatta di segmenti disegnati come le celle (stessa resa, colore e intensità).
     function renderLegendBar() {
-        const n = resa === 'trasparenza' ? 40 : GRADINI;
+        const n = GRADINI;
         let html = '';
         for (let i = 0; i < n; i++) {
-            const { fillColor, alpha } = stileCella((i + 0.5) / n * RATIO_MAX);
             html += `<rect x="${(i / n * 100).toFixed(3)}%" width="${(100 / n + 0.1).toFixed(3)}%" height="100%" ` +
-                `fill="${fillColor}" fill-opacity="${applicaIntensita(alpha).toFixed(2)}"/>`;
+                `fill="${trama((i + 0.5) / n * RATIO_MAX)}" fill-opacity="${applicaIntensita(ALPHA_TRAMA).toFixed(2)}"/>`;
         }
         legendSvg.innerHTML = html;
     }
@@ -501,7 +514,32 @@
     // ── Layer inquinante (Copernicus) ──
     let pollutionLayer = null;
     const pollutantSelect = document.getElementById('pollutant-select');
-    pollutantSelect.addEventListener('change', () => loadPollution(pollutantSelect.value));
+    pollutantSelect.addEventListener('change', () => {
+        aggiornaNomePannello();
+        loadPollution(pollutantSelect.value);
+    });
+
+    // ── Pannello richiudibile: al suo posto resta un pulsante col nome dell'inquinante ──
+    // Sui telefoni parte chiuso, per lasciare la mappa libera.
+    const pannello = document.getElementById('pollution-control');
+    const pannelloApri = document.getElementById('pannello-apri');
+    function aggiornaNomePannello() {
+        const scelta = pollutantSelect.selectedOptions[0];
+        document.getElementById('pannello-apri-nome').textContent =
+            pollutantSelect.value ? scelta.textContent.trim() : pollutantSelect.getAttribute('aria-label');
+    }
+    function mostraPannello(aperto) {
+        pannello.hidden = !aperto;
+        pannelloApri.hidden = aperto;
+        (aperto ? pollutantSelect : pannelloApri).focus({ preventScroll: true });
+    }
+    document.getElementById('pannello-chiudi').addEventListener('click', () => mostraPannello(false));
+    pannelloApri.addEventListener('click', () => mostraPannello(true));
+    aggiornaNomePannello();
+    if (window.matchMedia('(max-width: 600px)').matches) {
+        pannello.hidden = true;
+        pannelloApri.hidden = false;
+    }
 
     // Coefficiente di intensità (slider) applicato all'opacità di ogni cella;
     // al passaggio del mouse la cella si evidenzia.
@@ -513,29 +551,6 @@
     const applicaIntensita = alpha => Math.min(alpha * intensita, 0.95);
     const hoverOpacity = alpha => Math.min(applicaIntensita(alpha) + 0.3, 1);
 
-    // ── Resa e sfondo (preferenze ricordate nel browser) ──
-    const resaSelect = document.getElementById('resa-select');
-    const sfondoSelect = document.getElementById('sfondo-select');
-    let resa = 'retino';
-    try {
-        const salvata = localStorage.getItem('coperni.resa');
-        if (RESE.includes(salvata)) resa = salvata;
-    } catch (e) { /* storage non disponibile: resta il default */ }
-    resaSelect.value = resa;
-    sfondoSelect.value = sfondo;
-
-    resaSelect.addEventListener('change', () => {
-        resa = resaSelect.value;
-        try { localStorage.setItem('coperni.resa', resa); } catch (e) {}
-        renderLegendBar();
-        if (pollutionLayer) {
-            pollutionLayer.eachLayer(rect => {
-                const { fillColor, alpha } = stileCella(rect.options.ratio);
-                rect.setStyle({ fillColor, alpha, fillOpacity: applicaIntensita(alpha) });
-            });
-        }
-    });
-    sfondoSelect.addEventListener('change', () => impostaSfondo(sfondoSelect.value));
     opacityRange.addEventListener('input', () => {
         intensita = parseFloat(opacityRange.value);
         opacityValue.textContent = `×${numero(intensita)}`;
@@ -548,17 +563,56 @@
     renderLegendBar();
 
     // ── Area: celle sul lato lungo della viewport (preferenza ricordata nel browser) ──
-    const latoSelect = document.getElementById('lato-select');
+    // Tre pulsanti in alto a sinistra al posto di + e −: sono l'unico modo di cambiare zoom.
+    let lato = LATI[0];
     try {
-        const salvato = localStorage.getItem('coperni.lato');
-        if (salvato && LATI.includes(Number(salvato))) latoSelect.value = salvato;
+        const salvato = Number(localStorage.getItem('coperni.lato'));
+        if (LATI.includes(salvato)) lato = salvato;
     } catch (e) { /* storage non disponibile: resta il default */ }
-    latoSelect.addEventListener('change', () => {
-        try { localStorage.setItem('coperni.lato', latoSelect.value); } catch (e) {}
-        inquadra(limitiStimati(Number(latoSelect.value)));
-        loadPollution(pollutantSelect.value);
+
+    const KM = { {% for l, km in lati_km %}{{ l }}: {{ km }}{% if not forloop.last %}, {% endif %}{% endfor %} };
+    const pulsantiArea = {};
+    const ControlloArea = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd() {
+            const barra = L.DomUtil.create('div', 'leaflet-bar area-control');
+            barra.setAttribute('role', 'group');
+            barra.setAttribute('aria-label', '{% translate "Area" as area %}{{ area|escapejs }}');
+            for (const l of LATI) {
+                const a = L.DomUtil.create('a', '', barra);
+                a.href = '#';
+                a.setAttribute('role', 'button');
+                a.textContent = l;
+                a.title = testo('area_celle', { n: l, km: KM[l] });
+                L.DomEvent.on(a, 'click', e => {
+                    L.DomEvent.preventDefault(e);
+                    impostaLato(l);
+                });
+                pulsantiArea[l] = a;
+            }
+            L.DomEvent.disableClickPropagation(barra);
+            return barra;
+        },
     });
-    inquadra(limitiStimati(Number(latoSelect.value)));
+    new ControlloArea().addTo(map);
+
+    function evidenziaLato() {
+        for (const [l, a] of Object.entries(pulsantiArea)) {
+            a.classList.toggle('attiva', Number(l) === lato);
+            a.setAttribute('aria-pressed', Number(l) === lato);
+        }
+    }
+
+    function impostaLato(nuovo) {
+        if (nuovo === lato) return;
+        lato = nuovo;
+        try { localStorage.setItem('coperni.lato', lato); } catch (e) {}
+        evidenziaLato();
+        inquadra(limitiStimati(lato));
+        loadPollution(pollutantSelect.value);
+    }
+    evidenziaLato();
+    inquadra(limitiStimati(lato));
 
     // ogni caricamento ha un numero: se nel frattempo ne è partito un altro (cambio veloce di
     // inquinante/area) la risposta vecchia viene scartata, invece di sovrapporre due layer
@@ -589,7 +643,7 @@
         try {
             const params = new URLSearchParams({
                 lat: CENTRO[0], lon: CENTRO[1], inquinante,
-                lato: latoSelect.value, aspect: aspectMappa().toFixed(3),
+                lato, aspect: aspectMappa().toFixed(3),
             });
             if (istante != null) params.set('istante', new Date(istante).toISOString());
             const res = await fetch(`{% url 'copernicus:griglia' %}?${params}`);
@@ -625,10 +679,9 @@
             const layer = L.featureGroup();
             for (const [lat, lon, valore] of dati.celle) {
                 const ratio = soglia ? valore / soglia : null;
-                const { fillColor, alpha } = stileCella(ratio);
                 const rect = L.rectangle(
                     [[lat - mezzo, lon - mezzo], [lat + mezzo, lon + mezzo]],
-                    { stroke: false, fillColor, fillOpacity: applicaIntensita(alpha), alpha, ratio },
+                    { stroke: false, fillColor: trama(ratio), fillOpacity: applicaIntensita(ALPHA_TRAMA), alpha: ALPHA_TRAMA },
                 );
                 const dettaglio = ratio != null
                     ? `${testo('volte_soglia', { ratio: numero(ratio) })} · ${giudizio(ratio)}`
@@ -638,7 +691,6 @@
                     `<div class="popup-valore">${numero(valore)} <small>${unita}</small></div>` +
                     `<div class="popup-giudizio">${dettaglio}</div>`
                 );
-                // alpha letto dalle opzioni: cambia se l'utente cambia resa
                 rect.on('mouseover', () => rect.setStyle({ fillOpacity: hoverOpacity(rect.options.alpha) }));
                 rect.on('mouseout', () => rect.setStyle({ fillOpacity: applicaIntensita(rect.options.alpha) }));
                 layer.addLayer(rect);
