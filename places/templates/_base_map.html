@@ -129,14 +129,40 @@
         #map[data-sfondo="light"] { background: #fafaf8; }
 
         /* Leaflet overrides for dark theme */
-        .leaflet-control-zoom a {
+        .leaflet-bar a {
             background: var(--surface) !important;
             color: var(--text) !important;
             border-color: var(--border) !important;
         }
 
-        .leaflet-control-zoom a:hover {
+        .leaflet-bar a:hover {
             background: var(--surface-hover) !important;
+        }
+
+        /* scelta dello sfondo, in basso a destra: chiusa mostra solo l'icona */
+        .leaflet-control-layers {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border) !important;
+            border-radius: 6px;
+            box-shadow: var(--shadow) !important;
+        }
+
+        .leaflet-control-layers-toggle {
+            filter: invert(0.9);   /* icona di Leaflet scura: chiara sul fondo scuro */
+        }
+
+        .leaflet-control-layers-expanded {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+        .leaflet-control-layers label {
+            cursor: pointer;
+        }
+
+        .leaflet-control-layers-selector {
+            accent-color: var(--accent);
         }
 
         .leaflet-control-attribution {
@@ -230,10 +256,17 @@
     // sottile sui due lati lunghi), il resto dello schermo è tutto colorato
     const RIEMPIMENTO = 0.95;
 
+    // Lo zoom non è libero: lo decidono i pulsanti dell'area (20/50/100 celle, in alto a sinistra),
+    // perché i dati coprono solo la finestra richiesta. Resta lo spostamento col trascinamento.
     const map = L.map('map', {
-        zoomControl: true,
+        zoomControl: false,
         attributionControl: true,
         zoomSnap: 0,   // zoom continuo: l'inquadratura resta esatta, con 0.25 verrebbe arrotondata
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        boxZoom: false,
+        keyboard: false,
     });
 
     function aspectMappa() {
@@ -353,6 +386,17 @@
         labelsLayer = L.maplibreGL({ ...opzioni, style: etichette, pane: 'labels' }).addTo(map);
     }
     impostaSfondo(sfondo, false);
+
+    // Scelta dello sfondo in basso a destra, col controllo layer di Leaflet. I due sfondi sono gli
+    // stessi layer MapLibre con stile diverso, quindi qui i "layer" sono gruppi vuoti che fanno
+    // solo da segnaposto: al cambio si cambia lo stile (impostaSfondo).
+    const segnaposto = Object.fromEntries(SFONDI.map(nome => [nome, L.layerGroup()]));
+    segnaposto[sfondo].addTo(map);
+    L.control.layers({
+        '{% translate "Dark" as scuro %}{{ scuro|escapejs }}': segnaposto.dark,
+        '{% translate "Light" as chiaro %}{{ chiaro|escapejs }}': segnaposto.light,
+    }, null, { position: 'bottomright' }).addTo(map);
+    map.on('baselayerchange', e => impostaSfondo(SFONDI.find(nome => segnaposto[nome] === e.layer)));
 
     function showSpinner(show) {
         document.getElementById('spinner').classList.toggle('active', show);

@@ -94,7 +94,7 @@ the same number the charts average for that day in a square viewport; summed-are
   - `export.py` — ADS download (`scarica`), conversion (`netcdf_a_parquet`), `Archivio`
     (`gs://…` with google-cloud-storage, or a local folder), `esporta` = all of it + index.
     Management command `cams_export`.
-  - `griglia.py` — web side. `finestra(lat, lon, lato, aspect)`: `lato` (20 or 50, `LATO_CELLE`)
+  - `griglia.py` — web side. `finestra(lat, lon, lato, aspect)`: `lato` (20, 50 or 100, `LATO_CELLE`)
     cells on the **long side** of the viewport, the other side `ceil(lato·cosφ/aspect)`
     (landscape) or `ceil(lato·aspect/cosφ)` (portrait), because in Web Mercator a 0.1° cell looks
     1/cosφ times taller than wide. `celle(..., istante=None)` = one hour (default the current one),
@@ -132,18 +132,19 @@ the same number the charts average for that day in a square viewport; summed-are
   - Templates in `places/templates/` (not the conventional `places/templates/places/`).
     `_header.html` (nav + htmx search + "my position") is included by `_base_map.html` and by
     `grafici.html` (otherwise standalone).
-  - `map_view.html`: pollutant and area selectors (20/50, remembered in `localStorage`
-    `coperni.lato`). **"Cover"** framing: `getBoundsZoom(box, inside=true) + log2(RIEMPIMENTO=0.95)`,
+  - `map_view.html`: compact top-right panel (pollutant, legend, "Intensità"), closable with ▴
+    and replaced by a button with the pollutant name; starts closed below 600px. No zoom +/−:
+    Leaflet zoom handlers are off and the **area buttons** 20/50/100 (`ControlloArea`, top left,
+    remembered in `localStorage` `coperni.lato`) are the only zoom. **"Cover"** framing: `getBoundsZoom(box, inside=true) + log2(RIEMPIMENTO=0.95)`,
     `zoomSnap: 0`; first a client estimate (`limitiStimati`, same formula as the server), then the
     exact `limiti` from the API. Cells are borderless `L.rectangle`, colour from `valore/soglia`
-    (`COLOR_STOPS`, EU threshold at yellow, purple above 2×). **"Resa"** (rendering) selector
-    (`localStorage` `coperni.resa`): `retino` (default, halftone: dot radius ∝ ratio),
-    `tratteggio` (hatching: line width ∝ ratio) — `userSpaceOnUse` SVG patterns created on demand
-    in `<svg id="trame">` (20 steps) and used as `fillColor: url(#id)` (needs the SVG renderer, not
-    canvas) — or `trasparenza` (opacity `alphaForRatio`, 0.08→0.75). "Intensità" slider multiplies
-    opacity. OpenFreeMap basemap (see Basemap below) split in two: base below, labels in the
-    `labels` pane above); dark/light **"Sfondo"** selector (`impostaSfondo` in `_base_map.html`,
-    `localStorage` `coperni.sfondo`, default from `MAP_BASEMAP`). Every load has a number
+    (`COLOR_STOPS`, EU threshold at yellow, purple above 2×), always drawn as **halftone**
+    (`retino`: dot radius ∝ ratio) — `userSpaceOnUse` SVG patterns created on demand in
+    `<svg id="trame">` (20 steps) and used as `fillColor: url(#id)` (needs the SVG renderer, not
+    canvas). "Intensità" slider multiplies opacity. OpenFreeMap basemap (see Basemap below) split
+    in two: base below, labels in the `labels` pane above); dark/light choice with
+    `L.control.layers` bottom right (empty `layerGroup` placeholders → `impostaSfondo` in
+    `_base_map.html`, `localStorage` `coperni.sfondo`, default from `MAP_BASEMAP`). Every load has a number
     (`ultimaRichiesta`): stale responses are dropped (avoids duplicate layers). Bottom-left box
     (`riferimento-dati`): shown hour and run used, ±1h/±24h arrows within the API's
     `primo`/`ultimo` and a "now" button (`istante = null` = current hour). Rapid clicks: text

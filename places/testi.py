@@ -21,6 +21,8 @@ def testi_js() -> dict[str, str]:
         'ore': pgettext('unit of time', 'hours'),
         'corsa': _('CAMS model run of {date} at 00 UTC'),
         'nessuna_corsa': _('No forecast for this hour'),
+        # pulsanti dell'area
+        'area_celle': _('{n} cells · ~{km} km'),
         # giudizio nel popup
         'buona': _('good air'),
         'sotto': _('below the EU threshold'),

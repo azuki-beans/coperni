@@ -34,7 +34,7 @@ PASSO_INT = round(PASSO * SCALA_COORD)
 OFFSET_CENTRO = PASSO_INT // 2
 UNITA = 'µg/m³'
 
-LATO_CELLE = (20, 50)  # celle sul lato lungo della viewport (scelte in UI)
+LATO_CELLE = (20, 50, 100)  # celle sul lato lungo della viewport (scelte in UI)
 ORE_STORICO = 24  # di ogni corsa passata si usano solo le prime 24h (le successive le copre la corsa dopo)
 SERIE_GIORNI_INDIETRO = 7
 INDICE_TTL = 300  # secondi: il job aggiorna l'indice una volta al giorno
