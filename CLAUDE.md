@@ -142,9 +142,8 @@ the same number the charts average for that day in a square viewport; summed-are
     (`retino`: dot radius ∝ ratio) — `userSpaceOnUse` SVG patterns created on demand in
     `<svg id="trame">` (20 steps) and used as `fillColor: url(#id)` (needs the SVG renderer, not
     canvas). "Intensità" slider multiplies opacity. OpenFreeMap basemap (see Basemap below) split
-    in two: base below, labels in the `labels` pane above); dark/light choice with
-    `L.control.layers` bottom right (empty `layerGroup` placeholders → `impostaSfondo` in
-    `_base_map.html`, `localStorage` `coperni.sfondo`, default from `MAP_BASEMAP`). Every load has a number
+    in two: base below, labels in the `labels` pane above); light style only (the dark one was
+    removed: almost unreadable under the cells; the old `coperni.sfondo` key is cleared). Every load has a number
     (`ultimaRichiesta`): stale responses are dropped (avoids duplicate layers). Bottom-left box
     (`riferimento-dati`): shown hour and run used, ±1h/±24h arrows within the API's
     `primo`/`ultimo` and a "now" button (`istante = null` = current hour). Rapid clicks: text
@@ -197,16 +196,14 @@ the same number the charts average for that day in a square viewport; summed-are
 
 - Replaced CARTO raster tiles (free tier 5M tiles/month ≈ 80k visits, key exposed in the page) with
   [OpenFreeMap](https://openfreemap.org) vector tiles: no key, no limits, no SLA (one maintainer,
-  donations). Styles `dark` and `positron`, fetched from `tiles.openfreemap.org/styles/<name>`.
+  donations). Style `positron` only, fetched from `tiles.openfreemap.org/styles/<name>`.
 - Drawn by **MapLibre GL 5.x** under Leaflet with `@maplibre/maplibre-gl-leaflet` (pinned on
   jsdelivr). MapLibre 6 is ESM-only and the plugin's UMD build needs `window.maplibregl`: stay on
   5.x unless the plugin changes.
-- `_base_map.html:stiliPer()` splits each style: non-symbol layers → layer in `tilePane`, symbol
+- `_base_map.html` splits the style: non-symbol layers → layer in `tilePane`, symbol
   layers → layer in the `labels` pane (above the cells). Road names/shields
   (`transportation`, `transportation_name`) are dropped; place labels use
-  `coalesce(name:<page lang>, original)`. `ritoccaScuro()` brightens and enlarges place labels and
-  dims roads in the dark style (`scala()` multiplies sizes inside zoom expressions: MapLibre
-  forbids wrapping `zoom` expressions).
+  `coalesce(name:<page lang>, original)`.
 - If OpenFreeMap disappears: self-host the same styles on PMTiles (a Europe extract on a bucket).
 
 ## Deploy
@@ -227,7 +224,6 @@ public-read bucket. Details and setup commands in [`docs/architecture.md`](docs/
 ## Configuration (env)
 
 See `.env.example`. Worth remembering:
-- `MAP_BASEMAP` (default `dark`): **initial** background only, `light` or `dark`; no key needed.
 - `CAMS_STORAGE`, `COPERNICUS_POLLUTANTS`, `COPERNICUS_SOGLIA_*` (EU thresholds),
   `COPERNICUS_LATITUDE/LONGITUDE` (default centre).
 - **Deliberate choice:** map and popup compare the **current hour's value** with the threshold,

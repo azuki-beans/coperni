@@ -21,15 +21,15 @@
         }
 
         :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface-hover: #242836;
-            --border: #2e3346;
-            --text: #e1e4ed;
-            --text-dim: #8b90a5;
-            --accent: #6c8cff;
+            --bg: #f4f5f7;
+            --surface: #ffffff;
+            --surface-hover: #eceef3;
+            --border: #d8dce4;
+            --text: #1d2130;
+            --text-dim: #5b6276;
+            --accent: #3a5ee0;
             --radius: 10px;
-            --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            --shadow: 0 4px 20px rgba(20, 25, 40, 0.14);
         }
 
         body {
@@ -127,11 +127,10 @@
             height: 100%;
         }
 
-        /* colore di fondo mentre i tile caricano, intonato allo sfondo scelto */
-        #map[data-sfondo="dark"] { background: #0e0e0e; }
-        #map[data-sfondo="light"] { background: #fafaf8; }
+        /* colore di fondo mentre i tile caricano, intonato allo sfondo chiaro */
+        #map { background: #fafaf8; }
 
-        /* Leaflet overrides for dark theme */
+        /* Leaflet overrides for the UI theme */
         .leaflet-bar a {
             background: var(--surface) !important;
             color: var(--text) !important;
@@ -142,34 +141,8 @@
             background: var(--surface-hover) !important;
         }
 
-        /* scelta dello sfondo, in basso a destra: chiusa mostra solo l'icona */
-        .leaflet-control-layers {
-            background: var(--surface);
-            color: var(--text);
-            border: 1px solid var(--border) !important;
-            border-radius: 6px;
-            box-shadow: var(--shadow) !important;
-        }
-
-        .leaflet-control-layers-toggle {
-            filter: invert(0.9);   /* icona di Leaflet scura: chiara sul fondo scuro */
-        }
-
-        .leaflet-control-layers-expanded {
-            padding: 6px 10px;
-            font-size: 13px;
-        }
-
-        .leaflet-control-layers label {
-            cursor: pointer;
-        }
-
-        .leaflet-control-layers-selector {
-            accent-color: var(--accent);
-        }
-
         .leaflet-control-attribution {
-            background: rgba(15, 17, 23, 0.85) !important;
+            background: rgba(255, 255, 255, 0.85) !important;
             color: var(--text-dim) !important;
             font-size: 11px !important;
         }
@@ -301,14 +274,10 @@
     // Leaflet. Lo stile è spezzato in due: sfondo senza etichette sotto le celle, sole etichette
     // (layer "symbol") sopra, nel pane dedicato, così toponimi e strade restano leggibili
     // attraverso il colore. Le etichette usano il nome nella lingua della pagina quando esiste.
-    const STILI = { dark: 'dark', light: 'positron' };
-    const SFONDI = Object.keys(STILI);
+    // Solo lo stile chiaro (Positron): sotto le celle colorate quello scuro era quasi illeggibile.
     const LINGUA = document.documentElement.lang;
-    let sfondo = '{{ sfondo }}';
-    try {
-        const salvato = localStorage.getItem('coperni.sfondo');
-        if (SFONDI.includes(salvato)) sfondo = salvato;
-    } catch (e) { /* storage non disponibile: resta il default */ }
+    // la scelta dello sfondo non esiste più: si toglie la vecchia preferenza salvata
+    try { localStorage.removeItem('coperni.sfondo'); } catch (e) {}
 
     // in testa: chi ha fatto il sito e da dove vengono i dati (resta negli screenshot condivisi)
     map.attributionControl.addAttribution(
@@ -324,82 +293,22 @@
     map.getPane('labels').style.zIndex = 450;   // sopra overlayPane (400), sotto i popup (700)
     map.getPane('labels').style.pointerEvents = 'none';
 
-    // lo stile Dark di OpenFreeMap ha nomi piccoli e spenti e strade molto evidenti: sotto le celle
-    // colorate i luoghi si leggevano male. Nomi più chiari e grandi con alone, strade attenuate.
-    // moltiplica i valori di una dimensione: numero, {stops: [[zoom, v]…]} o ["interpolate", …, zoom, v…]
-    function scala(valore, k) {
-        if (typeof valore === 'number') return valore * k;
-        if (valore?.stops) return { ...valore, stops: valore.stops.map(([z, v]) => [z, v * k]) };
-        if (Array.isArray(valore) && valore[0] === 'interpolate') {
-            return valore.map((v, i) => (i >= 4 && i % 2 === 0 && typeof v === 'number') ? v * k : v);
-        }
-        return valore;
-    }
-
-    function ritoccaScuro(stile) {
-        for (const l of stile.layers) {
-            if (l.type === 'symbol' && l['source-layer'] === 'place') {
-                l.paint = { ...l.paint, 'text-color': '#d4d8e2', 'text-halo-color': '#0e0e0e', 'text-halo-width': 1.4 };
-                if (l.layout['text-size'] !== undefined) l.layout['text-size'] = scala(l.layout['text-size'], 1.15);
+    (async () => {
+        const stile = await (await fetch('https://tiles.openfreemap.org/styles/positron')).json();
+        // niente nomi e sigle di strade: sopra le celle servono solo luoghi e acque
+        stile.layers = stile.layers.filter(l => !(l.type === 'symbol'
+            && ['transportation', 'transportation_name'].includes(l['source-layer'])));
+        const etichetta = l => l.type === 'symbol';
+        for (const l of stile.layers.filter(etichetta)) {
+            const campo = l.layout?.['text-field'];
+            if (campo && JSON.stringify(campo).includes('name')) {
+                l.layout['text-field'] = ['coalesce', ['get', `name:${LINGUA}`], campo];
             }
-            if (l.type === 'line' && l['source-layer'] === 'transportation') {
-                l.paint = { ...l.paint, 'line-opacity': 0.45 };
-            }
-        }
-    }
-
-    const stiliCaricati = {};
-    async function stiliPer(nome) {
-        if (!stiliCaricati[nome]) {
-            const stile = await (await fetch(`https://tiles.openfreemap.org/styles/${STILI[nome]}`)).json();
-            // niente nomi e sigle di strade: sopra le celle servono solo luoghi e acque
-            stile.layers = stile.layers.filter(l => !(l.type === 'symbol'
-                && ['transportation', 'transportation_name'].includes(l['source-layer'])));
-            const etichetta = l => l.type === 'symbol';
-            if (nome === 'dark') ritoccaScuro(stile);
-            for (const l of stile.layers.filter(etichetta)) {
-                const campo = l.layout?.['text-field'];
-                if (campo && JSON.stringify(campo).includes('name')) {
-                    l.layout['text-field'] = ['coalesce', ['get', `name:${LINGUA}`], campo];
-                }
-            }
-            stiliCaricati[nome] = {
-                base: { ...stile, layers: stile.layers.filter(l => !etichetta(l)) },
-                etichette: { ...stile, layers: stile.layers.filter(etichetta) },
-            };
-        }
-        return stiliCaricati[nome];
-    }
-
-    let baseLayer = null, labelsLayer = null;
-    async function impostaSfondo(nome, ricorda = true) {
-        if (!SFONDI.includes(nome)) return;
-        sfondo = nome;
-        if (ricorda) try { localStorage.setItem('coperni.sfondo', nome); } catch (e) {}
-        document.getElementById('map').dataset.sfondo = nome;
-        const { base, etichette } = await stiliPer(nome);
-        if (nome !== sfondo) return;   // nel frattempo è stato scelto l'altro sfondo
-        if (baseLayer) {
-            baseLayer.getMaplibreMap().setStyle(base);
-            labelsLayer.getMaplibreMap().setStyle(etichette);
-            return;
         }
         const opzioni = { interactive: false, attributionControl: false };
-        baseLayer = L.maplibreGL({ ...opzioni, style: base, pane: 'tilePane' }).addTo(map);
-        labelsLayer = L.maplibreGL({ ...opzioni, style: etichette, pane: 'labels' }).addTo(map);
-    }
-    impostaSfondo(sfondo, false);
-
-    // Scelta dello sfondo in basso a destra, col controllo layer di Leaflet. I due sfondi sono gli
-    // stessi layer MapLibre con stile diverso, quindi qui i "layer" sono gruppi vuoti che fanno
-    // solo da segnaposto: al cambio si cambia lo stile (impostaSfondo).
-    const segnaposto = Object.fromEntries(SFONDI.map(nome => [nome, L.layerGroup()]));
-    segnaposto[sfondo].addTo(map);
-    L.control.layers({
-        '{% translate "Dark" as scuro %}{{ scuro|escapejs }}': segnaposto.dark,
-        '{% translate "Light" as chiaro %}{{ chiaro|escapejs }}': segnaposto.light,
-    }, null, { position: 'bottomright' }).addTo(map);
-    map.on('baselayerchange', e => impostaSfondo(SFONDI.find(nome => segnaposto[nome] === e.layer)));
+        L.maplibreGL({ ...opzioni, style: { ...stile, layers: stile.layers.filter(l => !etichetta(l)) }, pane: 'tilePane' }).addTo(map);
+        L.maplibreGL({ ...opzioni, style: { ...stile, layers: stile.layers.filter(etichetta) }, pane: 'labels' }).addTo(map);
+    })();
 
     function showSpinner(show) {
         document.getElementById('spinner').classList.toggle('active', show);

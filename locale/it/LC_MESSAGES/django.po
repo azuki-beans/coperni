@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 00:20+0200\n"
+"POT-Creation-Date: 2026-10-08 09:18+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -76,18 +76,10 @@ msgstr "Previsione qualità dell'aria: %(luogo)s"
 msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
-#: places/templates/_base_map.html:316 places/templates/_header.html:136
+#: places/templates/_base_map.html:285 places/templates/_header.html:136
 #: places/templates/map_view.html:293
 msgid "Air quality"
 msgstr "Qualità dell'aria"
-
-#: places/templates/_base_map.html:399
-msgid "Dark"
-msgstr "Scuro"
-
-#: places/templates/_base_map.html:400
-msgid "Light"
-msgstr "Chiaro"
 
 #: places/templates/_header.html:139
 msgid "Map"

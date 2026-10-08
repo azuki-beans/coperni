@@ -31,8 +31,6 @@ def _contesto(request, nav_attiva):
 
 def map_view(request):
     centro, context = _contesto(request, "map")
-    # sfondo iniziale (dark/light): l'utente lo cambia dalla mappa, la scelta resta nel browser
-    context["sfondo"] = "light" if settings.MAP_BASEMAP == "light" else "dark"
     return ricorda(render(request, "map_view.html", context), centro)
 
 
