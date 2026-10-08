@@ -11,7 +11,7 @@ pollutants evolved over the past week and what is expected for the next 48 hours
 
 Available in **English** and **Italian** (`/it/…`).
 
-![Searching a place, moving through the forecast hours, switching pollutant and basemap](docs/screenshots/demo.gif)
+![Searching a place, moving through the forecast hours, changing area and pollutant](docs/screenshots/demo.gif)
 
 ## Why
 
@@ -25,11 +25,10 @@ the last place you looked at.
 
 ## What you see
 
-- **Map**: the area around the chosen place (20 or 50 cells per side, ~150 or ~390 km),
-  one cell every 0.1°. The colour follows `value / threshold`: cyan to green below the EU
-  threshold, yellow at the threshold, red above it, purple above twice the threshold. Three
-  renderings are available: *halftone* (dot size ∝ concentration), *hatching* (line width ∝
-  concentration) and *transparency*. Dark or light basemap. Click a cell to read its value.
+- **Map**: the area around the chosen place (20, 50 or 100 cells on the long side of the screen,
+  ~150, ~390 or ~780 km at Milan's latitude), one cell every 0.1°. The colour follows `value / threshold`: cyan to green below the EU
+  threshold, yellow at the threshold, red above it, purple above twice the threshold, drawn
+  as a *halftone* (dot size ∝ concentration) over a light basemap. Click a cell to read its value.
 - **Time navigation**: step ±1 h / ±24 h through the past days and the next 48 h of the forecast.
 - **Ranking**: the most populous places (Italian municipalities ≥ 50k, other cities ≥ 500k)
   ranked by the daily average of each pollutant over the chart area, sortable and filterable.
@@ -38,9 +37,9 @@ the last place you looked at.
 - **Search**: Italian municipalities (including bilingual names such as *Bolzano/Bozen*) and
   European cities above 15,000 inhabitants, or your current position.
 
-![Map of NO₂ over the Po Valley, dark background](docs/screenshots/map.jpg)
+![Map of PM2.5 over the Po Valley](docs/screenshots/map.jpg)
 
-![Ozone in the afternoon, hatching on a light background](docs/screenshots/map-light.jpg)
+![Ranking of the most populous places by daily average](docs/screenshots/ranking.png)
 
 ![Pollutant trends: last 7 days and 48 h forecast](docs/screenshots/charts.png)
 
@@ -199,7 +198,6 @@ All configuration is done with environment variables (see [`.env.example`](.env.
 |---|---|
 | `CDS_API_URL`, `CDS_API_KEY` | ADS credentials (export job only) |
 | `CAMS_STORAGE` | `gs://bucket/prefix` (read by the web over public HTTPS) or a local folder; default `data/cams` |
-| `MAP_BASEMAP` | initial basemap, `dark` (default) or `light` |
 | `CLOUDFLARE_ANALYTICS_TOKEN` | optional cookieless analytics with [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/); empty = off |
 | `COPERNICUS_POLLUTANTS` | default `pm2p5,pm10,no2,o3,so2` |
 | `COPERNICUS_SOGLIA_*` | thresholds per pollutant (µg/m³) |

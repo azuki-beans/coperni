@@ -140,10 +140,6 @@ CAMS_STORAGE = os.environ.get('CAMS_STORAGE', str(BASE_DIR / 'data' / 'cams'))
 # Il dominio è solo DNS su Cloudflare, quindi l'inserimento automatico non funzionerebbe.
 CLOUDFLARE_ANALYTICS_TOKEN = os.environ.get('CLOUDFLARE_ANALYTICS_TOKEN', '')
 
-# Sfondo iniziale della mappa (OpenFreeMap, niente chiave): 'dark' o 'light'. L'utente lo cambia
-# dalla mappa e la scelta resta nel browser.
-MAP_BASEMAP = os.environ.get('MAP_BASEMAP', 'dark')
-
 # Centro proposto quando l'URL non ne indica uno. Default: Mezzolombardo (TN)
 COPERNICUS_LATITUDE = float(os.environ.get('COPERNICUS_LATITUDE', '46.215022'))
 COPERNICUS_LONGITUDE = float(os.environ.get('COPERNICUS_LONGITUDE', '11.092251'))
