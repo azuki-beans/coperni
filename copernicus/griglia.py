@@ -17,6 +17,8 @@ from pathlib import Path
 import duckdb
 from django.conf import settings
 
+from copernicus import eaqi
+
 # codice inquinante (usato in env/soglie/Parquet) -> variabile richiesta ad ADS / nome nel NetCDF
 POLLUTANT_VARIABLES = {
     'pm2p5': {'cds': 'particulate_matter_2.5um', 'nc': 'pm2p5_conc'},
@@ -191,11 +193,12 @@ def celle(lat: float, lon: float, inquinante: str, lato: int, aspect: float,
 
 def serie(lat: float, lon: float, lato: int, aspect: float) -> dict:
     """Media oraria della finestra per ogni inquinante: storico dalle prime 24h delle corse degli
-    ultimi SERIE_GIORNI_INDIETRO giorni + tutta l'ultima corsa (previsione fino a +48h)."""
+    ultimi SERIE_GIORNI_INDIETRO giorni + tutta l'ultima corsa (previsione fino a +48h). In più
+    l'indice EEA di ogni ora (`eaqi`), calcolato su quelle medie."""
     f = finestra(lat, lon, lato, aspect)
     giorni = indice()['giorni']
     if not giorni:
-        return {'limiti': _limiti(f), 'serie': {}}
+        return {'limiti': _limiti(f), 'serie': {}, 'eaqi': []}
 
     ultimo = giorni[-1]
     da = date.fromisoformat(ultimo) - timedelta(days=SERIE_GIORNI_INDIETRO)
@@ -216,9 +219,12 @@ def serie(lat: float, lon: float, lato: int, aspect: float) -> dict:
         c: {'unita': UNITA, 'soglia': settings.COPERNICUS_SOGLIE_ALLARME.get(c), 'punti': []}
         for c in inquinanti
     }
+    indice_eaqi = []  # livello EEA di ogni ora, dalle medie orarie della finestra
     for giorno, ora, *valori in righe:
         t = (_inizio_corsa(giorno) + timedelta(hours=ora)).isoformat()
-        for codice, valore in zip(inquinanti, valori):
-            if valore is not None:
-                serie[codice]['punti'].append({'t': t, 'v': round(valore / SCALA_VALORE, 2)})
-    return {'limiti': _limiti(f), 'serie': {c: s for c, s in serie.items() if s['punti']}}
+        medie = {c: v / SCALA_VALORE for c, v in zip(inquinanti, valori) if v is not None}
+        for codice, valore in medie.items():
+            serie[codice]['punti'].append({'t': t, 'v': round(valore, 2)})
+        if (livello := eaqi.livello(medie)) is not None:
+            indice_eaqi.append({'t': t, 'v': livello})
+    return {'limiti': _limiti(f), 'serie': {c: s for c, s in serie.items() if s['punti']}, 'eaqi': indice_eaqi}

@@ -140,6 +140,32 @@
             min-height: 420px;
         }
 
+        .chart-header[hidden], .legenda-indice[hidden] { display: none; }
+
+        .legenda-indice {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: -6px;
+        }
+
+        .legenda-indice i {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 5px;
+            vertical-align: -1px;
+        }
+
+        .chart-card.indice {
+            flex: none;
+            min-height: 0;
+            height: 220px;
+        }
+
         .chart-card canvas {
             width: 100% !important;
             height: 100% !important;
@@ -176,9 +202,20 @@
         <div class="empty-state" id="empty-state" hidden>{% translate "No data available for this period." %}</div>
         <canvas id="pollution-chart"></canvas>
     </div>
+    <div class="chart-header" id="indice-header" hidden>
+        <h2>{% translate "European Air Quality Index (EEA)" %}</h2>
+        <div class="range-info">{% translate "hour by hour: the worst pollutant sets the level" %}</div>
+    </div>
+    <div class="chart-card indice" id="indice-card" hidden>
+        <canvas id="indice-chart"></canvas>
+    </div>
+    <div class="legenda-indice" id="indice-legenda" hidden>
+        {% for l in eaqi_livelli %}<span><i style="background:{{ l.colore }}"></i>{{ l.nome }}</span>{% endfor %}
+    </div>
 </div>
 
 {{ testi|json_script:"testi" }}
+{{ eaqi_livelli|json_script:"eaqi-livelli" }}
 <script>
     const T = JSON.parse(document.getElementById('testi').textContent);
     const testo = (chiave, valori = {}) => T[chiave].replace(/\{(\w+)\}/g, (_, k) => valori[k] ?? '');
@@ -206,6 +243,58 @@
     }
 
     let chart = null;
+    let chartIndice = null;
+    const LIVELLI = JSON.parse(document.getElementById('eaqi-livelli').textContent);
+    // stessa larghezza dell'asse Y nei due grafici: così i tempi sono allineati in verticale
+    const ASSE_Y = 64;
+
+    function disegnaIndice(punti, min, max) {
+        for (const id of ['indice-header', 'indice-card', 'indice-legenda']) {
+            document.getElementById(id).hidden = punti.length === 0;
+        }
+        if (chartIndice) chartIndice.destroy();
+        if (punti.length === 0) return;
+        chartIndice = new Chart(document.getElementById('indice-chart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: punti.map((p) => ({ x: new Date(p.t).getTime(), y: p.v })),
+                    backgroundColor: punti.map((p) => LIVELLI[p.v - 1].colore),
+                    barPercentage: 1,
+                    categoryPercentage: 1,
+                }],
+            },
+            options: {
+                locale: LOCALE,
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                scales: {
+                    x: {
+                        type: 'linear', min, max, offset: false,
+                        grid: { color: '#e3e6ec' },
+                        ticks: { color: '#5b6276', maxTicksLimit: 14, callback: formatTick },
+                    },
+                    y: {
+                        min: 0, max: LIVELLI.length,
+                        afterFit: (asse) => { asse.width = ASSE_Y; },
+                        grid: { color: '#e3e6ec' },
+                        // i nomi dei livelli stanno nella legenda sotto: sull'asse non entrano su mobile
+                        ticks: { color: '#5b6276', stepSize: 1 },
+                    },
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => formatTick(items[0].parsed.x),
+                            label: (item) => LIVELLI[item.parsed.y - 1].nome,
+                        },
+                    },
+                },
+            },
+        });
+    }
 
     async function loadSerie() {
         const loadingState = document.getElementById('loading-state');
@@ -298,6 +387,7 @@
                             },
                         },
                         y: {
+                            afterFit: (asse) => { asse.width = ASSE_Y; },
                             grid: { color: '#e3e6ec' },
                             ticks: { color: '#5b6276' },
                             title: { display: true, text: 'µg/m³', color: '#5b6276' },
@@ -330,6 +420,8 @@
                     },
                 },
             });
+
+            disegnaIndice(data.eaqi || [], chart.scales.x.min, chart.scales.x.max);
         } catch (err) {
             loadingState.hidden = true;
             emptyState.hidden = false;

@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 
-from copernicus import griglia
+from copernicus import eaqi, griglia
 from places.centro import centro_da_richiesta
 
 # slug -> titolo, nell'ordine del menu laterale
@@ -42,6 +42,12 @@ def _ultima_corsa() -> date | None:
     return date.fromisoformat(giorni[-1]) if giorni else None
 
 
+def _fasce(limiti: tuple[int, ...]) -> list[str]:
+    """(5, 15, …) -> ["0–5", "6–15", …, ">140"], come nella tabella EEA."""
+    inizi = (0, *(n + 1 for n in limiti))
+    return [f"{da}–{a}" for da, a in zip(inizi, limiti)] + [f">{limiti[-1]}"]
+
+
 def pagina(request, slug="progetto"):
     if slug not in PAGINE:
         raise Http404
@@ -59,4 +65,10 @@ def pagina(request, slug="progetto"):
     }
     if slug == "aggiornamenti":
         context["ultima_corsa"] = _ultima_corsa()
+    if slug == "dati":
+        context["eaqi_livelli"] = eaqi.legenda()
+        context["eaqi_fasce"] = [
+            (NOMI_INQUINANTI.get(p, p.upper()), _fasce(eaqi.FASCE[p]))
+            for p in settings.COPERNICUS_POLLUTANTS if p in eaqi.FASCE
+        ]
     return render(request, f"pagine/{get_language()}/{slug}.html", context)

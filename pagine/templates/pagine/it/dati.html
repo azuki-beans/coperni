@@ -57,6 +57,34 @@
     sopra la soglia diventano frequenti in molte zone.
 </p>
 
+<h3>Indice europeo della qualità dell'aria (EEA)</h3>
+<p>
+    La classifica e i grafici mostrano anche l'<strong>indice europeo della qualità dell'aria</strong>
+    dell'Agenzia europea dell'ambiente, nella versione rivista nel 2024 sulla base delle linee
+    guida 2021 dell'Organizzazione mondiale della sanità. Ogni inquinante riceve un livello dal
+    suo valore orario e l'indice è il <strong>livello peggiore</strong> tra gli inquinanti: non
+    li somma.
+</p>
+<div class="tabella-scorrevole">
+<table>
+    <thead>
+        <tr><th>µg/m³</th>{% for l in eaqi_livelli %}<th class="numero"><i class="chip" style="background:{{ l.colore }}"></i>{{ l.nome }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+        {% for nome, fasce in eaqi_fasce %}
+        <tr><td>{{ nome }}</td>{% for f in fasce %}<td class="numero">{{ f }}</td>{% endfor %}</tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+<p class="dim">
+    Qui l'indice è calcolato sulla <strong>media dell'area</strong> mostrata (la stessa dei
+    grafici), ora per ora. Nella classifica ogni luogo mostra l'ora peggiore del giorno (00–24
+    UTC); a parità di livello conta la media dei livelli orari. L'EEA calcola l'indice sulle
+    stazioni di misura: qui è applicato alla previsione CAMS, quindi è una stima. Fonte:
+    <a href="https://www.eionet.europa.eu/etcs/etc-he/products/etc-he-products/etc-he-reports/etc-he-report-2024-17-eeas-revision-of-the-european-air-quality-index-bands" rel="noopener">ETC HE Report 2024/17</a>.
+</p>
+
 <h3>Crediti</h3>
 <p class="dim">
     Generato usando informazioni del Copernicus Atmosphere Monitoring Service ({% now "Y" %}).

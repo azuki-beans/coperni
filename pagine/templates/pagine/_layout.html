@@ -194,6 +194,25 @@
             font-weight: 500;
         }
 
+        article th.numero { text-align: right; }
+
+        /* tabelle larghe (fasce dell'indice EEA): scorrono da sole su mobile, non la pagina */
+        article .tabella-scorrevole {
+            overflow-x: auto;
+            margin-bottom: 14px;
+        }
+
+        article .tabella-scorrevole table { margin-bottom: 0; }
+
+        article .chip {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 5px;
+            vertical-align: -1px;
+        }
+
         article td.numero {
             text-align: right;
             font-variant-numeric: tabular-nums;
