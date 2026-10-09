@@ -284,6 +284,85 @@
             color: var(--text-dim);
         }
 
+        /* indice EEA dell'area mostrata: tessera colorata in rilievo, numero grande + aggettivo */
+        .indice-eea {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 6px 10px 6px 6px;
+            border-radius: 8px;
+            background: var(--colore-eea, var(--bg));
+            color: var(--text);
+            text-decoration: none;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 rgba(0, 0, 0, 0.12),
+                0 2px 6px rgba(20, 25, 40, 0.18);
+        }
+
+        .indice-eea[hidden] {
+            display: none;
+        }
+
+        .indice-eea .eea-numero {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.55);
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .indice-eea .eea-etichetta {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.8;
+        }
+
+        .indice-eea .eea-nome {
+            display: block;
+            font-size: 19px;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        /* livelli 4..6: sfondo scuro, testo chiaro */
+        .indice-eea.scuro {
+            color: #fff;
+        }
+
+        .indice-eea.scuro .eea-numero {
+            background: rgba(0, 0, 0, 0.22);
+        }
+
+        /* livello EEA anche sul pulsante che sostituisce il pannello chiuso */
+        .pannello-apri .eea-mini {
+            display: inline-block;
+            min-width: 1.6em;
+            margin-right: 6px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: var(--colore-eea);
+            color: var(--text);
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .pannello-apri .eea-mini.scuro {
+            color: #fff;
+        }
+
+        .pannello-apri .eea-mini[hidden] {
+            display: none;
+        }
+
 {% endblock %}
 
 {% block overlay %}
@@ -299,6 +378,11 @@
             <button type="button" class="pannello-chiudi" id="pannello-chiudi" title="{{ nascondi }}"
                     aria-label="{{ nascondi }}" aria-controls="pollution-control" aria-expanded="true">▴</button>
         </div>
+        {% translate "European Air Quality Index (EEA)" as nome_eea %}
+        <a class="indice-eea" id="indice-eea" href="{% url 'pagine:pagina' 'dati' %}" title="{{ nome_eea }}" hidden>
+            <span class="eea-numero" id="eea-numero"></span>
+            <span><span class="eea-etichetta">{% translate "EEA index" %}</span><span class="eea-nome" id="eea-nome"></span></span>
+        </a>
         <div class="pollution-legend" id="pollution-legend">
             <div class="legend-bar" id="legend-bar"><svg id="legend-svg"></svg><span class="legend-tick" id="legend-tick"></span></div>
             <div class="legend-scale" id="legend-scale"></div>
@@ -312,7 +396,7 @@
         <div class="pollution-timestamp" id="pollution-timestamp"></div>
     </div>
     <button type="button" class="pannello-apri" id="pannello-apri" title="{{ mostra }}"
-            aria-controls="pollution-control" aria-expanded="false" hidden><span id="pannello-apri-nome"></span> ▾</button>
+            aria-controls="pollution-control" aria-expanded="false" hidden><span class="eea-mini" id="eea-mini" hidden></span><span id="pannello-apri-nome"></span> ▾</button>
     <div class="riferimento-dati" id="riferimento-dati" hidden>
         {% translate "24 hours earlier" as prima24 %}{% translate "One hour earlier" as prima1 %}
         {% translate "One hour later" as dopo1 %}{% translate "24 hours later" as dopo24 %}
@@ -332,6 +416,7 @@
     {% comment %}pattern SVG di retino/tratteggio, referenziati dalle celle come fill="url(#…)";
     niente display:none, altrimenti i browser non li disegnano{% endcomment %}
     <svg id="trame" width="0" height="0" style="position:absolute" aria-hidden="true"><defs></defs></svg>
+    {{ eaqi_livelli|json_script:"eaqi-livelli" }}
 {% endblock %}
 
 {% block script %}
@@ -511,6 +596,28 @@
         pollutionLegend.style.display = 'block';
     }
 
+    // ── Indice EEA dell'area e dell'ora mostrate ──
+    // Calcolato dal server sulle medie della finestra di tutti gli inquinanti (come nei grafici),
+    // quindi non dipende dall'inquinante scelto nel menu.
+    const LIVELLI_EEA = JSON.parse(document.getElementById('eaqi-livelli').textContent);
+    const indiceEea = document.getElementById('indice-eea');
+    const eeaMini = document.getElementById('eea-mini');
+
+    function mostraIndice(livello) {
+        const l = livello ? LIVELLI_EEA[livello - 1] : null;
+        indiceEea.hidden = eeaMini.hidden = !l;
+        if (!l) return;
+        const scuro = l.livello >= 4;
+        for (const el of [indiceEea, eeaMini]) {
+            el.style.setProperty('--colore-eea', l.colore);
+            el.classList.toggle('scuro', scuro);
+        }
+        document.getElementById('eea-numero').textContent = l.livello;
+        document.getElementById('eea-nome').textContent = l.nome;
+        eeaMini.textContent = l.livello;
+        eeaMini.title = `${indiceEea.querySelector('.eea-etichetta').textContent}: ${l.nome}`;
+    }
+
     // ── Layer inquinante (Copernicus) ──
     let pollutionLayer = null;
     const pollutantSelect = document.getElementById('pollutant-select');
@@ -636,6 +743,7 @@
             sostituisciLayer(null);
             pollutionLegend.style.display = 'none';
             riferimento.hidden = true;
+            mostraIndice(null);
             return;
         }
 
@@ -652,6 +760,7 @@
 
             if (!res.ok) {
                 sostituisciLayer(null);
+                mostraIndice(null);
                 pollutionTimestamp.textContent = T.errore;
                 return;
             }
@@ -664,6 +773,7 @@
                 limitiInquadrati = chiaveLimiti;
             }
             if (dati.timestamp) mostraRiferimento(dati);
+            mostraIndice(dati.eaqi);
             if (dati.celle.length === 0) {
                 sostituisciLayer(null);
                 pollutionTimestamp.textContent = T.nessun_dato_area;
@@ -700,6 +810,7 @@
         } catch (err) {
             console.error('Pollution layer error:', err);
             sostituisciLayer(null);
+            mostraIndice(null);
             pollutionTimestamp.textContent = T.errore;
         } finally {
             if (richiesta === ultimaRichiesta) showSpinner(false);

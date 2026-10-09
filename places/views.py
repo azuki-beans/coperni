@@ -31,6 +31,7 @@ def _contesto(request, nav_attiva):
 
 def map_view(request):
     centro, context = _contesto(request, "map")
+    context["eaqi_livelli"] = eaqi.legenda()
     return ricorda(render(request, "map_view.html", context), centro)
 
 

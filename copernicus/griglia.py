@@ -165,7 +165,8 @@ def celle(lat: float, lon: float, inquinante: str, lato: int, aspect: float,
     f = finestra(lat, lon, lato, aspect)
     giorni, ore = indice()['giorni'], indice()['ore']
     risultato = {'limiti': _limiti(f), 'nx': f['nx'], 'ny': f['ny'], 'passo': PASSO, 'unita': UNITA,
-                 'timestamp': None, 'corsa': None, 'primo': None, 'ultimo': None, 'celle': []}
+                 'timestamp': None, 'corsa': None, 'primo': None, 'ultimo': None, 'celle': [],
+                 'eaqi': None}
     if not giorni:
         return risultato
 
@@ -188,7 +189,21 @@ def celle(lat: float, lon: float, inquinante: str, lato: int, aspect: float,
     risultato['celle'] = [
         [la / SCALA_COORD, lo / SCALA_COORD, v / SCALA_VALORE] for la, lo, v in righe
     ]
+    risultato['eaqi'] = _eaqi_finestra(f, giorno, ora)
     return risultato
+
+
+def _eaqi_finestra(f: dict, giorno: str, ora: int) -> int | None:
+    """Livello EEA (1..6) dell'ora sulla media della finestra di ogni inquinante: lo stesso numero che
+    serie() dà ai grafici per quell'ora e quella corsa. Stessi row group della query delle celle."""
+    inquinanti = settings.COPERNICUS_POLLUTANTS
+    medie = ', '.join(f'avg("{c}")' for c in inquinanti)
+    valori = _cursore().execute(
+        f'''SELECT {medie} FROM read_parquet(?)
+            WHERE ora = ? AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?''',
+        [_file(giorno), ora, f['lat_min'], f['lat_max'], f['lon_min'], f['lon_max']],
+    ).fetchone()
+    return eaqi.livello({c: v / SCALA_VALORE for c, v in zip(inquinanti, valori) if v is not None})
 
 
 def serie(lat: float, lon: float, lato: int, aspect: float) -> dict:

@@ -96,7 +96,9 @@ per pollutant (upper limits inclusive, on the value rounded to an integer, as in
 index = worst level; nothing is summed. Applied to the **area mean** (window), not per cell: in
 `griglia.serie()` (`eaqi` list in the series API, bar chart under the pollutant chart) and in
 `export.classifica` (ranking column "EEA index", default sort). Names and official colours in
-`LIVELLI`; the bands table on `/info/dati/` is rendered from `FASCE`. Not on the map (yet).
+`LIVELLI`; the bands table on `/info/dati/` is rendered from `FASCE`. On the map: `celle()` also
+returns `eaqi` (level of the shown hour over the window, all pollutants: same value as the chart for
+that hour), shown as a large coloured tile in the panel and a small badge on the closed-panel button.
 
 ## Django apps
 
