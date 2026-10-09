@@ -126,9 +126,10 @@ the reasoning behind it and how to deploy your own copy.
   compression. A local window touches ~4 of ~600 row groups (~0.2 MB per pollutant), which is
   all DuckDB downloads thanks to Parquet statistics and HTTP range requests.
 - `indice.json` lists the available runs, because a bucket served over HTTPS cannot be listed.
-- `classifica.json` (~10 KB): for the places of the ranking, the daily average (hours 0–23) of each
-  pollutant over the 20-cell window with aspect 1:1. Computed with 2D prefix sums (summed-area
-  table), so every window costs 4 lookups: ~0.2 s for the whole run.
+- `classifica.json` (~13 KB): for the places of the ranking, the daily average (hours 0–23) of each
+  pollutant over the 20-cell window with aspect 1:1, plus the European Air Quality Index (EEA) of
+  each hour of that window (worst hour and mean level). Computed with 2D prefix sums (summed-area
+  table), so every window costs 4 lookups: ~1 s for the whole run.
   Old files are removed by a bucket lifecycle rule (21 days).
 
 ### Web (`copernicus/griglia.py`, `places/`)

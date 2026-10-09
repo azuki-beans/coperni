@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 09:18+0200\n"
+"POT-Creation-Date: 2026-10-09 06:46+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -15,15 +15,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: copernicus/eaqi.py:25
+msgid "Good"
+msgstr "Buona"
+
+#: copernicus/eaqi.py:26
+msgid "Fair"
+msgstr "Discreta"
+
+#: copernicus/eaqi.py:27
+msgid "Moderate"
+msgstr "Moderata"
+
+#: copernicus/eaqi.py:28
+msgid "Poor"
+msgstr "Scadente"
+
+#: copernicus/eaqi.py:29
+msgid "Very poor"
+msgstr "Molto scadente"
+
+#: copernicus/eaqi.py:30
+msgid "Extremely poor"
+msgstr "Estremamente scadente"
+
 #: luoghi/templates/luoghi/_risultati.html:6
 msgid "No place found"
 msgstr "Nessun luogo trovato"
 
-#: pagine/templates/pagine/_layout.html:257
+#: pagine/templates/pagine/_layout.html:276
 msgid "Topics"
 msgstr "Argomenti"
 
-#: pagine/templates/pagine/_layout.html:263 places/templates/_header.html:160
+#: pagine/templates/pagine/_layout.html:282 places/templates/_header.html:160
 msgid "Source code on GitHub"
 msgstr "Codice sorgente su GitHub"
 
@@ -133,7 +157,7 @@ msgstr "Mappa delle previsioni di qualità dell'aria sul Nord Italia"
 msgid "Air quality ranking"
 msgstr "Classifica della qualità dell'aria"
 
-#: places/templates/classifica.html:224
+#: places/templates/classifica.html:238
 #, python-format
 msgid ""
 "Daily average (00–24 UTC) of the CAMS forecast of %(data)s, over an area "
@@ -142,7 +166,15 @@ msgstr ""
 "Media del giorno (00–24 UTC) della previsione CAMS del %(data)s, su un'area "
 "larga circa %(km)s km attorno a ogni luogo: la stessa area dei grafici."
 
-#: places/templates/classifica.html:225
+#: places/templates/classifica.html:239
+msgid ""
+"EEA index: the worst hour of the day on the European Air Quality Index, "
+"computed from the hourly averages of the area."
+msgstr ""
+"Indice EEA: l'ora peggiore del giorno secondo l'indice europeo della qualità "
+"dell'aria, calcolato sulle medie orarie dell'area."
+
+#: places/templates/classifica.html:240
 msgid ""
 "Values in µg/m³; the dot compares them with the EU threshold, with the "
 "colours of the map."
@@ -150,52 +182,60 @@ msgstr ""
 "Valori in µg/m³; il pallino li confronta con la soglia UE, con i colori "
 "della mappa."
 
-#: places/templates/classifica.html:226
+#: places/templates/classifica.html:241
 msgid "About the data"
 msgstr "Informazioni sui dati"
 
-#: places/templates/classifica.html:232
+#: places/templates/classifica.html:247
 msgid "Filter by name or country…"
 msgstr "Filtra per nome o paese…"
 
-#: places/templates/classifica.html:233
+#: places/templates/classifica.html:248
 msgid "Filter by name or country"
 msgstr "Filtra per nome o paese"
 
-#: places/templates/classifica.html:234
+#: places/templates/classifica.html:249
 msgid "Places"
 msgstr "Luoghi"
 
-#: places/templates/classifica.html:235
+#: places/templates/classifica.html:250
 msgid "All places"
 msgstr "Tutti i luoghi"
 
-#: places/templates/classifica.html:236
+#: places/templates/classifica.html:251
 msgid "Italian municipalities"
 msgstr "Comuni italiani"
 
-#: places/templates/classifica.html:237
+#: places/templates/classifica.html:252
 msgid "Other cities"
 msgstr "Altre città"
 
-#: places/templates/classifica.html:246
+#: places/templates/classifica.html:261
 msgid "Place"
 msgstr "Luogo"
 
-#: places/templates/classifica.html:247
+#: places/templates/classifica.html:262
 msgid "Country"
 msgstr "Paese"
 
-#: places/templates/classifica.html:251
+#: places/templates/classifica.html:264
+msgid "EEA index"
+msgstr "Indice EEA"
+
+#: places/templates/classifica.html:265
+msgid "worst hour"
+msgstr "ora peggiore"
+
+#: places/templates/classifica.html:270
 #, python-format
 msgid "threshold %(soglia)s"
 msgstr "soglia %(soglia)s"
 
-#: places/templates/classifica.html:269
+#: places/templates/classifica.html:289
 msgid "No place matches the filter."
 msgstr "Nessun luogo corrisponde al filtro."
 
-#: places/templates/classifica.html:272
+#: places/templates/classifica.html:292
 msgid ""
 "The ranking is not available yet: it is computed with the next forecast "
 "update."
@@ -212,17 +252,25 @@ msgstr "Grafici qualità dell'aria: %(luogo)s"
 msgid "Air quality charts"
 msgstr "Grafici qualità dell'aria"
 
-#: places/templates/grafici.html:171
+#: places/templates/grafici.html:197
 msgid "Pollutant trends"
 msgstr "Andamento inquinanti"
 
-#: places/templates/grafici.html:175
+#: places/templates/grafici.html:201
 msgid "Loading…"
 msgstr "Caricamento…"
 
-#: places/templates/grafici.html:176
+#: places/templates/grafici.html:202
 msgid "No data available for this period."
 msgstr "Nessun dato disponibile per il periodo."
+
+#: places/templates/grafici.html:206
+msgid "European Air Quality Index (EEA)"
+msgstr "Indice europeo della qualità dell'aria (EEA)"
+
+#: places/templates/grafici.html:207
+msgid "hour by hour: the worst pollutant sets the level"
+msgstr "ora per ora: decide l'inquinante peggiore"
 
 #: places/templates/map_view.html:290
 msgid "Hide panel"

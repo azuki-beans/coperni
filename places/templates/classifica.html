@@ -204,6 +204,20 @@
             vertical-align: baseline;
         }
 
+        /* livello EEA: colori ufficiali, testo chiaro sui tre livelli scuri */
+        .livello {
+            display: inline-block;
+            min-width: 92px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            color: #1d2130;
+        }
+
+        .livello.scuro { color: #fff; }
+
         .vuoto {
             padding: 32px;
             text-align: center;
@@ -222,6 +236,7 @@
         <h2>{{ titolo_pagina }}</h2>
         <p>
             {% if corsa %}{% blocktranslate with data=corsa|date:"DATE_FORMAT" km=km %}Daily average (00–24 UTC) of the CAMS forecast of {{ data }}, over an area about {{ km }} km wide around each place: the same area as the charts.{% endblocktranslate %}{% endif %}
+            {% translate "EEA index: the worst hour of the day on the European Air Quality Index, computed from the hourly averages of the area." %}
             {% translate "Values in µg/m³; the dot compares them with the EU threshold, with the colours of the map." %}
             <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">{% translate "About the data" %}</a>
         </p>
@@ -245,9 +260,13 @@
                 <th class="numero">#</th>
                 <th><button type="button" data-colonna="1">{% translate "Place" %}</button></th>
                 <th><button type="button" data-colonna="2">{% translate "Country" %}</button></th>
+                <th {% if eaqi_disponibile %}aria-sort="descending"{% endif %}>
+                    <button type="button" data-colonna="3" data-numerica>{% translate "EEA index" %}</button>
+                    <small>{% translate "worst hour" %}</small>
+                </th>
                 {% for c in colonne %}
-                <th class="numero" {% if forloop.first %}aria-sort="descending"{% endif %}>
-                    <button type="button" data-colonna="{{ forloop.counter|add:2 }}" data-numerica>{{ c.codice|upper }}</button>
+                <th class="numero" {% if forloop.first and not eaqi_disponibile %}aria-sort="descending"{% endif %}>
+                    <button type="button" data-colonna="{{ forloop.counter|add:3 }}" data-numerica>{{ c.codice|upper }}</button>
                     {% if c.soglia %}<small>{% blocktranslate with soglia=c.soglia|floatformat:"-1" %}threshold {{ soglia }}{% endblocktranslate %}</small>{% endif %}
                 </th>
                 {% endfor %}
@@ -259,6 +278,7 @@
                 <td class="numero dim">{{ forloop.counter }}</td>
                 <td><a href="{% url 'places:map' %}?{{ r.query }}">{{ r.nome }}</a></td>
                 <td class="dim">{{ r.paese }}</td>
+                <td data-valore="{{ r.eaqi.ordine|default_if_none:''|unlocalize }}">{% if r.eaqi %}<span class="livello{% if r.eaqi.livello >= 4 %} scuro{% endif %}" style="background:{{ r.eaqi.colore }}">{{ r.eaqi.nome }}</span>{% else %}<span class="dim">—</span>{% endif %}</td>
                 {% for v in r.valori %}
                 <td class="numero" data-valore="{{ v.valore|default_if_none:''|unlocalize }}">{% if v.valore is None %}—{% else %}{{ v.valore|floatformat:1 }}{% endif %}{% if v.colore %}<i class="pallino" style="background:{{ v.colore }}"></i>{% endif %}</td>
                 {% endfor %}

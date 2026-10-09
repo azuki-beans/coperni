@@ -28,6 +28,7 @@ import xarray as xr
 from django.conf import settings
 
 from config.sito import POPOLAZIONE_MIN_CITTA, POPOLAZIONE_MIN_COMUNI
+from copernicus import eaqi
 from copernicus.griglia import (
     LATO_CELLE, ORE_STORICO, PASSO_INT, POLLUTANT_VARIABLES, SCALA_COORD, SCALA_VALORE, finestra,
 )
@@ -105,50 +106,80 @@ def _luoghi_classifica() -> dict[str, list[tuple[str, float, float]]]:
 
 
 def classifica(parquet: Path, giorno: date) -> dict:
-    """Media del giorno (prime ORE_STORICO ore della corsa) di ogni inquinante sulla finestra di
-    LATO_CELLE[0] celle attorno a ogni luogo: la stessa area dei grafici, con proporzioni 1:1.
+    """Per ogni luogo, sulla finestra di LATO_CELLE[0] celle attorno (la stessa area dei grafici,
+    con proporzioni 1:1) e sulle prime ORE_STORICO ore della corsa:
+    - media del giorno di ogni inquinante (tutti i valori cella/ora non nulli della finestra);
+    - indice EEA (`eaqi`): livello di ogni ora calcolato sulle medie orarie della finestra, come
+      nei grafici; [livello peggiore del giorno, media dei livelli orari].
 
-    Somme e conteggi per cella vanno in un'immagine integrale (somme cumulate 2D): la somma di
-    qualunque finestra costa 4 letture, quindi il calcolo è O(celle + luoghi). Media di tutti i
-    valori cella/ora non nulli della finestra.
+    Somme e conteggi per cella vanno in immagini integrali (somme cumulate 2D): la somma di
+    qualunque finestra costa 4 letture, quindi il calcolo è O(celle + luoghi) per ogni ora.
     """
     inquinanti = [c for c in settings.COPERNICUS_POLLUTANTS if c in POLLUTANT_VARIABLES]
-    colonne = ', '.join(f'sum("{c}")::DOUBLE, count("{c}")' for c in inquinanti)
+    colonne = ', '.join(f'"{c}"' for c in inquinanti)
     righe = duckdb.execute(
-        f'SELECT lat, lon, {colonne} FROM read_parquet(?) WHERE ora < ? GROUP BY lat, lon',
-        [str(parquet), ORE_STORICO],
+        f'SELECT lat, lon, ora, {colonne} FROM read_parquet(?) WHERE ora < ?', [str(parquet), ORE_STORICO],
     ).fetchnumpy()
     lat0, lon0 = int(righe['lat'].min()), int(righe['lon'].min())
     i = (righe['lat'].astype(int) - lat0) // PASSO_INT
     j = (righe['lon'].astype(int) - lon0) // PASSO_INT
     forma = (i.max() + 1, j.max() + 1)
 
-    def integrale(valori) -> np.ndarray:
-        g = np.zeros(forma)
-        g[i, j] = np.nan_to_num(np.asarray(valori, dtype=float))
-        return np.pad(g.cumsum(0).cumsum(1), ((1, 0), (1, 0)))
+    # (ora, lat, lon) in µg/m³, NaN dove manca il valore: ~28 MB per inquinante in float32
+    cubi = {}
+    for c in inquinanti:
+        cubi[c] = np.full((ORE_STORICO, *forma), np.nan, dtype=np.float32)
+        valori = np.ma.asarray(righe[c]).astype(np.float32).filled(np.nan)
+        cubi[c][righe['ora'].astype(int), i, j] = valori / SCALA_VALORE
 
-    colonne_valori = list(righe.values())[2:]
-    integrali = [(integrale(colonne_valori[2 * k]), integrale(colonne_valori[2 * k + 1]))
-                 for k in range(len(inquinanti))]
+    def integrali(somme: np.ndarray, conteggi: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        return tuple(np.pad(a.astype(float).cumsum(0).cumsum(1), ((1, 0), (1, 0))) for a in (somme, conteggi))
 
-    def media(lat: float, lon: float) -> list[float | None]:
-        f = finestra(lat, lon, LATO_CELLE[0], 1.0)
-        # indici della finestra nella griglia, ritagliati al dominio (estremi esclusivi)
-        i0 = max((f['lat_min'] - lat0) // PASSO_INT, 0)
-        i1 = min((f['lat_max'] - lat0) // PASSO_INT + 1, forma[0])
-        j0 = max((f['lon_min'] - lon0) // PASSO_INT, 0)
-        j1 = min((f['lon_max'] - lon0) // PASSO_INT + 1, forma[1])
-        valori = []
-        for somme, conteggi in integrali:
-            s, n = (a[i1, j1] - a[i0, j1] - a[i1, j0] + a[i0, j0] for a in (somme, conteggi))
-            valori.append(round(float(s / n) / SCALA_VALORE, 1) if n > 0 and i1 > i0 and j1 > j0 else None)
-        return valori
+    luoghi = _luoghi_classifica()
+    # indici della finestra di ogni luogo nella griglia, ritagliati al dominio (estremi esclusivi)
+    finestre = {}
+    for tipo, elenco in luoghi.items():
+        for chiave, lat, lon in elenco:
+            f = finestra(lat, lon, LATO_CELLE[0], 1.0)
+            i0 = max((f['lat_min'] - lat0) // PASSO_INT, 0)
+            i1 = min((f['lat_max'] - lat0) // PASSO_INT + 1, forma[0])
+            j0 = max((f['lon_min'] - lon0) // PASSO_INT, 0)
+            j1 = min((f['lon_max'] - lon0) // PASSO_INT + 1, forma[1])
+            finestre[tipo, chiave] = (i0, i1, j0, j1) if i1 > i0 and j1 > j0 else None
+
+    def medie(somme: np.ndarray, conteggi: np.ndarray) -> dict:
+        s_int, n_int = integrali(somme, conteggi)
+        risultato = {}
+        for luogo, f in finestre.items():
+            if f is None:
+                risultato[luogo] = None
+                continue
+            i0, i1, j0, j1 = f
+            s, n = (a[i1, j1] - a[i0, j1] - a[i1, j0] + a[i0, j0] for a in (s_int, n_int))
+            risultato[luogo] = float(s / n) if n > 0 else None
+        return risultato
+
+    giornaliere = {c: medie(np.nansum(cubi[c], axis=0), (~np.isnan(cubi[c])).sum(axis=0)) for c in inquinanti}
+
+    livelli_orari = {luogo: [] for luogo in finestre}
+    for ora in range(ORE_STORICO):
+        orarie = {c: medie(np.nan_to_num(cubi[c][ora]), ~np.isnan(cubi[c][ora])) for c in inquinanti}
+        for luogo, livelli in livelli_orari.items():
+            if (n := eaqi.livello({c: orarie[c][luogo] for c in inquinanti})) is not None:
+                livelli.append(n)
+
+    def arrotonda(valore: float | None) -> float | None:
+        return None if valore is None else round(valore, 1)
 
     return {
         'corsa': giorno.isoformat(), 'ore': ORE_STORICO, 'lato': LATO_CELLE[0], 'inquinanti': inquinanti,
-        **{tipo: {chiave: media(lat, lon) for chiave, lat, lon in luoghi}
-           for tipo, luoghi in _luoghi_classifica().items()},
+        **{tipo: {chiave: [arrotonda(giornaliere[c][tipo, chiave]) for c in inquinanti] for chiave, _, _ in elenco}
+           for tipo, elenco in luoghi.items()},
+        'eaqi': {
+            tipo: {chiave: [max(lv), round(sum(lv) / len(lv), 2)] if (lv := livelli_orari[tipo, chiave]) else None
+                   for chiave, _, _ in elenco}
+            for tipo, elenco in luoghi.items()
+        },
     }
 
 

@@ -79,11 +79,24 @@ cannot be listed. The job rewrites it (last `COPERNICUS_RETENTION_DAYS` days); f
 done by the bucket **lifecycle rule** (21 days).
 
 `classifica.json` (`export.classifica`, written only when the exported day is the newest run):
-`{"corsa", "ore": 24, "lato": 20, "inquinanti": [...], "comuni": {codice: [v…]}, "citta": {geonameid: [v…]}}`,
-µg/m³ with 1 decimal, null if missing. Places = the sitemap set (`config/sito.py`
-`POPOLAZIONE_MIN_*`, ~280), read from `luoghi/dati/*.csv` (the job image has no places DB). Value =
-mean of all non-null cell/hour values for hours 0–23 over `finestra(lat, lon, 20, aspect=1)`, i.e.
-the same number the charts average for that day in a square viewport; summed-area tables → ~0.2 s.
+`{"corsa", "ore": 24, "lato": 20, "inquinanti": [...], "comuni": {codice: [v…]}, "citta": {geonameid: [v…]},
+"eaqi": {"comuni": {codice: [max, media]}, "citta": {…}}}`, µg/m³ with 1 decimal, null if missing.
+Places = the sitemap set (`config/sito.py` `POPOLAZIONE_MIN_*`, ~280), read from `luoghi/dati/*.csv`
+(the job image has no places DB). Value = mean of all non-null cell/hour values for hours 0–23 over
+`finestra(lat, lon, 20, aspect=1)`, i.e. the same number the charts average for that day in a square
+viewport. `eaqi` = EEA level (1..6) of each hour from the hourly window means, as in the charts:
+worst hour of the day and mean of the hourly levels (tie-break in the ranking). Data held as
+(hour, lat, lon) float32 cubes (~28 MB per pollutant), summed-area tables per hour → ~1 s.
+
+## European Air Quality Index (`copernicus/eaqi.py`)
+
+EEA index, bands revised in 2024 (ETC HE Report 2024/17, Table 5.2). **Hourly values for every
+pollutant, PM included** (the 24h running mean was the old index): do not reintroduce it. One level
+per pollutant (upper limits inclusive, on the value rounded to an integer, as in the EEA table),
+index = worst level; nothing is summed. Applied to the **area mean** (window), not per cell: in
+`griglia.serie()` (`eaqi` list in the series API, bar chart under the pollutant chart) and in
+`export.classifica` (ranking column "EEA index", default sort). Names and official colours in
+`LIVELLI`; the bands table on `/info/dati/` is rendered from `FASCE`. Not on the map (yet).
 
 ## Django apps
 
@@ -151,12 +164,15 @@ the same number the charts average for that day in a square viewport; summed-are
     (`sostituisciLayer`); reframes only if `limiti` change. "Data not up to date" if `ultimo` is
     more than 2h in the past.
   - `classifica.html` (`/places/classifica/`, menu "Ranking" before "Charts"): server-rendered
-    table from `griglia.classifica()` joined with `Comune`/`Citta`; dot colour from `views.COLORI`
+    table from `griglia.classifica()` joined with `Comune`/`Citta`; first data column = EEA index
+    (worst hour, sorted by `max + media/10`), empty for old JSON files without `eaqi`; dot colour from `views.COLORI`
     (copy of `COLOR_STOPS` in `map_view.html`: keep them in sync). Sorting/filtering in ~50 lines of
     vanilla JS, no table library. Does not set the `centro` cookie.
   - `grafici.html`: Chart.js 4.5.1 from jsdelivr, `linear` X axis in epoch ms (no date adapter),
     dashed thresholds tied to the main line (`pairedIndex`). Same window as the map (side from
-    `localStorage`, window aspect ratio).
+    `localStorage`, window aspect ratio). Below it the EEA index as coloured bars, same X range and
+    fixed Y axis width (`ASSE_Y`) so the two charts line up; level names in an HTML legend (too
+    long for the axis on mobile).
 
 ## Languages (i18n)
 

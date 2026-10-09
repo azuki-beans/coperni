@@ -55,6 +55,33 @@
     common in many areas.
 </p>
 
+<h3>European Air Quality Index (EEA)</h3>
+<p>
+    The ranking and the charts also show the <strong>European Air Quality Index</strong> of the
+    European Environment Agency, in the version revised in 2024 on the basis of the 2021 World
+    Health Organization guidelines. Each pollutant gets a level from its hourly value, and the
+    index is the <strong>worst level</strong> among the pollutants: it does not add them up.
+</p>
+<div class="tabella-scorrevole">
+<table>
+    <thead>
+        <tr><th>µg/m³</th>{% for l in eaqi_livelli %}<th class="numero"><i class="chip" style="background:{{ l.colore }}"></i>{{ l.nome }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+        {% for nome, fasce in eaqi_fasce %}
+        <tr><td>{{ nome }}</td>{% for f in fasce %}<td class="numero">{{ f }}</td>{% endfor %}</tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+<p class="dim">
+    Here the index is computed on the <strong>average of the area</strong> shown (the same as the
+    charts), hour by hour. In the ranking each place shows the worst hour of the day (00–24 UTC);
+    places at the same level are ordered by the average of the hourly levels. The EEA computes
+    the index on measuring stations: here it is applied to the CAMS forecast, so it is an
+    estimate. Source: <a href="https://www.eionet.europa.eu/etcs/etc-he/products/etc-he-products/etc-he-reports/etc-he-report-2024-17-eeas-revision-of-the-european-air-quality-index-bands" rel="noopener">ETC HE Report 2024/17</a>.
+</p>
+
 <h3>Credits</h3>
 <p class="dim">
     Generated using Copernicus Atmosphere Monitoring Service information ({% now "Y" %}).
