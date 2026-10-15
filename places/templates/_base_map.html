@@ -227,12 +227,13 @@
     // restituiti dall'API.
     const CENTRO = [{{ centro_latitudine }}, {{ centro_longitudine }}];
     const LATI = [{% for l in lati %}{{ l }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const LATO_DEFAULT = {{ lato_default }};
 
     // quota della viewport coperta dall'area dei dati: 0.95 lascia scoperto ~5% (una fascia
     // sottile sui due lati lunghi), il resto dello schermo è tutto colorato
     const RIEMPIMENTO = 0.95;
 
-    // Lo zoom non è libero: lo decidono i pulsanti dell'area (20/50/100 celle, in alto a sinistra),
+    // Lo zoom non è libero: lo decidono i pulsanti dell'area (10/20/50/100 celle, in alto a sinistra),
     // perché i dati coprono solo la finestra richiesta. Resta lo spostamento col trascinamento.
     const map = L.map('map', {
         zoomControl: false,
@@ -268,7 +269,7 @@
         const zoom = map.getBoundsZoom(box, true) + Math.log2(RIEMPIMENTO);
         map.setView(box.getCenter(), zoom, { animate: false });
     }
-    inquadra(limitiStimati(LATI[0]));
+    inquadra(limitiStimati(LATO_DEFAULT));
 
     // Sfondo OpenFreeMap (tile vettoriali, gratuite, senza chiave) disegnato da MapLibre GL sotto
     // Leaflet. Lo stile è spezzato in due: sfondo senza etichette sotto le celle, sole etichette

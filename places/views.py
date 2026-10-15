@@ -6,7 +6,7 @@ from django.conf import settings
 from django.shortcuts import render
 
 from copernicus import eaqi, griglia
-from copernicus.griglia import LATO_CELLE, PASSO
+from copernicus.griglia import LATO_CELLE, LATO_DEFAULT, PASSO
 from luoghi.models import Citta, Comune
 from places.centro import centro_da_richiesta, ricorda
 from places.testi import testi_js
@@ -22,6 +22,7 @@ def _contesto(request, nav_attiva):
         "centro_latitudine": f"{centro.lat:.6f}",
         "centro_longitudine": f"{centro.lon:.6f}",
         "lati": LATO_CELLE,
+        "lato_default": LATO_DEFAULT,
         # larghezza indicativa della finestra in orizzontale: le celle sono 0.1° di longitudine
         "lati_km": [(lato, round(lato * PASSO * 111.32 * math.cos(math.radians(centro.lat)))) for lato in LATO_CELLE],
         "copernicus_pollutants": settings.COPERNICUS_POLLUTANTS,
@@ -103,6 +104,6 @@ def classifica_view(request):
         "colonne": [{"codice": c, "soglia": s} for c, s in zip(inquinanti, soglie)],
         "eaqi_disponibile": bool(indici),
         "corsa": date.fromisoformat(dati["corsa"]) if dati.get("corsa") else None,
-        "km": round(dati.get("lato", LATO_CELLE[0]) * PASSO * 111.32 * math.cos(math.radians(45))),
+        "km": round(dati.get("lato", LATO_DEFAULT) * PASSO * 111.32 * math.cos(math.radians(45))),
     }
     return render(request, "classifica.html", context)

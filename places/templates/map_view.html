@@ -818,9 +818,9 @@
     renderLegendBar();
 
     // ── Area: celle sul lato lungo della viewport (preferenza ricordata nel browser) ──
-    // Tre pulsanti in alto a sinistra al posto di + e −: sono l'unico modo di cambiare zoom.
+    // Quattro pulsanti in alto a sinistra al posto di + e −: sono l'unico modo di cambiare zoom.
     // L'area di un link condiviso vale per questa pagina ma non diventa la preferenza salvata.
-    let lato = LATI[0];
+    let lato = LATO_DEFAULT;
     if (LATI.includes(Number(PARAMETRI.get('lato')))) {
         lato = Number(PARAMETRI.get('lato'));
     } else {
