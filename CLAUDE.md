@@ -165,6 +165,23 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     immediately, request after 250 ms. The old layer stays until the new one arrives
     (`sostituisciLayer`); reframes only if `limiti` change. "Data not up to date" if `ultimo` is
     more than 2h in the past.
+  - **View in the URL**: `?inquinante=&lato=&istante=` (ISO, only when not "now") next to the centre;
+    `aggiornaUrl()` keeps the address in sync with `history.replaceState`, always with the explicit
+    centre from the server (`centro.querystring`), so links never depend on the `centro` cookie.
+    A `lato` from the URL does not overwrite `coperni.lato`. `config/sito.py` drops these params
+    from the canonical URL (`PARAMETRI_VISTA`).
+  - **Share** (`ControlloCondividi`, below the area buttons): menu with native share (if
+    `navigator.share`), WhatsApp/Telegram/email/Facebook/X/LinkedIn/Bluesky as plain URLs (no
+    social scripts), copy link, PNG and PDF. The image is **recomposed on a canvas**
+    (`componiImmagine`): MapLibre canvases copied right after a synchronous `redraw()` (no
+    `preserveDrawingBuffer`; layers in `stratiGl` from `_base_map.html`), cells redrawn from the
+    last API response (`ultimiDati`) with the same halftone as canvas patterns (`gradinoDi`,
+    `raggioPunto`, `colorePunto` shared with the SVG `trama`), then a footer with title, hour,
+    EEA level, legend and attribution. PDF (`creaPdf`): jsPDF 3.0.4 + Chart.js loaded from
+    jsdelivr only on first use, A4 one page, map as JPEG ≤2200 px, charts from the shared
+    `_grafici_js.html` (also used by `grafici.html`) drawn off-screen, CAMS licence attribution.
+    Standard PDF fonts lack subscripts: `pulisci()` turns NO₂ into NO2. Static files are not served
+    in production (no whitenoise): shared JS goes in template includes, not `static/`.
   - `classifica.html` (`/places/classifica/`, menu "Ranking" before "Charts"): server-rendered
     table from `griglia.classifica()` joined with `Comune`/`Citta`; first data column = EEA index
     (worst hour, sorted by `max + media/10`), empty for old JSON files without `eaqi`; dot colour from `views.COLORI`

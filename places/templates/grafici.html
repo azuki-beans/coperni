@@ -221,32 +221,11 @@
     const testo = (chiave, valori = {}) => T[chiave].replace(/\{(\w+)\}/g, (_, k) => valori[k] ?? '');
     const LOCALE = document.documentElement.lang === 'it' ? 'it-IT' : 'en-GB';
 
-    // Colori per inquinante — stessa palette usata altrove nel progetto per coerenza visiva.
-    const POLLUTANT_COLORS = {
-        pm2p5: '#dc2626',
-        pm10: '#ea580c',
-        no2: '#ca8a04',
-        o3: '#16a34a',
-        so2: '#0284c7',
-    };
-    const FALLBACK_COLORS = ['#7c3aed', '#db2777', '#0d9488', '#d97706'];
-
-    function colorFor(inquinante, index) {
-        return POLLUTANT_COLORS[inquinante] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
-    }
-
-    function formatTick(value) {
-        const d = new Date(value);
-        return d.toLocaleString(LOCALE, {
-            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-        });
-    }
+{% include "_grafici_js.html" %}
 
     let chart = null;
     let chartIndice = null;
     const LIVELLI = JSON.parse(document.getElementById('eaqi-livelli').textContent);
-    // stessa larghezza dell'asse Y nei due grafici: così i tempi sono allineati in verticale
-    const ASSE_Y = 64;
 
     function disegnaIndice(punti, min, max) {
         for (const id of ['indice-header', 'indice-card', 'indice-legenda']) {
@@ -254,46 +233,7 @@
         }
         if (chartIndice) chartIndice.destroy();
         if (punti.length === 0) return;
-        chartIndice = new Chart(document.getElementById('indice-chart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                datasets: [{
-                    data: punti.map((p) => ({ x: new Date(p.t).getTime(), y: p.v })),
-                    backgroundColor: punti.map((p) => LIVELLI[p.v - 1].colore),
-                    barPercentage: 1,
-                    categoryPercentage: 1,
-                }],
-            },
-            options: {
-                locale: LOCALE,
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'nearest', axis: 'x', intersect: false },
-                scales: {
-                    x: {
-                        type: 'linear', min, max, offset: false,
-                        grid: { color: '#e3e6ec' },
-                        ticks: { color: '#5b6276', maxTicksLimit: 14, callback: formatTick },
-                    },
-                    y: {
-                        min: 0, max: LIVELLI.length,
-                        afterFit: (asse) => { asse.width = ASSE_Y; },
-                        grid: { color: '#e3e6ec' },
-                        // i nomi dei livelli stanno nella legenda sotto: sull'asse non entrano su mobile
-                        ticks: { color: '#5b6276', stepSize: 1 },
-                    },
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            title: (items) => formatTick(items[0].parsed.x),
-                            label: (item) => LIVELLI[item.parsed.y - 1].nome,
-                        },
-                    },
-                },
-            },
-        });
+        chartIndice = graficoIndice(document.getElementById('indice-chart'), punti, min, max, LIVELLI);
     }
 
     async function loadSerie() {
@@ -325,101 +265,10 @@
             const fmt = (iso) => new Date(iso).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit' });
             rangeInfo.textContent = `${fmt(tempi[0])} — ${fmt(tempi[tempi.length - 1])} · ${T.media_area}`;
 
-            // Per ogni inquinante: dataset principale + (se la soglia è configurata) un dataset
-            // "soglia" con una linea tratteggiata dello stesso colore, agganciato al principale
-            // (stesso pairedIndex) così il toggle in legenda nasconde/mostra entrambi insieme.
-            const datasets = [];
-            inquinanti.forEach((inquinante, i) => {
-                const serie = data.serie[inquinante];
-                const color = colorFor(inquinante, i);
-                const punti = serie.punti.map((p) => ({ x: new Date(p.t).getTime(), y: p.v }));
-                const mainIndex = datasets.length;
-
-                datasets.push({
-                    label: `${inquinante.toUpperCase()} (${serie.unita})`,
-                    data: punti,
-                    borderColor: color,
-                    backgroundColor: color,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.15,
-                });
-
-                if (serie.soglia != null && punti.length > 0) {
-                    datasets.push({
-                        label: testo('soglia', { pollutant: inquinante.toUpperCase() }),
-                        data: [
-                            { x: punti[0].x, y: serie.soglia },
-                            { x: punti[punti.length - 1].x, y: serie.soglia },
-                        ],
-                        borderColor: color,
-                        borderDash: [6, 4],
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        tension: 0,
-                        isThreshold: true,
-                        pairedIndex: mainIndex,
-                    });
-                    datasets[mainIndex].pairedIndex = datasets.length - 1;
-                }
-            });
-
-            const ctx = document.getElementById('pollution-chart').getContext('2d');
             if (chart) {
                 chart.destroy();
             }
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: { datasets },
-                options: {
-                    locale: LOCALE,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'nearest', axis: 'x', intersect: false },
-                    scales: {
-                        x: {
-                            type: 'linear',
-                            grid: { color: '#e3e6ec' },
-                            ticks: {
-                                color: '#5b6276',
-                                maxTicksLimit: 14,
-                                callback: formatTick,
-                            },
-                        },
-                        y: {
-                            afterFit: (asse) => { asse.width = ASSE_Y; },
-                            grid: { color: '#e3e6ec' },
-                            ticks: { color: '#5b6276' },
-                            title: { display: true, text: 'µg/m³', color: '#5b6276' },
-                        },
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#1d2130',
-                                // le soglie non hanno una voce propria in legenda: seguono il
-                                // toggle della linea principale a cui sono agganciate (sotto).
-                                filter: (item, data) => !data.datasets[item.datasetIndex].isThreshold,
-                            },
-                            onClick: (e, legendItem, legend) => {
-                                const chart = legend.chart;
-                                Chart.defaults.plugins.legend.onClick.call(chart, e, legendItem, legend);
-                                const paired = chart.data.datasets[legendItem.datasetIndex].pairedIndex;
-                                if (paired !== undefined) {
-                                    chart.getDatasetMeta(paired).hidden = chart.getDatasetMeta(legendItem.datasetIndex).hidden;
-                                    chart.update();
-                                }
-                            },
-                        },
-                        tooltip: {
-                            filter: (item) => !item.dataset.isThreshold,
-                            callbacks: {
-                                title: (items) => formatTick(items[0].parsed.x),
-                            },
-                        },
-                    },
-                },
-            });
+            chart = graficoSerie(document.getElementById('pollution-chart'), data.serie);
 
             disegnaIndice(data.eaqi || [], chart.scales.x.min, chart.scales.x.max);
         } catch (err) {

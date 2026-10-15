@@ -293,6 +293,9 @@
     map.getPane('labels').style.zIndex = 450;   // sopra overlayPane (400), sotto i popup (700)
     map.getPane('labels').style.pointerEvents = 'none';
 
+    // i due layer MapLibre (sfondo, etichette), in ordine di disegno: servono per l'immagine da condividere
+    const stratiGl = [];
+
     (async () => {
         const stile = await (await fetch('https://tiles.openfreemap.org/styles/positron')).json();
         // niente nomi e sigle di strade: sopra le celle servono solo luoghi e acque
@@ -306,8 +309,10 @@
             }
         }
         const opzioni = { interactive: false, attributionControl: false };
-        L.maplibreGL({ ...opzioni, style: { ...stile, layers: stile.layers.filter(l => !etichetta(l)) }, pane: 'tilePane' }).addTo(map);
-        L.maplibreGL({ ...opzioni, style: { ...stile, layers: stile.layers.filter(etichetta) }, pane: 'labels' }).addTo(map);
+        stratiGl.push(
+            L.maplibreGL({ ...opzioni, style: { ...stile, layers: stile.layers.filter(l => !etichetta(l)) }, pane: 'tilePane' }).addTo(map),
+            L.maplibreGL({ ...opzioni, style: { ...stile, layers: stile.layers.filter(etichetta) }, pane: 'labels' }).addTo(map),
+        );
     })();
 
     function showSpinner(show) {

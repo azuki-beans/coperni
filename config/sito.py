@@ -2,6 +2,8 @@
 favicon, robots.txt, sitemap con le due lingue e i luoghi più popolosi, statistiche Cloudflare Web Analytics.
 """
 
+from urllib.parse import urlencode
+
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.http import HttpResponse
@@ -28,11 +30,19 @@ FAVICON_SVG = (
 POPOLAZIONE_MIN_COMUNI = 50_000
 POPOLAZIONE_MIN_CITTA = 500_000
 
+# stato della mappa nell'URL (link condivisi): non cambia la pagina, fuori dall'URL canonico
+PARAMETRI_VISTA = ('inquinante', 'lato', 'istante')
+
+
+def _url_canonico(request) -> str:
+    query = urlencode([(k, v) for k, v in request.GET.items() if k not in PARAMETRI_VISTA])
+    return request.build_absolute_uri(request.path + (f'?{query}' if query else ''))
+
 
 def sito(request):
     """Context processor: URL canonico, repository, immagine di anteprima, favicon e statistiche (se configurate)."""
     return {
-        'url_canonico': request.build_absolute_uri(),
+        'url_canonico': _url_canonico(request),
         'url_repo': URL_REPO,
         'immagine_anteprima': IMMAGINE_ANTEPRIMA,
         'favicon_svg': FAVICON_SVG,

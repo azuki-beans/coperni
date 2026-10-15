@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 06:46+0200\n"
+"POT-Creation-Date: 2026-10-15 12:20+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -101,7 +101,7 @@ msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
 #: places/templates/_base_map.html:285 places/templates/_header.html:136
-#: places/templates/map_view.html:293
+#: places/templates/map_view.html:477 places/templates/map_view.html:1407
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
@@ -218,7 +218,8 @@ msgstr "Luogo"
 msgid "Country"
 msgstr "Paese"
 
-#: places/templates/classifica.html:264
+#: places/templates/classifica.html:264 places/templates/map_view.html:489
+#: places/testi.py:48
 msgid "EEA index"
 msgstr "Indice EEA"
 
@@ -252,7 +253,7 @@ msgstr "Grafici qualità dell'aria: %(luogo)s"
 msgid "Air quality charts"
 msgstr "Grafici qualità dell'aria"
 
-#: places/templates/grafici.html:197
+#: places/templates/grafici.html:197 places/testi.py:52
 msgid "Pollutant trends"
 msgstr "Andamento inquinanti"
 
@@ -264,7 +265,8 @@ msgstr "Caricamento…"
 msgid "No data available for this period."
 msgstr "Nessun dato disponibile per il periodo."
 
-#: places/templates/grafici.html:206
+#: places/templates/grafici.html:206 places/templates/map_view.html:486
+#: places/testi.py:53
 msgid "European Air Quality Index (EEA)"
 msgstr "Indice europeo della qualità dell'aria (EEA)"
 
@@ -272,55 +274,79 @@ msgstr "Indice europeo della qualità dell'aria (EEA)"
 msgid "hour by hour: the worst pollutant sets the level"
 msgstr "ora per ora: decide l'inquinante peggiore"
 
-#: places/templates/map_view.html:290
+#: places/templates/map_view.html:474
 msgid "Hide panel"
 msgstr "Nascondi pannello"
 
-#: places/templates/map_view.html:290
+#: places/templates/map_view.html:474
 msgid "Show panel"
 msgstr "Mostra pannello"
 
-#: places/templates/map_view.html:297
+#: places/templates/map_view.html:481
 msgid "None"
 msgstr "Nessuno"
 
-#: places/templates/map_view.html:308
+#: places/templates/map_view.html:497
 msgid "Intensity"
 msgstr "Intensità"
 
-#: places/templates/map_view.html:317
+#: places/templates/map_view.html:506
 msgid "24 hours earlier"
 msgstr "24 ore prima"
 
-#: places/templates/map_view.html:317
+#: places/templates/map_view.html:506
 msgid "One hour earlier"
 msgstr "Un'ora prima"
 
-#: places/templates/map_view.html:318
+#: places/templates/map_view.html:507
 msgid "One hour later"
 msgstr "Un'ora dopo"
 
-#: places/templates/map_view.html:318
+#: places/templates/map_view.html:507
 msgid "24 hours later"
 msgstr "24 ore dopo"
 
-#: places/templates/map_view.html:322
+#: places/templates/map_view.html:511 places/testi.py:51
 msgid "Forecast for"
 msgstr "Previsione per"
 
-#: places/templates/map_view.html:324 places/testi.py:14
+#: places/templates/map_view.html:513 places/testi.py:14
 msgid "now"
 msgstr "adesso"
 
-#: places/templates/map_view.html:325
+#: places/templates/map_view.html:514
 msgid "data not up to date"
 msgstr "dati non aggiornati"
 
-#: places/templates/map_view.html:327
+#: places/templates/map_view.html:516
 msgid "when it updates"
 msgstr "quando si aggiorna"
 
-#: places/templates/map_view.html:581
+#: places/templates/map_view.html:525 places/templates/map_view.html:1013
+msgid "Share"
+msgstr "Condividi"
+
+#: places/templates/map_view.html:527
+msgid "Share with…"
+msgstr "Condividi con…"
+
+#: places/templates/map_view.html:531
+msgid "Email"
+msgstr "Email"
+
+#: places/templates/map_view.html:538
+msgid "Copy link"
+msgstr "Copia link"
+
+#: places/templates/map_view.html:539
+msgid "Download image (PNG)"
+msgstr "Scarica immagine (PNG)"
+
+#: places/templates/map_view.html:540
+msgid "Download PDF"
+msgstr "Scarica PDF"
+
+#: places/templates/map_view.html:841
 msgid "Area"
 msgstr "Area"
 
@@ -425,3 +451,44 @@ msgstr "media dell'area mostrata in mappa"
 #, python-brace-format
 msgid "Threshold {pollutant}"
 msgstr "Soglia {pollutant}"
+
+#: places/testi.py:43
+msgid "Link copied"
+msgstr "Link copiato"
+
+#: places/testi.py:44
+msgid "Copy failed: copy the address from the browser bar"
+msgstr "Copia non riuscita: copia l'indirizzo dalla barra del browser"
+
+#: places/testi.py:45
+msgid "Preparing…"
+msgstr "Preparazione…"
+
+#: places/testi.py:46
+msgid "Could not create the file"
+msgstr "Impossibile creare il file"
+
+#: places/testi.py:49
+#, python-brace-format
+msgid "Generated on {date}"
+msgstr "Generato il {date}"
+
+#: places/testi.py:50
+msgid "Pollutant"
+msgstr "Inquinante"
+
+#: places/testi.py:55
+msgid ""
+"Forecasts of the CAMS European ensemble model (Copernicus Atmosphere "
+"Monitoring Service), on a grid of about 10 km. The map shows the value of "
+"the pollutant at the hour indicated, compared with the EU reference "
+"threshold: the comparison is indicative, because the legal limits refer to "
+"daily means (ozone: 8-hour means). The chart shows the hourly mean over the "
+"area of the map for the past days and the next 48 hours; below it, the "
+"European Air Quality Index, where the worst pollutant of each hour sets the "
+"level."
+msgstr "Previsioni del modello ensemble europeo CAMS (Copernicus Atmosphere Monitoring Service), su una griglia di circa 10 km. La mappa mostra il valore dell'inquinante all'ora indicata, confrontato con la soglia di riferimento UE: il confronto è indicativo, perché i limiti di legge si riferiscono a medie giornaliere (ozono: medie su 8 ore). Il grafico mostra la media oraria sull'area della mappa per i giorni passati e le prossime 48 ore; sotto, l'indice europeo della qualità dell'aria, in cui l'inquinante peggiore di ogni ora decide il livello."
+
+#: places/testi.py:62
+msgid "Open the live map"
+msgstr "Apri la mappa aggiornata"
