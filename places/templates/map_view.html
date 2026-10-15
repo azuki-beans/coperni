@@ -1483,7 +1483,14 @@
         scrivi(`Generated using Copernicus Atmosphere Monitoring Service information ${new Date().getFullYear()}. ` +
             'Neither the European Commission nor ECMWF is responsible for any use that may be made of the ' +
             'Copernicus information or data it contains. Basemap © OpenStreetMap contributors, © OpenMapTiles, OpenFreeMap.',
-            { size: 7, colore: TENUE, dopo: 0 });
+            { size: 7, colore: TENUE, dopo: 1.5 });
+        // chi ha fatto il sito, come nell'attribuzione della mappa
+        const firma = 'Coperni by azuki-beans · {{ url_repo|escapejs }}';
+        spazio(7 * PT * 1.3);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...TENUE);
+        doc.textWithLink(firma, M, y, { url: '{{ url_repo|escapejs }}', baseline: 'top' });
 
         return doc.output('blob');
     }
