@@ -30,6 +30,12 @@
     coordinate a circa 1 km prima di inviarle: la posizione esatta non lascia il tuo dispositivo.
     Le coordinate arrotondate finiscono nell'indirizzo della pagina e nel cookie <code>centro</code>.
 </p>
+<p>
+    Il pulsante <strong>Condividi</strong> della mappa non manda nulla da solo. L'indirizzo
+    della pagina contiene il luogo e la vista (inquinante, area, ora) e i link a WhatsApp, Telegram,
+    email e social aprono quel servizio solo se li scegli: da lì in poi vale la privacy del
+    servizio che usi. Immagine e PDF sono creati nel tuo browser e non passano dal nostro server.
+</p>
 
 <h3>Dati raccolti dal server</h3>
 <p>
@@ -53,7 +59,7 @@
 </p>
 <ul>
     <li><a href="https://openfreemap.org" rel="noopener">OpenFreeMap</a>: lo sfondo della mappa;</li>
-    <li><a href="https://www.jsdelivr.com" rel="noopener">jsDelivr</a> e <a href="https://unpkg.com" rel="noopener">unpkg</a>: le librerie della pagina (mappa, grafici);</li>
+    <li><a href="https://www.jsdelivr.com" rel="noopener">jsDelivr</a> e <a href="https://unpkg.com" rel="noopener">unpkg</a>: le librerie della pagina (mappa, grafici e, solo se scarichi il PDF, la libreria che lo crea);</li>
     {% if cf_analytics_token %}<li><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare</a>: il conteggio delle visite.</li>{% endif %}
 </ul>
 <p>
@@ -76,5 +82,5 @@
     al <a href="https://www.garanteprivacy.it" rel="noopener">Garante per la protezione dei dati personali</a>.
 </p>
 
-<p class="dim">Ultimo aggiornamento: 3 ottobre 2026.</p>
+<p class="dim">Ultimo aggiornamento: 15 ottobre 2026.</p>
 {% endblock %}

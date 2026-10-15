@@ -1,0 +1,170 @@
+{% comment %}
+Grafici dell'andamento, condivisi tra la pagina Grafici e il PDF della mappa: stessi colori, assi,
+soglie e barre dell'indice EEA. Va incluso dentro un <script> che definisce T, testo e LOCALE;
+Chart.js deve essere caricato prima di chiamare le funzioni (nella mappa arriva solo per il PDF).
+`opzioni` si aggiunge alle opzioni di Chart.js (per il PDF: niente animazioni, dimensione fissa).
+{% endcomment %}
+    // Colori per inquinante — stessa palette usata altrove nel progetto per coerenza visiva.
+    const POLLUTANT_COLORS = {
+        pm2p5: '#dc2626',
+        pm10: '#ea580c',
+        no2: '#ca8a04',
+        o3: '#16a34a',
+        so2: '#0284c7',
+    };
+    const FALLBACK_COLORS = ['#7c3aed', '#db2777', '#0d9488', '#d97706'];
+
+    function colorFor(inquinante, index) {
+        return POLLUTANT_COLORS[inquinante] || FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+    }
+
+    function formatTick(value) {
+        const d = new Date(value);
+        return d.toLocaleString(LOCALE, {
+            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        });
+    }
+
+    // stessa larghezza dell'asse Y nei due grafici: così i tempi sono allineati in verticale
+    const ASSE_Y = 64;
+
+    // serie = risposta di /copernicus/api/serie/ → `serie`: {inquinante: {unita, soglia, punti}}
+    function graficoSerie(canvas, serie, opzioni = {}) {
+        // Per ogni inquinante: dataset principale + (se la soglia è configurata) un dataset
+        // "soglia" con una linea tratteggiata dello stesso colore, agganciato al principale
+        // (stesso pairedIndex) così il toggle in legenda nasconde/mostra entrambi insieme.
+        const datasets = [];
+        Object.keys(serie).forEach((inquinante, i) => {
+            const s = serie[inquinante];
+            const color = colorFor(inquinante, i);
+            const punti = s.punti.map((p) => ({ x: new Date(p.t).getTime(), y: p.v }));
+            const mainIndex = datasets.length;
+
+            datasets.push({
+                label: `${inquinante.toUpperCase()} (${s.unita})`,
+                data: punti,
+                borderColor: color,
+                backgroundColor: color,
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.15,
+            });
+
+            if (s.soglia != null && punti.length > 0) {
+                datasets.push({
+                    label: testo('soglia', { pollutant: inquinante.toUpperCase() }),
+                    data: [
+                        { x: punti[0].x, y: s.soglia },
+                        { x: punti[punti.length - 1].x, y: s.soglia },
+                    ],
+                    borderColor: color,
+                    borderDash: [6, 4],
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    tension: 0,
+                    isThreshold: true,
+                    pairedIndex: mainIndex,
+                });
+                datasets[mainIndex].pairedIndex = datasets.length - 1;
+            }
+        });
+
+        return new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: { datasets },
+            options: {
+                locale: LOCALE,
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        grid: { color: '#e3e6ec' },
+                        ticks: {
+                            color: '#5b6276',
+                            maxTicksLimit: 14,
+                            callback: formatTick,
+                        },
+                    },
+                    y: {
+                        afterFit: (asse) => { asse.width = ASSE_Y; },
+                        grid: { color: '#e3e6ec' },
+                        ticks: { color: '#5b6276' },
+                        title: { display: true, text: 'µg/m³', color: '#5b6276' },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#1d2130',
+                            // le soglie non hanno una voce propria in legenda: seguono il
+                            // toggle della linea principale a cui sono agganciate (sotto).
+                            filter: (item, data) => !data.datasets[item.datasetIndex].isThreshold,
+                        },
+                        onClick: (e, legendItem, legend) => {
+                            const chart = legend.chart;
+                            Chart.defaults.plugins.legend.onClick.call(chart, e, legendItem, legend);
+                            const paired = chart.data.datasets[legendItem.datasetIndex].pairedIndex;
+                            if (paired !== undefined) {
+                                chart.getDatasetMeta(paired).hidden = chart.getDatasetMeta(legendItem.datasetIndex).hidden;
+                                chart.update();
+                            }
+                        },
+                    },
+                    tooltip: {
+                        filter: (item) => !item.dataset.isThreshold,
+                        callbacks: {
+                            title: (items) => formatTick(items[0].parsed.x),
+                        },
+                    },
+                },
+                ...opzioni,
+            },
+        });
+    }
+
+    // punti = `eaqi` della stessa risposta; min/max = asse X del grafico sopra, per allinearli
+    function graficoIndice(canvas, punti, min, max, livelli, opzioni = {}) {
+        return new Chart(canvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                datasets: [{
+                    data: punti.map((p) => ({ x: new Date(p.t).getTime(), y: p.v })),
+                    backgroundColor: punti.map((p) => livelli[p.v - 1].colore),
+                    barPercentage: 1,
+                    categoryPercentage: 1,
+                }],
+            },
+            options: {
+                locale: LOCALE,
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                scales: {
+                    x: {
+                        type: 'linear', min, max, offset: false,
+                        grid: { color: '#e3e6ec' },
+                        ticks: { color: '#5b6276', maxTicksLimit: 14, callback: formatTick },
+                    },
+                    y: {
+                        min: 0, max: livelli.length,
+                        afterFit: (asse) => { asse.width = ASSE_Y; },
+                        grid: { color: '#e3e6ec' },
+                        // i nomi dei livelli stanno nella legenda sotto: sull'asse non entrano su mobile
+                        ticks: { color: '#5b6276', stepSize: 1 },
+                    },
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => formatTick(items[0].parsed.x),
+                            label: (item) => livelli[item.parsed.y - 1].nome,
+                        },
+                    },
+                },
+                ...opzioni,
+            },
+        });
+    }

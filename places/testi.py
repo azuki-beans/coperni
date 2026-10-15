@@ -39,4 +39,25 @@ def testi_js() -> dict[str, str]:
         # grafici
         'media_area': _('average of the area shown on the map'),
         'soglia': _('Threshold {pollutant}'),
+        # condivisione (menu della mappa)
+        'link_copiato': _('Link copied'),
+        'copia_non_riuscita': _('Copy failed: copy the address from the browser bar'),
+        'preparazione': _('Preparing…'),
+        'errore_file': _('Could not create the file'),
+        # immagine e PDF
+        'indice_eea': _('EEA index'),
+        'pdf_generato': _('Generated on {date}'),
+        'pdf_inquinante': _('Pollutant'),
+        'pdf_previsione': _('Forecast for'),
+        'pdf_andamento': _('Pollutant trends'),
+        'pdf_indice_titolo': _('European Air Quality Index (EEA)'),
+        'pdf_spiegazione': _(
+            'Forecasts of the CAMS European ensemble model (Copernicus Atmosphere Monitoring Service), '
+            'on a grid of about 10 km. The map shows the value of the pollutant at the hour indicated, '
+            'compared with the EU reference threshold: the comparison is indicative, because the legal '
+            'limits refer to daily means (ozone: 8-hour means). The chart shows the hourly mean over the '
+            'area of the map for the past days and the next 48 hours; below it, the European Air Quality '
+            'Index, where the worst pollutant of each hour sets the level.'
+        ),
+        'pdf_link': _('Open the live map'),
     }

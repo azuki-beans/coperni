@@ -363,6 +363,111 @@
             display: none;
         }
 
+        /* ── Condividi: un pulsante sotto l'area, un menu con le opzioni ── */
+        .condividi-control a {
+            width: 38px !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .condividi-control svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .menu-condividi {
+            position: absolute;
+            z-index: 1050;
+            width: 280px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 6px;
+            font-size: 13px;
+        }
+
+        .menu-condividi[hidden] {
+            display: none;
+        }
+
+        .menu-condividi .reti {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .menu-condividi a, .menu-condividi button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 10px;
+            border: 0;
+            border-radius: 6px;
+            background: none;
+            color: var(--text);
+            font: inherit;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .menu-condividi a:hover, .menu-condividi button:hover:not(:disabled),
+        .menu-condividi a:focus-visible, .menu-condividi button:focus-visible {
+            background: var(--surface-hover);
+        }
+
+        .menu-condividi button:disabled {
+            color: var(--text-dim);
+            cursor: default;
+        }
+
+        .menu-condividi button[hidden] {
+            display: none;
+        }
+
+        /* pallino col colore del servizio: niente loghi né script dei social */
+        .menu-condividi [data-colore]::before {
+            content: '';
+            flex-shrink: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--colore, var(--text-dim));
+        }
+
+        .menu-condividi hr {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 6px 4px;
+        }
+
+        .menu-condividi .stato {
+            padding: 4px 10px 2px;
+            color: var(--text-dim);
+            font-size: 12px;
+        }
+
+        .menu-condividi .stato:empty {
+            display: none;
+        }
+
+        /* sul telefono: pannello dal basso, a tutta larghezza */
+        @media (max-width: 600px) {
+            .menu-condividi {
+                position: fixed;
+                left: 0 !important;
+                right: 0;
+                top: auto !important;
+                bottom: 0;
+                width: auto;
+                border-radius: var(--radius) var(--radius) 0 0;
+                padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+                font-size: 15px;
+            }
+        }
+
 {% endblock %}
 
 {% block overlay %}
@@ -416,10 +521,35 @@
     {% comment %}pattern SVG di retino/tratteggio, referenziati dalle celle come fill="url(#…)";
     niente display:none, altrimenti i browser non li disegnano{% endcomment %}
     <svg id="trame" width="0" height="0" style="position:absolute" aria-hidden="true"><defs></defs></svg>
+    {% translate "Share" as condividi %}
+    <div class="menu-condividi" id="menu-condividi" role="menu" aria-label="{{ condividi }}" hidden>
+        <button type="button" role="menuitem" data-azione="nativo" data-colore hidden>{% translate "Share with…" %}</button>
+        <div class="reti">
+            <a role="menuitem" data-rete="whatsapp" data-colore style="--colore:#25d366" target="_blank" rel="noopener">WhatsApp</a>
+            <a role="menuitem" data-rete="telegram" data-colore style="--colore:#229ed9" target="_blank" rel="noopener">Telegram</a>
+            <a role="menuitem" data-rete="email" data-colore>{% translate "Email" %}</a>
+            <a role="menuitem" data-rete="facebook" data-colore style="--colore:#1877f2" target="_blank" rel="noopener">Facebook</a>
+            <a role="menuitem" data-rete="x" data-colore style="--colore:#000" target="_blank" rel="noopener">X</a>
+            <a role="menuitem" data-rete="linkedin" data-colore style="--colore:#0a66c2" target="_blank" rel="noopener">LinkedIn</a>
+            <a role="menuitem" data-rete="bluesky" data-colore style="--colore:#1185fe" target="_blank" rel="noopener">Bluesky</a>
+        </div>
+        <hr>
+        <button type="button" role="menuitem" data-azione="copia">{% translate "Copy link" %}</button>
+        <button type="button" role="menuitem" data-azione="png">{% translate "Download image (PNG)" %}</button>
+        <button type="button" role="menuitem" data-azione="pdf">{% translate "Download PDF" %}</button>
+        <div class="stato" id="menu-stato" aria-live="polite"></div>
+    </div>
     {{ eaqi_livelli|json_script:"eaqi-livelli" }}
 {% endblock %}
 
 {% block script %}
+    // ── Vista nell'URL ──
+    // Inquinante, area e ora scelta stanno nell'indirizzo, insieme al centro: un link copiato o
+    // condiviso riapre la stessa mappa. Il centro arriva sempre esplicito dal server (anche se
+    // la pagina l'ha preso dal cookie), così il link non dipende dai cookie di chi lo apre.
+    const PARAMETRI = new URLSearchParams(location.search);
+    const CENTRO_QUERY = '{{ centro.querystring|escapejs }}';
+
     // ── Scala colori ──
     // Rampa continua ispirata all'European Air Quality Index, parametrizzata sul rapporto
     // valore/soglia: la soglia UE cade nel passaggio giallo → arancio, oltre 2× è viola.
@@ -455,25 +585,31 @@
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const trameDefs = document.querySelector('#trame defs');
 
+    // gradino del retino (null = inquinante senza soglia), raggio e colore dei suoi punti:
+    // gli stessi per i pattern SVG della mappa e per quelli canvas dell'immagine da condividere
+    function gradinoDi(ratio) {
+        if (ratio == null || Number.isNaN(ratio)) return null;
+        return Math.round(Math.min(Math.max(ratio, 0), RATIO_MAX) / RATIO_MAX * GRADINI);
+    }
+    // raggio massimo oltre la mezza diagonale (PASSO·√2/2): a 2× soglia i punti si fondono
+    const raggioPunto = gradino => 0.7 + (gradino == null ? 0.3 : gradino / GRADINI) * (PASSO_TRAMA * 0.73 - 0.7);
+    const colorePunto = gradino => colorForRatio(gradino == null ? null : gradino / GRADINI * RATIO_MAX);
+
     function trama(ratio) {
-        const senzaSoglia = ratio == null || Number.isNaN(ratio);
-        const gradino = senzaSoglia ? null
-            : Math.round(Math.min(Math.max(ratio, 0), RATIO_MAX) / RATIO_MAX * GRADINI);
+        const gradino = gradinoDi(ratio);
         const id = `trama-${gradino ?? 'x'}`;
         if (!document.getElementById(id)) {
-            const t = senzaSoglia ? 0.3 : gradino / GRADINI;
             const pattern = document.createElementNS(SVG_NS, 'pattern');
             pattern.id = id;
             pattern.setAttribute('patternUnits', 'userSpaceOnUse');
             pattern.setAttribute('width', PASSO_TRAMA);
             pattern.setAttribute('height', PASSO_TRAMA);
             pattern.setAttribute('patternTransform', 'rotate(45)');   // angolo classico del retino
-            // raggio massimo oltre la mezza diagonale (PASSO·√2/2): a 2× soglia i punti si fondono
             const punto = document.createElementNS(SVG_NS, 'circle');
             punto.setAttribute('cx', PASSO_TRAMA / 2);
             punto.setAttribute('cy', PASSO_TRAMA / 2);
-            punto.setAttribute('r', (0.7 + t * (PASSO_TRAMA * 0.73 - 0.7)).toFixed(2));
-            punto.setAttribute('fill', colorForRatio(senzaSoglia ? null : gradino / GRADINI * RATIO_MAX));
+            punto.setAttribute('r', raggioPunto(gradino).toFixed(2));
+            punto.setAttribute('fill', colorePunto(gradino));
             pattern.appendChild(punto);
             trameDefs.appendChild(pattern);
         }
@@ -506,6 +642,13 @@
     let mostrato = null;             // ora effettivamente mostrata (ms), dall'ultima risposta
     let intervallo = null;           // [primo, ultimo] in ms
     const oraCorrente = () => Math.floor(Date.now() / ORA_MS) * ORA_MS;
+    {
+        // ora fissata da un link condiviso; se poi è fuori dai dati la limita l'API
+        const ms = Date.parse(PARAMETRI.get('istante') ?? '');
+        if (!Number.isNaN(ms) && Math.floor(ms / ORA_MS) * ORA_MS !== oraCorrente()) {
+            istante = Math.floor(ms / ORA_MS) * ORA_MS;
+        }
+    }
 
     function formattaOra(ms) {
         const dt = new Date(ms);
@@ -557,6 +700,7 @@
         istante = ms === oraCorrente() ? null : ms;
         mostrato = ms;
         mostraOra(ms);
+        aggiornaUrl();
         ultimaRichiesta++;   // una risposta ancora in viaggio riporterebbe l'ora precedente
         clearTimeout(attesaOra);
         attesaOra = setTimeout(() => loadPollution(pollutantSelect.value), 250);
@@ -621,6 +765,10 @@
     // ── Layer inquinante (Copernicus) ──
     let pollutionLayer = null;
     const pollutantSelect = document.getElementById('pollutant-select');
+    {
+        const scelto = PARAMETRI.get('inquinante');
+        if ([...pollutantSelect.options].some(o => o.value && o.value === scelto)) pollutantSelect.value = scelto;
+    }
     pollutantSelect.addEventListener('change', () => {
         aggiornaNomePannello();
         loadPollution(pollutantSelect.value);
@@ -671,11 +819,16 @@
 
     // ── Area: celle sul lato lungo della viewport (preferenza ricordata nel browser) ──
     // Tre pulsanti in alto a sinistra al posto di + e −: sono l'unico modo di cambiare zoom.
+    // L'area di un link condiviso vale per questa pagina ma non diventa la preferenza salvata.
     let lato = LATI[0];
-    try {
-        const salvato = Number(localStorage.getItem('coperni.lato'));
-        if (LATI.includes(salvato)) lato = salvato;
-    } catch (e) { /* storage non disponibile: resta il default */ }
+    if (LATI.includes(Number(PARAMETRI.get('lato')))) {
+        lato = Number(PARAMETRI.get('lato'));
+    } else {
+        try {
+            const salvato = Number(localStorage.getItem('coperni.lato'));
+            if (LATI.includes(salvato)) lato = salvato;
+        } catch (e) { /* storage non disponibile: resta il default */ }
+    }
 
     const KM = { {% for l, km in lati_km %}{{ l }}: {{ km }}{% if not forloop.last %}, {% endif %}{% endfor %} };
     const pulsantiArea = {};
@@ -725,6 +878,17 @@
     // inquinante/area) la risposta vecchia viene scartata, invece di sovrapporre due layer
     let ultimaRichiesta = 0;
     let limitiInquadrati = null;
+    // ultima risposta disegnata, per l'immagine e il PDF
+    let ultimiDati = null;
+
+    // l'indirizzo segue la vista (senza aggiungere voci alla cronologia)
+    function aggiornaUrl() {
+        const p = new URLSearchParams(CENTRO_QUERY);
+        if (pollutantSelect.value) p.set('inquinante', pollutantSelect.value);
+        p.set('lato', lato);
+        if (istante != null) p.set('istante', new Date(istante).toISOString().slice(0, 16) + 'Z');
+        history.replaceState(null, '', `${location.pathname}?${p}`);
+    }
 
     // il layer vecchio resta visibile finché il nuovo non è pronto: spostandosi di un'ora i
     // colori cambiano senza che la mappa si svuoti
@@ -738,8 +902,10 @@
         const richiesta = ++ultimaRichiesta;
         clearTimeout(attesaOra);
         pollutionTimestamp.textContent = '';
+        aggiornaUrl();
 
         if (!inquinante) {
+            ultimiDati = null;
             sostituisciLayer(null);
             pollutionLegend.style.display = 'none';
             riferimento.hidden = true;
@@ -759,6 +925,7 @@
             if (richiesta !== ultimaRichiesta) return;
 
             if (!res.ok) {
+                ultimiDati = null;
                 sostituisciLayer(null);
                 mostraIndice(null);
                 pollutionTimestamp.textContent = T.errore;
@@ -774,6 +941,7 @@
             }
             if (dati.timestamp) mostraRiferimento(dati);
             mostraIndice(dati.eaqi);
+            ultimiDati = { inquinante, dati };
             if (dati.celle.length === 0) {
                 sostituisciLayer(null);
                 pollutionTimestamp.textContent = T.nessun_dato_area;
@@ -809,6 +977,7 @@
             renderLegend(inquinante, soglia, unita);
         } catch (err) {
             console.error('Pollution layer error:', err);
+            ultimiDati = null;
             sostituisciLayer(null);
             mostraIndice(null);
             pollutionTimestamp.textContent = T.errore;
@@ -819,4 +988,510 @@
 
     // la mappa apre già con il primo inquinante configurato, non vuota
     loadPollution(pollutantSelect.value);
+
+    // ── Condividi ──
+    // Un pulsante sotto l'area apre il menu: link ai servizi più comuni (semplici URL, nessuno
+    // script dei social), copia del link, immagine PNG e PDF. Immagine e PDF sono composti nel
+    // browser; jsPDF e Chart.js si scaricano solo al primo PDF.
+    const URL_JSPDF = 'https://cdn.jsdelivr.net/npm/jspdf@3.0.4/dist/jspdf.umd.min.js';
+    const URL_CHARTJS = 'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js';
+    const NOME_FILE = 'coperni-{{ centro.etichetta|slugify }}';
+    const menuCondividi = document.getElementById('menu-condividi');
+    const menuStato = document.getElementById('menu-stato');
+    const enc = encodeURIComponent;
+    const titoloVista = () => document.title.replace(/ — Coperni$/, '');
+    let pulsanteCondividi = null;
+
+    const ControlloCondividi = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd() {
+            const barra = L.DomUtil.create('div', 'leaflet-bar condividi-control');
+            const a = L.DomUtil.create('a', '', barra);
+            a.href = '#';
+            a.setAttribute('role', 'button');
+            a.title = '{% translate "Share" as condividi %}{{ condividi|escapejs }}';
+            a.setAttribute('aria-label', a.title);
+            a.setAttribute('aria-haspopup', 'menu');
+            a.setAttribute('aria-controls', 'menu-condividi');
+            a.setAttribute('aria-expanded', 'false');
+            a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' +
+                '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>' +
+                '<path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" stroke="currentColor" stroke-width="2"/></svg>';
+            L.DomEvent.on(a, 'click', e => {
+                L.DomEvent.preventDefault(e);
+                apriMenu(menuCondividi.hidden);
+            });
+            L.DomEvent.disableClickPropagation(barra);
+            pulsanteCondividi = a;
+            return barra;
+        },
+    });
+    new ControlloCondividi().addTo(map);
+
+    function datiCondivisione() {
+        aggiornaUrl();
+        const parti = [titoloVista()];
+        if (pollutantSelect.value) parti.push(pollutantSelect.selectedOptions[0].textContent.trim());
+        if (mostrato != null) parti.push(formattaOra(mostrato));
+        return { url: location.href, titolo: titoloVista(), testo: parti.join(' · ') };
+    }
+
+    const RETI = {
+        whatsapp: ({ url, testo }) => `https://wa.me/?text=${enc(`${testo}\n${url}`)}`,
+        telegram: ({ url, testo }) => `https://t.me/share/url?url=${enc(url)}&text=${enc(testo)}`,
+        email: ({ url, titolo, testo }) => `mailto:?subject=${enc(titolo)}&body=${enc(`${testo}\n\n${url}`)}`,
+        facebook: ({ url }) => `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+        x: ({ url, testo }) => `https://x.com/intent/tweet?text=${enc(testo)}&url=${enc(url)}`,
+        linkedin: ({ url }) => `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`,
+        bluesky: ({ url, testo }) => `https://bsky.app/intent/compose?text=${enc(`${testo} ${url}`)}`,
+    };
+
+    function apriMenu(aperto) {
+        menuCondividi.hidden = !aperto;
+        pulsanteCondividi.setAttribute('aria-expanded', aperto);
+        if (!aperto) return;
+        // i link si costruiscono all'apertura: contengono la vista di questo momento
+        const dati = datiCondivisione();
+        for (const a of menuCondividi.querySelectorAll('[data-rete]')) a.href = RETI[a.dataset.rete](dati);
+        menuCondividi.querySelector('[data-azione="nativo"]').hidden = !navigator.share;
+        menuStato.textContent = '';
+        // su desktop sotto il pulsante (sul telefono il CSS lo mette in basso)
+        const box = pulsanteCondividi.getBoundingClientRect();
+        const contenitore = map.getContainer().getBoundingClientRect();
+        menuCondividi.style.left = `${box.left - contenitore.left}px`;
+        menuCondividi.style.top = `${box.bottom - contenitore.top + 6}px`;
+        menuCondividi.querySelector('[role="menuitem"]:not([hidden])').focus({ preventScroll: true });
+    }
+
+    document.addEventListener('click', e => {
+        if (!menuCondividi.hidden && !e.target.closest('#menu-condividi, .condividi-control')) apriMenu(false);
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !menuCondividi.hidden) {
+            apriMenu(false);
+            pulsanteCondividi.focus();
+        }
+    });
+    for (const a of menuCondividi.querySelectorAll('[data-rete]')) a.addEventListener('click', () => apriMenu(false));
+
+    const AZIONI = {
+        async nativo() {
+            const { url, titolo, testo } = datiCondivisione();
+            try {
+                await navigator.share({ title: titolo, text: testo, url });
+                apriMenu(false);
+            } catch (e) { /* condivisione annullata dall'utente */ }
+        },
+        async copia() {
+            try {
+                await navigator.clipboard.writeText(datiCondivisione().url);
+                menuStato.textContent = T.link_copiato;
+            } catch (e) {
+                menuStato.textContent = T.copia_non_riuscita;
+            }
+        },
+        async png() {
+            const tela = await componiImmagine();
+            const blob = await new Promise(ok => tela.toBlob(ok, 'image/png'));
+            scarica(blob, `${nomeFile()}.png`);
+        },
+        async pdf() {
+            scarica(await creaPdf(), `${nomeFile()}.pdf`);
+        },
+    };
+
+    for (const b of menuCondividi.querySelectorAll('[data-azione]')) {
+        b.addEventListener('click', async () => {
+            const azione = b.dataset.azione;
+            const lunga = azione === 'png' || azione === 'pdf';
+            const pulsanti = menuCondividi.querySelectorAll('button');
+            if (lunga) {
+                pulsanti.forEach(p => { p.disabled = true; });
+                menuStato.textContent = T.preparazione;
+            }
+            try {
+                await AZIONI[azione]();
+                if (lunga) menuStato.textContent = '';
+            } catch (err) {
+                console.error('Share error:', err);
+                menuStato.textContent = T.errore_file;
+            } finally {
+                pulsanti.forEach(p => { p.disabled = false; });
+            }
+        });
+    }
+
+    function nomeFile() {
+        const quando = new Date(mostrato ?? oraCorrente());
+        const pad = n => String(n).padStart(2, '0');
+        const data = `${quando.getFullYear()}-${pad(quando.getMonth() + 1)}-${pad(quando.getDate())}-${pad(quando.getHours())}`;
+        return [NOME_FILE, pollutantSelect.value, data].filter(Boolean).join('-');
+    }
+
+    function scarica(blob, nome) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = nome;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
+    }
+
+    const scriptCaricati = new Map();
+    function caricaScript(src) {
+        if (!scriptCaricati.has(src)) {
+            scriptCaricati.set(src, new Promise((ok, ko) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = ok;
+                s.onerror = () => { scriptCaricati.delete(src); ko(new Error(`script non caricato: ${src}`)); };
+                document.head.appendChild(s);
+            }));
+        }
+        return scriptCaricati.get(src);
+    }
+
+    // ── Immagine della mappa ──
+    // Lo sfondo è WebGL e le celle SVG con pattern: nessuna libreria di screenshot li cattura
+    // bene. Si ricompone su un canvas: sfondo MapLibre, celle ridisegnate dai dati con lo stesso
+    // retino, etichette MapLibre, poi una fascia con titolo, ora, legenda e fonti.
+    const SCALA_IMMAGINE = 2;
+    const PIEDE = 132;   // altezza della fascia sotto la mappa, px CSS
+
+    // copia del canvas MapLibre subito dopo un ridisegno sincrono (redraw): nello stesso task il
+    // buffer WebGL è ancora pieno, senza preserveDrawingBuffer che rallenterebbe la mappa
+    async function fotografaGl(strato) {
+        const gl = strato.getMaplibreMap();
+        if (!gl.loaded()) await new Promise(ok => { gl.once('idle', ok); setTimeout(ok, 4000); });
+        gl.redraw();
+        const sorgente = gl.getCanvas();
+        const copia = document.createElement('canvas');
+        copia.width = sorgente.width;
+        copia.height = sorgente.height;
+        copia.getContext('2d').drawImage(sorgente, 0, 0);
+        return { canvas: copia, box: sorgente.getBoundingClientRect() };
+    }
+
+    // pattern canvas del retino, uno per gradino; la tessera è disegnata alla scala dell'immagine
+    function motiviCanvas(ctx, scala) {
+        const motivi = new Map();
+        return gradino => {
+            if (!motivi.has(gradino)) {
+                const tessera = document.createElement('canvas');
+                tessera.width = tessera.height = PASSO_TRAMA * scala;
+                const c = tessera.getContext('2d');
+                c.scale(scala, scala);
+                c.fillStyle = colorePunto(gradino);
+                c.beginPath();
+                c.arc(PASSO_TRAMA / 2, PASSO_TRAMA / 2, raggioPunto(gradino), 0, 2 * Math.PI);
+                c.fill();
+                const motivo = ctx.createPattern(tessera, 'repeat');
+                motivo.setTransform(new DOMMatrix().rotate(45).scale(1 / scala));
+                motivi.set(gradino, motivo);
+            }
+            return motivi.get(gradino);
+        };
+    }
+
+    // testo troncato con "…" se non entra in `larghezza`
+    function adatta(ctx, testo, larghezza) {
+        if (ctx.measureText(testo).width <= larghezza) return testo;
+        while (testo && ctx.measureText(`${testo}…`).width > larghezza) testo = testo.slice(0, -1);
+        return `${testo}…`;
+    }
+
+    async function componiImmagine() {
+        const S = SCALA_IMMAGINE;
+        const box = map.getContainer().getBoundingClientRect();
+        const [W, H] = [box.width, box.height];
+        const foto = await Promise.all(stratiGl.map(fotografaGl));
+
+        const tela = document.createElement('canvas');
+        tela.width = Math.round(W * S);
+        tela.height = Math.round((H + PIEDE) * S);
+        const ctx = tela.getContext('2d');
+        ctx.fillStyle = '#fafaf8';
+        ctx.fillRect(0, 0, tela.width, tela.height);
+        const disegnaFoto = f => {
+            if (f) ctx.drawImage(f.canvas, (f.box.left - box.left) * S, (f.box.top - box.top) * S, f.box.width * S, f.box.height * S);
+        };
+
+        disegnaFoto(foto[0]);
+        ctx.save();
+        ctx.scale(S, S);
+        ctx.beginPath();
+        ctx.rect(0, 0, W, H);
+        ctx.clip();
+        if (ultimiDati) {
+            const { dati } = ultimiDati;
+            const mezzo = dati.passo / 2;
+            const motivo = motiviCanvas(ctx, S);
+            // un tracciato per gradino: celle adiacenti uguali si riempiono insieme, senza giunture
+            const tracciati = new Map();
+            for (const [lat, lon, valore] of dati.celle) {
+                const gradino = gradinoDi(dati.soglia ? valore / dati.soglia : null);
+                const a = map.latLngToContainerPoint([lat + mezzo, lon - mezzo]);
+                const b = map.latLngToContainerPoint([lat - mezzo, lon + mezzo]);
+                if (!tracciati.has(gradino)) tracciati.set(gradino, new Path2D());
+                tracciati.get(gradino).rect(a.x, a.y, b.x - a.x, b.y - a.y);
+            }
+            ctx.globalAlpha = applicaIntensita(ALPHA_TRAMA);
+            for (const [gradino, tracciato] of tracciati) {
+                ctx.fillStyle = motivo(gradino);
+                ctx.fill(tracciato);
+            }
+        }
+        ctx.restore();
+        disegnaFoto(foto[1]);
+        disegnaPiede(ctx, S, W, H);
+        return tela;
+    }
+
+    function disegnaPiede(ctx, S, W, H) {
+        const FONT = getComputedStyle(document.body).fontFamily;
+        const M = 14;
+        const larghezza = W - 2 * M;
+        ctx.save();
+        ctx.scale(S, S);
+        ctx.translate(0, H);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, W, PIEDE);
+        ctx.fillStyle = '#d8dce4';
+        ctx.fillRect(0, 0, W, 1);
+
+        // indice EEA in alto a destra, come la tessera del pannello
+        let spazioEea = 0;
+        const livello = ultimiDati?.dati.eaqi ? LIVELLI_EEA[ultimiDati.dati.eaqi - 1] : null;
+        if (livello) {
+            ctx.font = `700 13px ${FONT}`;
+            const etichetta = `${T.indice_eea} ${livello.livello} · ${livello.nome}`;
+            const w = ctx.measureText(etichetta).width + 16;
+            ctx.fillStyle = livello.colore;
+            ctx.beginPath();
+            ctx.roundRect(W - M - w, 10, w, 22, 5);
+            ctx.fill();
+            ctx.fillStyle = livello.livello >= 4 ? '#ffffff' : '#1d2130';
+            ctx.fillText(etichetta, W - M - w + 8, 26);
+            spazioEea = w + 10;
+        }
+
+        ctx.fillStyle = '#1d2130';
+        ctx.font = `600 16px ${FONT}`;
+        ctx.fillText(adatta(ctx, titoloVista(), larghezza - spazioEea), M, 26);
+
+        const riga = [];
+        if (ultimiDati) riga.push(ultimiDati.inquinante.toUpperCase());
+        if (mostrato != null) riga.push(formattaOra(mostrato));
+        ctx.fillStyle = '#5b6276';
+        ctx.font = `13px ${FONT}`;
+        ctx.fillText(adatta(ctx, riga.join(' · '), larghezza), M, 46);
+
+        // legenda: stessi segmenti a retino della barra nel pannello, con la tacca della soglia
+        const soglia = ultimiDati?.dati.soglia;
+        if (soglia) {
+            const L = Math.min(larghezza, 360);
+            const motivo = motiviCanvas(ctx, S);
+            ctx.globalAlpha = applicaIntensita(ALPHA_TRAMA);
+            for (let i = 0; i < GRADINI; i++) {
+                ctx.fillStyle = motivo(gradinoDi((i + 0.5) / GRADINI * RATIO_MAX));
+                ctx.fillRect(M + i / GRADINI * L, 58, L / GRADINI + 0.5, 12);
+            }
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = '#d8dce4';
+            ctx.strokeRect(M, 58, L, 12);
+            ctx.fillStyle = '#1d2130';
+            ctx.fillRect(M + L / RATIO_MAX - 1, 54, 2, 20);
+
+            const fmt = v => v.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
+            ctx.fillStyle = '#5b6276';
+            ctx.font = `10px ${FONT}`;
+            [0, 0.5, 1, 1.5, 2].forEach((r, i, tutti) => {
+                ctx.textAlign = i === 0 ? 'left' : i === tutti.length - 1 ? 'right' : 'center';
+                ctx.fillText(fmt(soglia * r), M + r / RATIO_MAX * L, 84);
+            });
+            ctx.textAlign = 'left';
+            ctx.font = `11px ${FONT}`;
+            const unita = ultimiDati.dati.unita;
+            ctx.fillText(adatta(ctx, `${unita} · ${testo('soglia_ue', { pollutant: ultimiDati.inquinante.toUpperCase() })} ${fmt(soglia)} ${unita}`, larghezza), M, 100);
+        }
+
+        ctx.fillStyle = '#8b90a5';
+        ctx.font = `10px ${FONT}`;
+        ctx.fillText(adatta(ctx, `${location.host} · Copernicus CAMS · © OpenStreetMap, OpenMapTiles, OpenFreeMap`, larghezza), M, PIEDE - 12);
+        ctx.restore();
+    }
+
+    // ── PDF ──
+    // A4 verticale: titolo, dati della vista, immagine della mappa, grafico dell'andamento e
+    // indice EEA (gli stessi della pagina Grafici, sulla stessa area), spiegazione, link e fonti.
+{% include "_grafici_js.html" %}
+
+    // grafici disegnati fuori schermo a dimensione fissa, esportati come PNG
+    async function immaginiGrafici() {
+        const params = new URLSearchParams({ lat: CENTRO[0], lon: CENTRO[1], lato, aspect: aspectMappa().toFixed(3) });
+        const res = await fetch(`{% url 'copernicus:serie' %}?${params}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (!Object.keys(data.serie || {}).length) return null;
+
+        const fuori = document.createElement('div');
+        fuori.style.cssText = 'position:fixed;left:-10000px;top:0;';
+        document.body.appendChild(fuori);
+        const tela = (w, h) => {
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            fuori.appendChild(c);
+            return c;
+        };
+        const statico = { responsive: false, animation: false, devicePixelRatio: 2 };
+        try {
+            const serie = graficoSerie(tela(1000, 290), data.serie, statico);
+            const risultato = { serie: serie.toBase64Image('image/png'), proporzioneSerie: 290 / 1000 };
+            if (data.eaqi?.length) {
+                const indice = graficoIndice(tela(1000, 85), data.eaqi, serie.scales.x.min, serie.scales.x.max, LIVELLI_EEA, statico);
+                risultato.indice = indice.toBase64Image('image/png');
+                risultato.proporzioneIndice = 85 / 1000;
+                indice.destroy();
+            }
+            serie.destroy();
+            return risultato;
+        } finally {
+            fuori.remove();
+        }
+    }
+
+    async function creaPdf() {
+        await Promise.all([caricaScript(URL_JSPDF), window.Chart ? null : caricaScript(URL_CHARTJS)]);
+        const [tela, grafici] = await Promise.all([componiImmagine(), immaginiGrafici()]);
+        const { url } = datiCondivisione();
+
+        // compress: senza, i PNG dei grafici finiscono nel PDF decompressi (diversi MB)
+        const doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+        const [PW, PH, M] = [210, 297, 15];
+        const LW = PW - 2 * M;
+        const PT = 0.3528;   // mm per punto tipografico
+        const TESTO = [29, 33, 48];
+        const TENUE = [91, 98, 118];
+        let y = M;
+
+        // i font standard del PDF non hanno i pedici (NO₂) né gli spazi stretti delle date
+        const pulisci = s => s.replace(/[₀-₉]/g, c => String(c.charCodeAt(0) - 0x2080)).replace(/[  ]/g, ' ');
+        const spazio = h => {
+            if (y + h > PH - M) {
+                doc.addPage();
+                y = M;
+            }
+        };
+        const scrivi = (testo, { size = 10, stile = 'normal', colore = TESTO, dopo = 1.5 } = {}) => {
+            doc.setFont('helvetica', stile);
+            doc.setFontSize(size);
+            doc.setTextColor(...colore);
+            const righe = doc.splitTextToSize(pulisci(testo), LW);
+            const h = righe.length * size * PT * 1.3;
+            spazio(h);
+            doc.text(righe, M, y, { baseline: 'top', lineHeightFactor: 1.3 });
+            y += h + dopo;
+        };
+        const immagine = (dati, formato, proporzione, altezzaMax) => {
+            let [w, h] = [LW, LW * proporzione];
+            if (h > altezzaMax) [w, h] = [altezzaMax / proporzione, altezzaMax];
+            spazio(h);
+            doc.addImage(dati, formato, M + (LW - w) / 2, y, w, h);
+            y += h + 3;
+        };
+
+        // intestazione
+        scrivi('Coperni · {% translate "Air quality" as qualita %}{{ qualita|escapejs }}', { size: 9, stile: 'bold', colore: [58, 94, 224], dopo: 1 });
+        scrivi(titoloVista(), { size: 16, stile: 'bold', dopo: 1 });
+        scrivi(testo('pdf_generato', { date: new Date().toLocaleString(LOCALE, { dateStyle: 'long', timeStyle: 'short' }) }), { size: 9, colore: TENUE, dopo: 4 });
+
+        // dati della vista
+        if (ultimiDati) {
+            const { inquinante, dati } = ultimiDati;
+            const fmt = v => v.toLocaleString(LOCALE, { maximumFractionDigits: 1 });
+            let riga = `${T.pdf_inquinante}: ${inquinante.toUpperCase()} (${dati.unita})`;
+            if (dati.soglia) riga += ` · ${testo('soglia_ue', { pollutant: inquinante.toUpperCase() })} ${fmt(dati.soglia)} ${dati.unita}`;
+            scrivi(riga, { dopo: 1 });
+            if (mostrato != null) scrivi(`${T.pdf_previsione}: ${formattaOra(mostrato)}`, { dopo: 1 });
+            if (dati.corsa) {
+                scrivi(testo('corsa', { date: new Date(dati.corsa).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }) }), { size: 9, colore: TENUE, dopo: 1 });
+            }
+            const livello = dati.eaqi ? LIVELLI_EEA[dati.eaqi - 1] : null;
+            if (livello) {
+                spazio(6);
+                doc.setFillColor(livello.colore);
+                doc.roundedRect(M, y, 5, 5, 1, 1, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(10);
+                doc.setTextColor(...TESTO);
+                doc.text(pulisci(`${T.indice_eea}: ${livello.livello} · ${livello.nome}`), M + 7, y + 0.6, { baseline: 'top' });
+                y += 7;
+            }
+        }
+        y += 2;
+
+        // mappa in JPEG, al massimo ~300 dpi sui 18 cm della pagina: un PNG a doppia
+        // risoluzione dello schermo peserebbe diversi MB
+        const larga = Math.min(tela.width, 2200);
+        const ridotta = document.createElement('canvas');
+        ridotta.width = larga;
+        ridotta.height = Math.round(tela.height * larga / tela.width);
+        ridotta.getContext('2d').drawImage(tela, 0, 0, ridotta.width, ridotta.height);
+        immagine(ridotta.toDataURL('image/jpeg', 0.85), 'JPEG', ridotta.height / ridotta.width, 90);
+
+        // andamento e indice EEA
+        if (grafici) {
+            scrivi(`${T.pdf_andamento} · ${T.media_area}`, { size: 10, stile: 'bold', dopo: 1 });
+            immagine(grafici.serie, 'PNG', grafici.proporzioneSerie, 55);
+            if (grafici.indice) {
+                scrivi(T.pdf_indice_titolo, { size: 10, stile: 'bold', dopo: 1 });
+                immagine(grafici.indice, 'PNG', grafici.proporzioneIndice, 16);
+                // legenda dei livelli su una o più righe
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                let x = M;
+                spazio(5);
+                for (const l of LIVELLI_EEA) {
+                    const nome = pulisci(`${l.livello} ${l.nome}`);
+                    const w = 4.5 + doc.getTextWidth(nome) + 5;
+                    if (x + w > M + LW) {
+                        x = M;
+                        y += 5;
+                        spazio(5);
+                    }
+                    doc.setFillColor(l.colore);
+                    doc.rect(x, y, 3, 3, 'F');
+                    doc.setTextColor(...TESTO);
+                    doc.text(nome, x + 4.5, y + 0.2, { baseline: 'top' });
+                    x += w;
+                }
+                y += 6;
+            }
+        }
+
+        // spiegazione, link e fonti
+        scrivi(T.pdf_spiegazione, { size: 8.5, dopo: 2 });
+        spazio(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(58, 94, 224);
+        doc.textWithLink(pulisci(T.pdf_link), M, y, { url, baseline: 'top' });
+        y += 9 * PT * 1.3 + 0.5;
+        scrivi(url, { size: 7.5, colore: TENUE, dopo: 3 });
+        scrivi(`Generated using Copernicus Atmosphere Monitoring Service information ${new Date().getFullYear()}. ` +
+            'Neither the European Commission nor ECMWF is responsible for any use that may be made of the ' +
+            'Copernicus information or data it contains. Basemap © OpenStreetMap contributors, © OpenMapTiles, OpenFreeMap.',
+            { size: 7, colore: TENUE, dopo: 1.5 });
+        // chi ha fatto il sito, come nell'attribuzione della mappa
+        const firma = 'Coperni by azuki-beans · {{ url_repo|escapejs }}';
+        spazio(7 * PT * 1.3);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...TENUE);
+        doc.textWithLink(firma, M, y, { url: '{{ url_repo|escapejs }}', baseline: 'top' });
+
+        return doc.output('blob');
+    }
 {% endblock %}

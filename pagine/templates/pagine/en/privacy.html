@@ -30,6 +30,13 @@
     coordinates to about 1 km before sending them: your exact position never leaves your device.
     The rounded coordinates end up in the page address and in the <code>centro</code> cookie.
 </p>
+<p>
+    The map's <strong>Share</strong> button sends nothing by itself. The page address contains
+    the place and the view (pollutant, area, hour), and the links to WhatsApp, Telegram, email and
+    social networks open that service only if you choose them: from then on the privacy policy of
+    that service applies. The image and the PDF are created in your browser and never go through
+    our server.
+</p>
 
 <h3>Data collected by the server</h3>
 <p>
@@ -53,7 +60,7 @@
 </p>
 <ul>
     <li><a href="https://openfreemap.org" rel="noopener">OpenFreeMap</a>: the map background;</li>
-    <li><a href="https://www.jsdelivr.com" rel="noopener">jsDelivr</a> and <a href="https://unpkg.com" rel="noopener">unpkg</a>: the page libraries (map, charts);</li>
+    <li><a href="https://www.jsdelivr.com" rel="noopener">jsDelivr</a> and <a href="https://unpkg.com" rel="noopener">unpkg</a>: the page libraries (map, charts and, only if you download the PDF, the library that creates it);</li>
     {% if cf_analytics_token %}<li><a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">Cloudflare</a>: visit counting.</li>{% endif %}
 </ul>
 <p>
@@ -77,5 +84,5 @@
     <a href="https://www.garanteprivacy.it/home_en" rel="noopener">Garante per la protezione dei dati personali</a>.
 </p>
 
-<p class="dim">Last updated: 3 October 2026.</p>
+<p class="dim">Last updated: 15 October 2026.</p>
 {% endblock %}
