@@ -25,7 +25,7 @@ the last place you looked at.
 
 ## What you see
 
-- **Map**: the area around the chosen place (20, 50 or 100 cells on the long side of the screen,
+- **Map**: the area around the chosen place (10, 20, 50 or 100 cells on the long side of the screen,
   ~150, ~390 or ~780 km at Milan's latitude), one cell every 0.1°. The colour follows `value / threshold`: cyan to green below the EU
   threshold, yellow at the threshold, red above it, purple above twice the threshold, drawn
   as a *halftone* (dot size ∝ concentration) over a light basemap. Click a cell to read its value.

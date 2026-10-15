@@ -109,7 +109,8 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
   - `export.py` — ADS download (`scarica`), conversion (`netcdf_a_parquet`), `Archivio`
     (`gs://…` with google-cloud-storage, or a local folder), `esporta` = all of it + index.
     Management command `cams_export`.
-  - `griglia.py` — web side. `finestra(lat, lon, lato, aspect)`: `lato` (20, 50 or 100, `LATO_CELLE`)
+  - `griglia.py` — web side. `finestra(lat, lon, lato, aspect)`: `lato` (10, 20, 50 or 100, `LATO_CELLE`;
+    default `LATO_DEFAULT` = 20, also the ranking window)
     cells on the **long side** of the viewport, the other side `ceil(lato·cosφ/aspect)`
     (landscape) or `ceil(lato·aspect/cosφ)` (portrait), because in Web Mercator a 0.1° cell looks
     1/cosφ times taller than wide. `celle(..., istante=None)` = one hour (default the current one),
@@ -149,7 +150,7 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     `grafici.html` (otherwise standalone).
   - `map_view.html`: compact top-right panel (pollutant, legend, "Intensità"), closable with ▴
     and replaced by a button with the pollutant name; starts closed below 600px. No zoom +/−:
-    Leaflet zoom handlers are off and the **area buttons** 20/50/100 (`ControlloArea`, top left,
+    Leaflet zoom handlers are off and the **area buttons** 10/20/50/100 (`ControlloArea`, top left,
     remembered in `localStorage` `coperni.lato`) are the only zoom. **"Cover"** framing: `getBoundsZoom(box, inside=true) + log2(RIEMPIMENTO=0.95)`,
     `zoomSnap: 0`; first a client estimate (`limitiStimati`, same formula as the server), then the
     exact `limiti` from the API. Cells are borderless `L.rectangle`, colour from `valore/soglia`

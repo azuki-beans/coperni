@@ -245,7 +245,7 @@
 
         try {
             // stessa finestra della mappa: area scelta lì e proporzioni dello schermo
-            let lato = '{{ lati.0 }}';
+            let lato = '{{ lato_default }}';
             try { lato = localStorage.getItem('coperni.lato') || lato; } catch (e) {}
             const params = new URLSearchParams({
                 lat: '{{ centro_latitudine }}', lon: '{{ centro_longitudine }}', lato,

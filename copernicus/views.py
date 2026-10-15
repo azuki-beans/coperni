@@ -11,7 +11,7 @@ def _finestra(request):
     try:
         lat = float(request.GET['lat'])
         lon = float(request.GET['lon'])
-        lato = int(request.GET.get('lato', griglia.LATO_CELLE[0]))
+        lato = int(request.GET.get('lato', griglia.LATO_DEFAULT))
         aspect = float(request.GET.get('aspect', 1.0))
     except (KeyError, ValueError):
         return None

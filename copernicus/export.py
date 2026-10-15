@@ -30,7 +30,7 @@ from django.conf import settings
 from config.sito import POPOLAZIONE_MIN_CITTA, POPOLAZIONE_MIN_COMUNI
 from copernicus import eaqi
 from copernicus.griglia import (
-    LATO_CELLE, ORE_STORICO, PASSO_INT, POLLUTANT_VARIABLES, SCALA_COORD, SCALA_VALORE, finestra,
+    LATO_DEFAULT, ORE_STORICO, PASSO_INT, POLLUTANT_VARIABLES, SCALA_COORD, SCALA_VALORE, finestra,
 )
 from luoghi.management.commands.luoghi_build import DATI
 
@@ -106,7 +106,7 @@ def _luoghi_classifica() -> dict[str, list[tuple[str, float, float]]]:
 
 
 def classifica(parquet: Path, giorno: date) -> dict:
-    """Per ogni luogo, sulla finestra di LATO_CELLE[0] celle attorno (la stessa area dei grafici,
+    """Per ogni luogo, sulla finestra di LATO_DEFAULT celle attorno (la stessa area dei grafici,
     con proporzioni 1:1) e sulle prime ORE_STORICO ore della corsa:
     - media del giorno di ogni inquinante (tutti i valori cella/ora non nulli della finestra);
     - indice EEA (`eaqi`): livello di ogni ora calcolato sulle medie orarie della finestra, come
@@ -140,7 +140,7 @@ def classifica(parquet: Path, giorno: date) -> dict:
     finestre = {}
     for tipo, elenco in luoghi.items():
         for chiave, lat, lon in elenco:
-            f = finestra(lat, lon, LATO_CELLE[0], 1.0)
+            f = finestra(lat, lon, LATO_DEFAULT, 1.0)
             i0 = max((f['lat_min'] - lat0) // PASSO_INT, 0)
             i1 = min((f['lat_max'] - lat0) // PASSO_INT + 1, forma[0])
             j0 = max((f['lon_min'] - lon0) // PASSO_INT, 0)
@@ -172,7 +172,7 @@ def classifica(parquet: Path, giorno: date) -> dict:
         return None if valore is None else round(valore, 1)
 
     return {
-        'corsa': giorno.isoformat(), 'ore': ORE_STORICO, 'lato': LATO_CELLE[0], 'inquinanti': inquinanti,
+        'corsa': giorno.isoformat(), 'ore': ORE_STORICO, 'lato': LATO_DEFAULT, 'inquinanti': inquinanti,
         **{tipo: {chiave: [arrotonda(giornaliere[c][tipo, chiave]) for c in inquinanti] for chiave, _, _ in elenco}
            for tipo, elenco in luoghi.items()},
         'eaqi': {
