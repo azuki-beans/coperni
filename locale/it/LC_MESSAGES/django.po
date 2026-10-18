@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 12:20+0200\n"
+"POT-Creation-Date: 2026-10-18 08:46+0200\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -100,8 +100,8 @@ msgstr "Previsione qualità dell'aria: %(luogo)s"
 msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
-#: places/templates/_base_map.html:285 places/templates/_header.html:136
-#: places/templates/map_view.html:477 places/templates/map_view.html:1407
+#: places/templates/_base_map.html:286 places/templates/_header.html:136
+#: places/templates/map_view.html:509 places/templates/map_view.html:1446
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
@@ -157,16 +157,16 @@ msgstr "Mappa delle previsioni di qualità dell'aria sul Nord Italia"
 msgid "Air quality ranking"
 msgstr "Classifica della qualità dell'aria"
 
-#: places/templates/classifica.html:238
+#: places/templates/classifica.html:285
 #, python-format
 msgid ""
-"Daily average (00–24 UTC) of the CAMS forecast of %(data)s, over an area "
-"about %(km)s km wide around each place: the same area as the charts."
+"Daily average over an area about %(km)s km wide around each place: the same "
+"area as the charts."
 msgstr ""
-"Media del giorno (00–24 UTC) della previsione CAMS del %(data)s, su un'area "
-"larga circa %(km)s km attorno a ogni luogo: la stessa area dei grafici."
+"Media del giorno su un'area larga circa %(km)s km attorno a ogni luogo: la "
+"stessa area dei grafici."
 
-#: places/templates/classifica.html:239
+#: places/templates/classifica.html:286
 msgid ""
 "EEA index: the worst hour of the day on the European Air Quality Index, "
 "computed from the hourly averages of the area."
@@ -174,7 +174,7 @@ msgstr ""
 "Indice EEA: l'ora peggiore del giorno secondo l'indice europeo della qualità "
 "dell'aria, calcolato sulle medie orarie dell'area."
 
-#: places/templates/classifica.html:240
+#: places/templates/classifica.html:287
 msgid ""
 "Values in µg/m³; the dot compares them with the EU threshold, with the "
 "colours of the map."
@@ -182,61 +182,119 @@ msgstr ""
 "Valori in µg/m³; il pallino li confronta con la soglia UE, con i colori "
 "della mappa."
 
-#: places/templates/classifica.html:241
+#: places/templates/classifica.html:288
 msgid "About the data"
 msgstr "Informazioni sui dati"
 
-#: places/templates/classifica.html:247
+#: places/templates/classifica.html:298
+#, python-format
+msgid ""
+"Ranking of <time datetime=\"%(iso)s\" data-formato=\"giorno\">%(data)s</time>"
+msgstr ""
+"Classifica di <time datetime=\"%(iso)s\" data-formato=\"giorno\">%(data)s</"
+"time>"
+
+#: places/templates/classifica.html:302
+#, python-format
+msgid ""
+"Average <time datetime=\"%(inizio_iso)s\" data-formato=\"ora\">%(inizio)s</"
+"time> → <time datetime=\"%(fine_iso)s\" data-formato=\"ora\">%(fine)s</time>"
+msgstr ""
+"Media <time datetime=\"%(inizio_iso)s\" data-formato=\"ora\">%(inizio)s</"
+"time> → <time datetime=\"%(fine_iso)s\" data-formato=\"ora\">%(fine)s</time>"
+
+#: places/templates/classifica.html:306
+msgid "your local time"
+msgstr "ora locale"
+
+#: places/templates/classifica.html:306
+msgid "Italian time"
+msgstr "ora italiana"
+
+#: places/templates/classifica.html:307
+#, python-format
+msgid ""
+"CAMS model run of <time datetime=\"%(iso)s\" data-formato=\"data\">%(data)s</"
+"time> at 00 UTC"
+msgstr ""
+"modello CAMS emesso il <time datetime=\"%(iso)s\" data-formato=\"data\">%(data)s"
+"</time> alle 00 UTC"
+
+#: places/templates/classifica.html:312
+msgid "Today"
+msgstr "Oggi"
+
+#: places/templates/classifica.html:312
+msgid "Yesterday"
+msgstr "Ieri"
+
+#: places/templates/classifica.html:312
+#, python-format
+msgid "%(n)s day ago"
+msgid_plural "%(n)s days ago"
+msgstr[0] "%(n)s giorno fa"
+msgstr[1] "%(n)s giorni fa"
+
+#: places/templates/classifica.html:314
+msgid ""
+"Today's ranking is published in the morning, with the new forecast. The map "
+"shows the current hour, so it can differ from this ranking."
+msgstr ""
+"La classifica di oggi viene pubblicata in mattinata, con la nuova "
+"previsione. La mappa mostra l'ora attuale, quindi può differire da questa "
+"classifica."
+
+#: places/templates/classifica.html:321
 msgid "Filter by name or country…"
 msgstr "Filtra per nome o paese…"
 
-#: places/templates/classifica.html:248
+#: places/templates/classifica.html:322
 msgid "Filter by name or country"
 msgstr "Filtra per nome o paese"
 
-#: places/templates/classifica.html:249
+#: places/templates/classifica.html:323
 msgid "Places"
 msgstr "Luoghi"
 
-#: places/templates/classifica.html:250
+#: places/templates/classifica.html:324
 msgid "All places"
 msgstr "Tutti i luoghi"
 
-#: places/templates/classifica.html:251
+#: places/templates/classifica.html:325
 msgid "Italian municipalities"
 msgstr "Comuni italiani"
 
-#: places/templates/classifica.html:252
+#: places/templates/classifica.html:326
 msgid "Other cities"
 msgstr "Altre città"
 
-#: places/templates/classifica.html:261
+#: places/templates/classifica.html:335
 msgid "Place"
 msgstr "Luogo"
 
-#: places/templates/classifica.html:262
+#: places/templates/classifica.html:336
 msgid "Country"
 msgstr "Paese"
 
-#: places/templates/classifica.html:264 places/templates/map_view.html:489
+#: places/templates/classifica.html:338 places/templates/map_view.html:521
 #: places/testi.py:48
 msgid "EEA index"
 msgstr "Indice EEA"
 
-#: places/templates/classifica.html:265
+#: places/templates/classifica.html:339
 msgid "worst hour"
 msgstr "ora peggiore"
 
-#: places/templates/classifica.html:270
+#: places/templates/classifica.html:344
 #, python-format
 msgid "threshold %(soglia)s"
 msgstr "soglia %(soglia)s"
 
-#: places/templates/classifica.html:289
+#: places/templates/classifica.html:363
 msgid "No place matches the filter."
 msgstr "Nessun luogo corrisponde al filtro."
 
-#: places/templates/classifica.html:292
+#: places/templates/classifica.html:366
 msgid ""
 "The ranking is not available yet: it is computed with the next forecast "
 "update."
@@ -265,7 +323,7 @@ msgstr "Caricamento…"
 msgid "No data available for this period."
 msgstr "Nessun dato disponibile per il periodo."
 
-#: places/templates/grafici.html:206 places/templates/map_view.html:486
+#: places/templates/grafici.html:206 places/templates/map_view.html:518
 #: places/testi.py:53
 msgid "European Air Quality Index (EEA)"
 msgstr "Indice europeo della qualità dell'aria (EEA)"
@@ -274,79 +332,79 @@ msgstr "Indice europeo della qualità dell'aria (EEA)"
 msgid "hour by hour: the worst pollutant sets the level"
 msgstr "ora per ora: decide l'inquinante peggiore"
 
-#: places/templates/map_view.html:474
+#: places/templates/map_view.html:506
 msgid "Hide panel"
 msgstr "Nascondi pannello"
 
-#: places/templates/map_view.html:474
+#: places/templates/map_view.html:506
 msgid "Show panel"
 msgstr "Mostra pannello"
 
-#: places/templates/map_view.html:481
+#: places/templates/map_view.html:513
 msgid "None"
 msgstr "Nessuno"
 
-#: places/templates/map_view.html:497
+#: places/templates/map_view.html:529
 msgid "Intensity"
 msgstr "Intensità"
 
-#: places/templates/map_view.html:506
+#: places/templates/map_view.html:538
 msgid "24 hours earlier"
 msgstr "24 ore prima"
 
-#: places/templates/map_view.html:506
+#: places/templates/map_view.html:538
 msgid "One hour earlier"
 msgstr "Un'ora prima"
 
-#: places/templates/map_view.html:507
+#: places/templates/map_view.html:539
 msgid "One hour later"
 msgstr "Un'ora dopo"
 
-#: places/templates/map_view.html:507
+#: places/templates/map_view.html:539
 msgid "24 hours later"
 msgstr "24 ore dopo"
 
-#: places/templates/map_view.html:511 places/testi.py:51
+#: places/templates/map_view.html:543 places/testi.py:51
 msgid "Forecast for"
 msgstr "Previsione per"
 
-#: places/templates/map_view.html:513 places/testi.py:14
+#: places/templates/map_view.html:547 places/testi.py:14
 msgid "now"
 msgstr "adesso"
 
-#: places/templates/map_view.html:514
+#: places/templates/map_view.html:548
 msgid "data not up to date"
 msgstr "dati non aggiornati"
 
-#: places/templates/map_view.html:516
+#: places/templates/map_view.html:550
 msgid "when it updates"
 msgstr "quando si aggiorna"
 
-#: places/templates/map_view.html:525 places/templates/map_view.html:1013
+#: places/templates/map_view.html:559 places/templates/map_view.html:1052
 msgid "Share"
 msgstr "Condividi"
 
-#: places/templates/map_view.html:527
+#: places/templates/map_view.html:561
 msgid "Share with…"
 msgstr "Condividi con…"
 
-#: places/templates/map_view.html:531
+#: places/templates/map_view.html:565
 msgid "Email"
 msgstr "Email"
 
-#: places/templates/map_view.html:538
+#: places/templates/map_view.html:572
 msgid "Copy link"
 msgstr "Copia link"
 
-#: places/templates/map_view.html:539
+#: places/templates/map_view.html:573
 msgid "Download image (PNG)"
 msgstr "Scarica immagine (PNG)"
 
-#: places/templates/map_view.html:540
+#: places/templates/map_view.html:574
 msgid "Download PDF"
 msgstr "Scarica PDF"
 
-#: places/templates/map_view.html:841
+#: places/templates/map_view.html:880
 msgid "Area"
 msgstr "Area"
 
@@ -487,8 +545,24 @@ msgid ""
 "area of the map for the past days and the next 48 hours; below it, the "
 "European Air Quality Index, where the worst pollutant of each hour sets the "
 "level."
-msgstr "Previsioni del modello ensemble europeo CAMS (Copernicus Atmosphere Monitoring Service), su una griglia di circa 10 km. La mappa mostra il valore dell'inquinante all'ora indicata, confrontato con la soglia di riferimento UE: il confronto è indicativo, perché i limiti di legge si riferiscono a medie giornaliere (ozono: medie su 8 ore). Il grafico mostra la media oraria sull'area della mappa per i giorni passati e le prossime 48 ore; sotto, l'indice europeo della qualità dell'aria, in cui l'inquinante peggiore di ogni ora decide il livello."
+msgstr ""
+"Previsioni del modello ensemble europeo CAMS (Copernicus Atmosphere "
+"Monitoring Service), su una griglia di circa 10 km. La mappa mostra il "
+"valore dell'inquinante all'ora indicata, confrontato con la soglia di "
+"riferimento UE: il confronto è indicativo, perché i limiti di legge si "
+"riferiscono a medie giornaliere (ozono: medie su 8 ore). Il grafico mostra "
+"la media oraria sull'area della mappa per i giorni passati e le prossime 48 "
+"ore; sotto, l'indice europeo della qualità dell'aria, in cui l'inquinante "
+"peggiore di ogni ora decide il livello."
 
 #: places/testi.py:62
 msgid "Open the live map"
 msgstr "Apri la mappa aggiornata"
+
+#, python-format
+#~ msgid "Ranking of %(data)s"
+#~ msgstr "Classifica di %(data)s"
+
+#, python-format
+#~ msgid "CAMS model run of %(data)s at 00 UTC"
+#~ msgstr "modello CAMS emesso il %(data)s alle 00 UTC"

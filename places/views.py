@@ -1,5 +1,5 @@
 import math
-from datetime import date
+from datetime import UTC, date, datetime, time, timedelta
 from urllib.parse import urlencode
 
 from django.conf import settings
@@ -99,11 +99,18 @@ def classifica_view(request):
     # ordine iniziale: indice EEA dal peggiore, poi il primo inquinante dal valore più alto
     righe.sort(key=lambda r: (r["eaqi"]["ordine"] if r["eaqi"] else 0, r["valori"][0]["valore"] or 0), reverse=True)
 
+    corsa = date.fromisoformat(dati["corsa"]) if dati.get("corsa") else None
+    # periodo della media: le prime `ore` ore della corsa, cioè 00–24 UTC del giorno della corsa
+    inizio = corsa and datetime.combine(corsa, time(), UTC)
     context |= {
         "righe": righe,
         "colonne": [{"codice": c, "soglia": s} for c, s in zip(inquinanti, soglie)],
         "eaqi_disponibile": bool(indici),
-        "corsa": date.fromisoformat(dati["corsa"]) if dati.get("corsa") else None,
+        "corsa": corsa,
+        "inizio": inizio,
+        "fine": inizio and inizio + timedelta(hours=dati.get("ore", 24)),
+        # giorni fra la corsa e oggi (UTC): 1 = la classifica è di ieri, quella di oggi arriva in mattinata
+        "giorni_fa": corsa and (datetime.now(UTC).date() - corsa).days,
         "km": round(dati.get("lato", LATO_DEFAULT) * PASSO * 111.32 * math.cos(math.radians(45))),
     }
     return render(request, "classifica.html", context)
