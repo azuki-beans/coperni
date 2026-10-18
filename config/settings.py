@@ -21,8 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+# Debug solo se richiesto esplicitamente (DJANGO_DEBUG=True in locale): se la variabile manca,
+# per esempio su un servizio Cloud Run ricreato, il sito non va online con le pagine di errore
+# dettagliate.
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 # Senza DJANGO_SECRET_KEY (sviluppo, job di export) una chiave casuale per processo: niente chiave
 # fissa nel codice. Il web in produzione la riceve dall'env.

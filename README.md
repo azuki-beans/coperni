@@ -167,6 +167,7 @@ Requirements: Python 3.14, [Poetry](https://python-poetry.org/), an
 
 ```bash
 cp .env.example .env                        # fill in CDS_API_KEY, ...
+set -a; source .env; set +a                 # DJANGO_DEBUG=True: debug is off by default
 poetry install --with job,luoghi            # main = web only; job = CAMS export; luoghi = places build
 
 poetry run python manage.py migrate
