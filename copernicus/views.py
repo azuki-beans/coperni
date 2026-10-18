@@ -6,16 +6,19 @@ from django.http import JsonResponse
 from copernicus import griglia
 
 
-def _finestra(request):
-    """Parametri comuni alle API: centro, celle sul lato lungo e proporzioni della viewport."""
+def _finestra(request, lato_max=griglia.LATO_MAX):
+    """Parametri comuni alle API: centro, celle sul lato lungo e proporzioni della viewport.
+    `lato=max` (tutto il dominio) vale `lato_max`: se stesso per la griglia, l'area più grande
+    per la serie (una media su tutta l'Europa non serve)."""
     try:
         lat = float(request.GET['lat'])
         lon = float(request.GET['lon'])
-        lato = int(request.GET.get('lato', griglia.LATO_DEFAULT))
+        lato = request.GET.get('lato', str(griglia.LATO_DEFAULT))
+        lato = lato_max if lato == griglia.LATO_MAX else int(lato)
         aspect = float(request.GET.get('aspect', 1.0))
     except (KeyError, ValueError):
         return None
-    if lato not in griglia.LATO_CELLE:
+    if lato not in (*griglia.LATO_CELLE, lato_max):
         return None
     return lat, lon, lato, aspect
 
@@ -41,7 +44,11 @@ def api_griglia(request):
         if istante.tzinfo is None:
             istante = istante.replace(tzinfo=UTC)
 
-    dati = griglia.celle(*parametri[:2], inquinante, *parametri[2:], istante=istante)
+    lat, lon, lato, aspect = parametri
+    if lato == griglia.LATO_MAX:
+        dati = griglia.panoramica(inquinante, istante=istante)
+    else:
+        dati = griglia.celle(lat, lon, inquinante, lato, aspect, istante=istante)
     dati['soglia'] = settings.COPERNICUS_SOGLIE_ALLARME.get(inquinante)
     risposta = JsonResponse(dati)
     # senza istante il valore è quello dell'ora corrente e cambia allo scoccare dell'ora; un'ora
@@ -53,7 +60,7 @@ def api_griglia(request):
 
 def api_serie(request):
     """Media oraria della finestra per ogni inquinante: storico 7 giorni + previsione 48h."""
-    parametri = _finestra(request)
+    parametri = _finestra(request, lato_max=griglia.LATO_CELLE[-1])
     if parametri is None:
         return JsonResponse({'error': 'invalid parameters'}, status=400)
 

@@ -857,17 +857,16 @@
     renderLegendBar();
 
     // ── Area: celle sul lato lungo della viewport (preferenza ricordata nel browser) ──
-    // Quattro pulsanti in alto a sinistra al posto di + e −: sono l'unico modo di cambiare zoom.
+    // Pulsanti in alto a sinistra al posto di + e − (10/20/50/100 celle e "max", tutto il dominio):
+    // sono l'unico modo di cambiare zoom.
     // L'area di un link condiviso vale per questa pagina ma non diventa la preferenza salvata.
-    let lato = LATO_DEFAULT;
-    if (LATI.includes(Number(PARAMETRI.get('lato')))) {
-        lato = Number(PARAMETRI.get('lato'));
-    } else {
-        try {
-            const salvato = Number(localStorage.getItem('coperni.lato'));
-            if (LATI.includes(salvato)) lato = salvato;
-        } catch (e) { /* storage non disponibile: resta il default */ }
+    // un numero di LATI o "max"; null se il valore non è valido
+    const latoValido = v => v === LATO_MAX ? LATO_MAX : LATI.includes(Number(v)) ? Number(v) : null;
+    let lato = latoValido(PARAMETRI.get('lato'));
+    if (lato == null) {
+        try { lato = latoValido(localStorage.getItem('coperni.lato')); } catch (e) { /* storage non disponibile */ }
     }
+    lato ??= LATO_DEFAULT;
 
     const KM = { {% for l, km in lati_km %}{{ l }}: {{ km }}{% if not forloop.last %}, {% endif %}{% endfor %} };
     const pulsantiArea = {};
@@ -877,12 +876,12 @@
             const barra = L.DomUtil.create('div', 'leaflet-bar area-control');
             barra.setAttribute('role', 'group');
             barra.setAttribute('aria-label', '{% translate "Area" as area %}{{ area|escapejs }}');
-            for (const l of LATI) {
+            for (const l of [...LATI, LATO_MAX]) {
                 const a = L.DomUtil.create('a', '', barra);
                 a.href = '#';
                 a.setAttribute('role', 'button');
-                a.textContent = l;
-                a.title = testo('area_celle', { n: l, km: KM[l] });
+                a.textContent = l === LATO_MAX ? T.area_max : l;
+                a.title = l === LATO_MAX ? T.area_max_titolo : testo('area_celle', { n: l, km: KM[l] });
                 L.DomEvent.on(a, 'click', e => {
                     L.DomEvent.preventDefault(e);
                     impostaLato(l);
@@ -897,8 +896,8 @@
 
     function evidenziaLato() {
         for (const [l, a] of Object.entries(pulsantiArea)) {
-            a.classList.toggle('attiva', Number(l) === lato);
-            a.setAttribute('aria-pressed', Number(l) === lato);
+            a.classList.toggle('attiva', l === String(lato));
+            a.setAttribute('aria-pressed', l === String(lato));
         }
     }
 
@@ -907,11 +906,11 @@
         lato = nuovo;
         try { localStorage.setItem('coperni.lato', lato); } catch (e) {}
         evidenziaLato();
-        inquadra(limitiStimati(lato));
+        inquadra(limitiStimati(lato), lato === LATO_MAX);
         loadPollution(pollutantSelect.value);
     }
     evidenziaLato();
-    inquadra(limitiStimati(lato));
+    inquadra(limitiStimati(lato), lato === LATO_MAX);
 
     // ogni caricamento ha un numero: se nel frattempo ne è partito un altro (cambio veloce di
     // inquinante/area) la risposta vecchia viene scartata, invece di sovrapporre due layer
@@ -975,7 +974,7 @@
             // la finestra cambia (area), non quando cambia l'ora o l'inquinante
             const chiaveLimiti = JSON.stringify(dati.limiti);
             if (chiaveLimiti !== limitiInquadrati) {
-                inquadra(dati.limiti);
+                inquadra(dati.limiti, lato === LATO_MAX);
                 limitiInquadrati = chiaveLimiti;
             }
             if (dati.timestamp) mostraRiferimento(dati);
@@ -987,9 +986,12 @@
                 return;
             }
 
-            // Ogni valore è una cella della griglia CAMS (0.1°): la disegniamo come rettangolo
-            // centrato sul punto, senza bordo, così le celle adiacenti formano un mosaico continuo.
+            // Ogni valore è una cella della griglia CAMS (0.1°, o un blocco da 0.5° nell'area "max"):
+            // la disegniamo come rettangolo centrato sul punto, senza bordo, così le celle adiacenti
+            // formano un mosaico continuo.
             const mezzo = dati.passo / 2;
+            const blocco = lato === LATO_MAX
+                ? `<div class="popup-giudizio">${testo('media_blocco', { gradi: numero(dati.passo) })}</div>` : '';
             const soglia = dati.soglia;
             const unita = dati.unita;
 
@@ -1006,7 +1008,7 @@
                 rect.bindPopup(
                     `<div>${inquinante.toUpperCase()}</div>` +
                     `<div class="popup-valore">${numero(valore)} <small>${unita}</small></div>` +
-                    `<div class="popup-giudizio">${dettaglio}</div>`
+                    `<div class="popup-giudizio">${dettaglio}</div>` + blocco
                 );
                 rect.on('mouseover', () => rect.setStyle({ fillOpacity: hoverOpacity(rect.options.alpha) }));
                 rect.on('mouseout', () => rect.setStyle({ fillOpacity: applicaIntensita(rect.options.alpha) }));
