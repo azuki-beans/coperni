@@ -23,6 +23,9 @@ def testi_js() -> dict[str, str]:
         'nessuna_corsa': _('No forecast for this hour'),
         # pulsanti dell'area
         'area_celle': _('{n} cells · ~{km} km'),
+        'area_max': pgettext('map area button', 'Max'),
+        'area_max_titolo': _('Whole area available (Europe), in blocks of 0.5°'),
+        'media_blocco': _('average of a {gradi}° block'),
         # giudizio nel popup
         'buona': _('good air'),
         'sotto': _('below the EU threshold'),

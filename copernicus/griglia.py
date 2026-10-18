@@ -10,6 +10,7 @@ import math
 import threading
 import time
 import urllib.error
+from functools import lru_cache
 import urllib.request
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -38,6 +39,12 @@ UNITA = 'µg/m³'
 
 LATO_CELLE = (10, 20, 50, 100)  # celle sul lato lungo della viewport (scelte in UI)
 LATO_DEFAULT = 20  # area iniziale della mappa e finestra della classifica
+# "max": tutto il dominio CAMS, in blocchi di BLOCCO×BLOCCO celle (0.5°): ~11.700 valori invece di
+# 294.000, che il browser non riuscirebbe a disegnare. Uguale per tutti (non dipende dal centro).
+LATO_MAX = 'max'
+BLOCCO = 5
+# bordi esterni del dominio CAMS Europa (centri cella da 30.05 a 71.95, da -24.95 a 44.95)
+DOMINIO = [[30.0, -25.0], [72.0, 45.0]]
 ORE_STORICO = 24  # di ogni corsa passata si usano solo le prime 24h (le successive le copre la corsa dopo)
 SERIE_GIORNI_INDIETRO = 7
 INDICE_TTL = 300  # secondi: il job aggiorna l'indice una volta al giorno
@@ -192,6 +199,50 @@ def celle(lat: float, lon: float, inquinante: str, lato: int, aspect: float,
     ]
     risultato['eaqi'] = _eaqi_finestra(f, giorno, ora)
     return risultato
+
+
+def panoramica(inquinante: str, istante: datetime | None = None) -> dict:
+    """Come celle(), ma su tutto il dominio: media di ogni blocco di BLOCCO×BLOCCO celle.
+    Niente indice EEA: una media su tutta l'Europa non direbbe niente."""
+    if inquinante not in POLLUTANT_VARIABLES:
+        raise ValueError(f'inquinante sconosciuto: {inquinante!r}')
+    giorni, ore = indice()['giorni'], indice()['ore']
+    risultato = {'limiti': DOMINIO, 'passo': round(PASSO * BLOCCO, 2), 'unita': UNITA,
+                 'timestamp': None, 'corsa': None, 'primo': None, 'ultimo': None, 'celle': [],
+                 'eaqi': None}
+    if not giorni:
+        return risultato
+
+    primo = _inizio_corsa(giorni[0])
+    ultimo = _inizio_corsa(giorni[-1]) + timedelta(hours=ore - 1)
+    istante = (istante or datetime.now(UTC)).replace(minute=0, second=0, microsecond=0)
+    istante = min(max(istante, primo), ultimo)
+    risultato |= {'timestamp': istante.isoformat(), 'primo': primo.isoformat(), 'ultimo': ultimo.isoformat()}
+
+    if (trovata := _corsa_per(istante, giorni, ore)) is None:
+        return risultato
+    giorno, ora = trovata
+    risultato['corsa'] = _inizio_corsa(giorno).isoformat()
+    risultato['celle'] = _blocchi(giorno, ora, inquinante)
+    return risultato
+
+
+@lru_cache(maxsize=32)
+def _blocchi(giorno: str, ora: int, inquinante: str) -> list[list[float]]:
+    """Medie a blocchi di un'ora: legge tutta la colonna dell'inquinante (~11 MB), quindi si tiene
+    in memoria. I file di una corsa non cambiano; 32 voci ≈ 60 MB."""
+    lato = PASSO_INT * BLOCCO
+    # floor e non //: in DuckDB la divisione intera tronca verso zero (longitudini negative)
+    righe = _cursore().execute(
+        f'''SELECT floor(lat / {lato}) AS i, floor(lon / {lato}) AS j, avg("{inquinante}")
+            FROM read_parquet(?) WHERE ora = ? AND "{inquinante}" IS NOT NULL GROUP BY ALL''',
+        [_file(giorno), ora],
+    ).fetchall()
+    centro = lato / 2
+    return [
+        [(i * lato + centro) / SCALA_COORD, (j * lato + centro) / SCALA_COORD, round(v / SCALA_VALORE, 1)]
+        for i, j, v in righe
+    ]
 
 
 def _eaqi_finestra(f: dict, giorno: str, ora: int) -> int | None:

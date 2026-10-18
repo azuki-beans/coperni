@@ -214,6 +214,7 @@
 </div>
 
 {{ testi|json_script:"testi" }}
+{{ dominio|json_script:"dominio" }}
 <script>
     // ── Testi tradotti (places/testi.py) e formati di data/numero della lingua della pagina ──
     const T = JSON.parse(document.getElementById('testi').textContent);
@@ -228,6 +229,9 @@
     const CENTRO = [{{ centro_latitudine }}, {{ centro_longitudine }}];
     const LATI = [{% for l in lati %}{{ l }}{% if not forloop.last %}, {% endif %}{% endfor %}];
     const LATO_DEFAULT = {{ lato_default }};
+    // "max": tutto il dominio CAMS in blocchi da 0.5°, inquadrato per intero
+    const LATO_MAX = 'max';
+    const DOMINIO = JSON.parse(document.getElementById('dominio').textContent);
 
     // quota della viewport coperta dall'area dei dati: 0.95 lascia scoperto ~5% (una fascia
     // sottile sui due lati lunghi), il resto dello schermo è tutto colorato
@@ -253,6 +257,7 @@
 
     // stessa formula di griglia.finestra: in Mercator una cella è 1/cosφ volte più alta che larga
     function limitiStimati(lato) {
+        if (lato === LATO_MAX) return DOMINIO;
         const aspect = aspectMappa();
         const cos = Math.cos(CENTRO[0] * Math.PI / 180);
         const [nx, ny] = aspect >= 1
@@ -261,11 +266,17 @@
         return [[CENTRO[0] - ny * 0.05, CENTRO[1] - nx * 0.05], [CENTRO[0] + ny * 0.05, CENTRO[1] + nx * 0.05]];
     }
 
-    function inquadra(limiti) {
+    function inquadra(limiti, contieni = false) {
         const box = L.latLngBounds(limiti);
         // inside=true → zoom minimo per cui la viewport sta DENTRO il box dei dati ("cover"):
         // l'area colorata riempie lo schermo invece di lasciare bande vuote. Il -log2 arretra
-        // di un filo lo zoom per lasciare scoperto il 5%.
+        // di un filo lo zoom per lasciare scoperto il 5%. Con `contieni` (area "max") è il
+        // contrario: tutto il dominio sta nello schermo, con bande vuote ai lati; fitBounds lo
+        // centra in coordinate Mercator (il punto medio in gradi, 51°N, taglierebbe Capo Nord).
+        if (contieni) {
+            map.fitBounds(box, { animate: false });
+            return;
+        }
         const zoom = map.getBoundsZoom(box, true) + Math.log2(RIEMPIMENTO);
         map.setView(box.getCenter(), zoom, { animate: false });
     }

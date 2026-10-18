@@ -6,7 +6,7 @@ from django.conf import settings
 from django.shortcuts import render
 
 from copernicus import eaqi, griglia
-from copernicus.griglia import LATO_CELLE, LATO_DEFAULT, PASSO
+from copernicus.griglia import DOMINIO, LATO_CELLE, LATO_DEFAULT, PASSO
 from luoghi.models import Citta, Comune
 from places.centro import centro_da_richiesta, ricorda
 from places.testi import testi_js
@@ -23,6 +23,7 @@ def _contesto(request, nav_attiva):
         "centro_longitudine": f"{centro.lon:.6f}",
         "lati": LATO_CELLE,
         "lato_default": LATO_DEFAULT,
+        "dominio": DOMINIO,  # inquadratura dell'area "max" (tutto il dominio CAMS)
         # larghezza indicativa della finestra in orizzontale: le celle sono 0.1° di longitudine
         "lati_km": [(lato, round(lato * PASSO * 111.32 * math.cos(math.radians(centro.lat)))) for lato in LATO_CELLE],
         "copernicus_pollutants": settings.COPERNICUS_POLLUTANTS,
