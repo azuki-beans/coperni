@@ -115,7 +115,7 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     (landscape) or `ceil(lato·aspect/cosφ)` (portrait), because in Web Mercator a 0.1° cell looks
     1/cosφ times taller than wide. `lato=max` (`LATO_MAX`) = the whole domain (`DOMINIO`) via
     `panoramica()`: means of 5×5-cell (0.5°, `BLOCCO`) blocks, ~11.7k values instead of 294k (the
-    browser cannot draw those), no `eaqi`, same for every centre; it reads the whole pollutant column
+    browser cannot draw those), no `eaqi`, same for every centre, `limiti` = `INQUADRATURA_MAX`; it reads the whole pollutant column
     (~11 MB), so `_blocchi` is `lru_cache`d (32 entries ≈ 60 MB). The series API maps `max` to 100.
     `celle(..., istante=None)` = one hour (default the current one),
     clamped to [start of the oldest run, last hour of the newest], read from the **most recent run
@@ -156,7 +156,7 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     and replaced by a button with the pollutant name; starts closed below 600px. No zoom +/−:
     Leaflet zoom handlers are off and the **area buttons** 10/20/50/100/Max (`ControlloArea`, top left,
     remembered in `localStorage` `coperni.lato`) are the only zoom. **"Cover"** framing: `getBoundsZoom(box, inside=true) + log2(RIEMPIMENTO=0.95)`,
-    `zoomSnap: 0` (Max: "contain", the whole `DOMINIO` visible); first a client estimate (`limitiStimati`, same formula as the server), then the
+    `zoomSnap: 0` (Max: "contain" on `INQUADRATURA_MAX`, Sicily–Stockholm, Portugal–Finland; blocks still cover the whole `DOMINIO`, visible by dragging); first a client estimate (`limitiStimati`, same formula as the server), then the
     exact `limiti` from the API. Cells are borderless `L.rectangle`, colour from `valore/soglia`
     (`COLOR_STOPS`, EU threshold at yellow, purple above 2×), always drawn as **halftone**
     (`retino`: dot radius ∝ ratio) — `userSpaceOnUse` SVG patterns created on demand in

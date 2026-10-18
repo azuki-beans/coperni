@@ -45,6 +45,10 @@ LATO_MAX = 'max'
 BLOCCO = 5
 # bordi esterni del dominio CAMS Europa (centri cella da 30.05 a 71.95, da -24.95 a 44.95)
 DOMINIO = [[30.0, -25.0], [72.0, 45.0]]
+# inquadratura dell'area "max": dalla Sicilia a Stoccolma, dal Portogallo alla Finlandia. Tutto il
+# dominio (Canarie–Capo Nord) in "contain" lasciava una fascia di dati stretta tra bande vuote; i
+# blocchi restano comunque su tutto il dominio e si vedono trascinando la mappa.
+INQUADRATURA_MAX = [[36.5, -10.0], [59.5, 30.0]]
 ORE_STORICO = 24  # di ogni corsa passata si usano solo le prime 24h (le successive le copre la corsa dopo)
 SERIE_GIORNI_INDIETRO = 7
 INDICE_TTL = 300  # secondi: il job aggiorna l'indice una volta al giorno
@@ -207,7 +211,7 @@ def panoramica(inquinante: str, istante: datetime | None = None) -> dict:
     if inquinante not in POLLUTANT_VARIABLES:
         raise ValueError(f'inquinante sconosciuto: {inquinante!r}')
     giorni, ore = indice()['giorni'], indice()['ore']
-    risultato = {'limiti': DOMINIO, 'passo': round(PASSO * BLOCCO, 2), 'unita': UNITA,
+    risultato = {'limiti': INQUADRATURA_MAX, 'passo': round(PASSO * BLOCCO, 2), 'unita': UNITA,
                  'timestamp': None, 'corsa': None, 'primo': None, 'ultimo': None, 'celle': [],
                  'eaqi': None}
     if not giorni:
