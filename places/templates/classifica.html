@@ -127,6 +127,53 @@
 
         .intro a { color: var(--accent); }
 
+        /* giorno e ore della classifica, in evidenza sopra la tabella */
+        .periodo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+        }
+
+        .periodo.vecchia { border-left-color: #b45309; }
+
+        .periodo .giorno {
+            font-size: 18px;
+            font-weight: 650;
+            letter-spacing: -0.2px;
+        }
+
+        .periodo .ore {
+            color: var(--text-dim);
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .periodo .ore time { color: var(--text); font-weight: 600; }
+
+        .periodo .stato {
+            flex-shrink: 0;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #e6ebfb;
+            color: var(--accent);
+        }
+
+        .periodo.vecchia .stato { background: #fdf0e1; color: #b45309; }
+
+        .periodo .avviso {
+            flex-basis: 100%;
+            font-size: 13px;
+            color: #b45309;
+        }
+
         .filtri {
             display: flex;
             gap: 8px;
@@ -235,12 +282,38 @@
     <div class="intro">
         <h2>{{ titolo_pagina }}</h2>
         <p>
-            {% if corsa %}{% blocktranslate with data=corsa|date:"DATE_FORMAT" km=km %}Daily average (00–24 UTC) of the CAMS forecast of {{ data }}, over an area about {{ km }} km wide around each place: the same area as the charts.{% endblocktranslate %}{% endif %}
+            {% blocktranslate with km=km %}Daily average over an area about {{ km }} km wide around each place: the same area as the charts.{% endblocktranslate %}
             {% translate "EEA index: the worst hour of the day on the European Air Quality Index, computed from the hourly averages of the area." %}
             {% translate "Values in µg/m³; the dot compares them with the EU threshold, with the colours of the map." %}
             <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">{% translate "About the data" %}</a>
         </p>
     </div>
+
+    {% if corsa %}
+    <div class="periodo{% if giorni_fa > 0 %} vecchia{% endif %}">
+        <div>
+            {% comment %}date scritte dal server (ora italiana), poi riformattate dal browser nel suo fuso e
+            nella lingua della pagina, come sulla mappa{% endcomment %}
+            <div class="giorno">{% blocktranslate trimmed with data=corsa|date:"j F Y" iso=corsa.isoformat %}
+                Ranking of <time datetime="{{ iso }}" data-formato="giorno">{{ data }}</time>
+            {% endblocktranslate %}</div>
+            <div class="ore">
+                {% blocktranslate trimmed with inizio=inizio|date:"j M H:i" fine=fine|date:"j M H:i" inizio_iso=inizio.isoformat fine_iso=fine.isoformat %}
+                Average <time datetime="{{ inizio_iso }}" data-formato="ora">{{ inizio }}</time>
+                → <time datetime="{{ fine_iso }}" data-formato="ora">{{ fine }}</time>
+                {% endblocktranslate %}
+                <span id="fuso" data-locale="{% translate "your local time" %}">({% translate "Italian time" %})</span>
+                · {% blocktranslate trimmed with data=corsa|date:"j M Y" iso=corsa.isoformat %}
+                CAMS model run of <time datetime="{{ iso }}" data-formato="data">{{ data }}</time> at 00 UTC
+                {% endblocktranslate %}
+            </div>
+        </div>
+        <span class="stato">{% if giorni_fa <= 0 %}{% translate "Today" %}{% elif giorni_fa == 1 %}{% translate "Yesterday" %}{% else %}{% blocktranslate count n=giorni_fa %}{{ n }} day ago{% plural %}{{ n }} days ago{% endblocktranslate %}{% endif %}</span>
+        {% if giorni_fa > 0 %}
+        <div class="avviso">{% translate "Today's ranking is published in the morning, with the new forecast. The map shows the current hour, so it can differ from this ranking." %}</div>
+        {% endif %}
+    </div>
+    {% endif %}
 
     {% if righe %}
     <div class="filtri">
@@ -294,6 +367,24 @@
 </div>
 
 <script>
+    // Orari del periodo nel fuso del browser (il server li scrive in ora italiana)
+    (() => {
+        const LOCALE = document.documentElement.lang === 'it' ? 'it-IT' : 'en-GB';
+        const FORMATI = {
+            // il giorno della corsa è una data UTC, senza ora: niente conversione di fuso
+            giorno: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' },
+            data: { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' },
+            ora: { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' },
+        };
+        for (const t of document.querySelectorAll('time[data-formato]')) {
+            t.textContent = new Date(t.dateTime).toLocaleString(LOCALE, FORMATI[t.dataset.formato]);
+        }
+        const fuso = document.getElementById('fuso');
+        if (fuso && Intl.DateTimeFormat().resolvedOptions().timeZone !== 'Europe/Rome') {
+            fuso.textContent = `(${fuso.dataset.locale})`;
+        }
+    })();
+
     // Ordinamento e filtro nel browser: le righe sono poche centinaia e arrivano già nell'HTML.
     (() => {
         const tabella = document.getElementById('classifica');

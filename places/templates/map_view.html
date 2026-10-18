@@ -259,8 +259,40 @@
             display: none;
         }
 
+        .riferimento-dati .etichetta {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+        }
+
+        /* l'ora dei colori: il dato più importante del riquadro */
+        .riferimento-dati .ora-grande {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+            vertical-align: -2px;
+            margin-right: 2px;
+        }
+
         .riferimento-dati .quando {
             font-weight: 600;
+        }
+
+        /* ora diversa da quella attuale: bordo e sfondo d'accento, per non scambiarla per "adesso" */
+        .riferimento-dati.spostato {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(58, 94, 224, 0.25), var(--shadow);
+        }
+
+        .riferimento-dati.spostato .ora-grande {
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .riferimento-dati .ora-grande { font-size: 19px; }
         }
 
         .riferimento-dati .vecchi {
@@ -508,7 +540,9 @@
         <button type="button" data-passo="-24" title="{{ prima24 }}" aria-label="{{ prima24 }}">«</button>
         <button type="button" data-passo="-1" title="{{ prima1 }}" aria-label="{{ prima1 }}">‹</button>
         <div class="testo">
-            <div>{% translate "Forecast for" %} <span class="quando" id="riferimento-quando"></span>
+            <div class="etichetta">{% translate "Forecast for" %}</div>
+            <div><span class="ora-grande" id="riferimento-ora"></span>
+                <span class="quando" id="riferimento-quando"></span>
                 <span class="relativo" id="riferimento-relativo"></span>
                 <button type="button" class="adesso" id="torna-adesso" hidden>{% translate "now" %}</button>
                 <span class="vecchi" id="riferimento-vecchi" hidden>· {% translate "data not up to date" %}</span></div>
@@ -670,11 +704,16 @@
 
     // aggiorna testo e pulsanti; chiamata subito al click (risposta immediata) e poi con i dati
     function mostraOra(ms) {
-        document.getElementById('riferimento-quando').textContent = formattaOra(ms);
+        const dt = new Date(ms);
+        document.getElementById('riferimento-ora').textContent =
+            dt.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('riferimento-quando').textContent =
+            dt.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long' });
         document.getElementById('riferimento-relativo').textContent = relativo(ms);
         // "adesso" = l'ora corrente, o l'ultima disponibile se i dati sono vecchi
         const adesso = intervallo ? Math.min(oraCorrente(), intervallo[1]) : oraCorrente();
         document.getElementById('torna-adesso').hidden = ms === adesso;
+        riferimento.classList.toggle('spostato', ms !== adesso);
         for (const b of riferimento.querySelectorAll('[data-passo]')) {
             const passo = Number(b.dataset.passo);
             b.disabled = !intervallo || (passo < 0 ? ms <= intervallo[0] : ms >= intervallo[1]);
