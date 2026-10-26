@@ -215,3 +215,6 @@ cython_debug/
 # Local tool settings
 .claude/
 .vscode/
+
+# Google Search Console reports (local only)
+google_search_problems/

@@ -55,6 +55,7 @@ def api_griglia(request):
     # precisa cambia solo se arriva una corsa più recente che la copre (una volta al giorno)
     max_age = _secondi_alla_prossima_ora() if istante is None else 900
     risposta['Cache-Control'] = f'public, max-age={max_age}'
+    risposta['X-Robots-Tag'] = 'noindex'
     return risposta
 
 
@@ -66,4 +67,5 @@ def api_serie(request):
 
     risposta = JsonResponse(griglia.serie(*parametri))
     risposta['Cache-Control'] = 'public, max-age=900'
+    risposta['X-Robots-Tag'] = 'noindex'
     return risposta

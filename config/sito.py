@@ -62,7 +62,10 @@ def robots(request):
     sitemap = request.build_absolute_uri(reverse('django.contrib.sitemaps.views.sitemap'))
     righe = [
         'User-agent: *',
-        # API JSON e cambio lingua (solo redirect): niente da indicizzare
+        # API JSON e cambio lingua (solo redirect): niente da indicizzare. Le API restano però
+        # scansionabili: Google esegue il JS di mappa e grafici e, se la fetch è bloccata, vede
+        # pagine vuote ("Soft 404"); fuori dall'indice le tiene l'header X-Robots-Tag
+        'Allow: /copernicus/api/',
         'Disallow: /copernicus/',
         'Disallow: /lingua/',
         'Disallow: /luoghi/',

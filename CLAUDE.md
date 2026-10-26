@@ -228,9 +228,11 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
 - Map and chart titles include the place name when the centre is a municipality or city
   (`Centro.e_luogo`): "Air quality forecast: Milano (MI)", good for shared links and search.
 - Preview image `docs/og-image.png` (1200×630), served from raw.githubusercontent.com like p7m-apri.
-- `/favicon.ico` (the same SVG), `/robots.txt` (API, search fragment and language switch excluded),
-  `/sitemap.xml` (`django.contrib.sitemaps`, i18n with alternates and x-default, cached 24h): the
-  pages plus the maps of municipalities ≥ 50k and cities ≥ 500k inhabitants (~570 URLs).
+- `/favicon.ico` (the same SVG), `/robots.txt` (search fragment and language switch excluded;
+  `/copernicus/api/` is **crawlable on purpose**: Google renders pages with their `fetch` calls, and
+  with the API blocked it saw empty map/charts and reported "Soft 404"; the JSON responses carry
+  `X-Robots-Tag: noindex` instead), `/sitemap.xml` (`django.contrib.sitemaps`, i18n with
+  alternates and x-default, cached 24h): the pages plus the maps of municipalities ≥ 50k and cities ≥ 500k inhabitants (~570 URLs).
 
 ## Basemap (OpenFreeMap)
 
