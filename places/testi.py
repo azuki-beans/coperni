@@ -41,6 +41,7 @@ def testi_js() -> dict[str, str]:
         'errore': _('Error loading data'),
         # grafici
         'media_area': _('average of the area shown on the map'),
+        'nessun_dato_periodo': _('No data available for this period.'),
         'soglia': _('Threshold {pollutant}'),
         # condivisione (menu della mappa)
         'link_copiato': _('Link copied'),

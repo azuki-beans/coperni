@@ -233,6 +233,9 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
   with the API blocked it saw empty map/charts and reported "Soft 404"; the JSON responses carry
   `X-Robots-Tag: noindex` instead), `/sitemap.xml` (`django.contrib.sitemaps`, i18n with
   alternates and x-default, cached 24h): the pages plus the maps of municipalities ≥ 50k and cities ≥ 500k inhabitants (~570 URLs).
+- **Charts pages are `noindex, follow`** and not in the sitemap: drawn only by JS, Google kept
+  reporting them as "Soft 404" even with the API crawlable (Nov 2026). The maps are the indexed
+  pages for each place. Keep "no data" texts out of the static HTML (set them from JS).
 
 ## Basemap (OpenFreeMap)
 

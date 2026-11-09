@@ -6,6 +6,9 @@
     {% if centro.e_luogo %}{% blocktranslate with luogo=centro.etichetta asvar titolo_pagina %}Air quality charts: {{ luogo }}{% endblocktranslate %}{% else %}{% translate "Air quality charts" as titolo_pagina %}{% endif %}
     <title>{{ titolo_pagina }} — Coperni</title>
     {% include "_meta_head.html" %}
+    {# grafici disegnati solo dal JS: per Google sono pagine vuote ("Soft 404"). Indicizzate le mappe,
+       che hanno lo stesso nome del luogo nel titolo; qui solo i link da seguire #}
+    <meta name="robots" content="noindex, follow">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <style>
         *, *::before, *::after {
@@ -199,7 +202,8 @@
     </div>
     <div class="chart-card">
         <div class="loading-state" id="loading-state">{% translate "Loading…" %}</div>
-        <div class="empty-state" id="empty-state" hidden>{% translate "No data available for this period." %}</div>
+        {# testo messo dal JS: nell'HTML statico "nessun dato" fa sembrare la pagina vuota ai motori di ricerca #}
+        <div class="empty-state" id="empty-state" hidden></div>
         <canvas id="pollution-chart"></canvas>
     </div>
     <div class="chart-header" id="indice-header" hidden>
@@ -257,6 +261,7 @@
 
             const inquinanti = Object.keys(data.serie || {});
             if (inquinanti.length === 0) {
+                emptyState.textContent = T.nessun_dato_periodo;
                 emptyState.hidden = false;
                 return;
             }

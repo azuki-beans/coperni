@@ -90,7 +90,8 @@ class SitemapPagine(SitemapBase):
     def items(self):
         from pagine.views import PAGINE
 
-        return ['places:map', 'places:classifica', 'places:grafici', *(f'pagine:{slug}' for slug in PAGINE)]
+        # niente grafici: sono noindex (solo JS, Google li segnalava come "Soft 404")
+        return ['places:map', 'places:classifica', *(f'pagine:{slug}' for slug in PAGINE)]
 
     def location(self, item):
         if item.startswith('pagine:'):
