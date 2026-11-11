@@ -1207,15 +1207,15 @@
     // retino, etichette MapLibre, poi una fascia con titolo, ora, legenda e fonti.
     const SCALA_IMMAGINE = 2;
     const PIEDE = 132;   // altezza della fascia sotto la mappa, px CSS
-    // immagine da scaricare: JPEG entro LATO_MAX px e PESO_MAX byte, così i social la accettano
+    // immagine da scaricare: JPEG entro LATO_IMMAGINE px e PESO_MAX byte, così i social la accettano
     // (il PNG a doppia risoluzione pesava ~8 MB; Bluesky si ferma a ~1 MB, X a 5 MB)
-    const LATO_MAX = 2048;
+    const LATO_IMMAGINE = 2048;
     const PESO_MAX = 950_000;
 
     // ridimensiona dopo la composizione (a scala intera i pattern del retino restano allineati)
     // e abbassa la qualità JPEG, poi il lato, finché il file non sta sotto PESO_MAX
     async function immagineLeggera(tela) {
-        let lato = Math.min(LATO_MAX, Math.max(tela.width, tela.height));
+        let lato = Math.min(LATO_IMMAGINE, Math.max(tela.width, tela.height));
         for (;;) {
             const f = lato / Math.max(tela.width, tela.height);
             const ridotta = document.createElement('canvas');
