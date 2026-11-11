@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 11:45+0100\n"
+"POT-Creation-Date: 2026-11-11 22:45+0100\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -101,7 +101,7 @@ msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
 #: places/templates/_base_map.html:297 places/templates/_header.html:136
-#: places/templates/map_view.html:509 places/templates/map_view.html:1448
+#: places/templates/map_view.html:514 places/templates/map_view.html:1482
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
@@ -276,8 +276,8 @@ msgstr "Luogo"
 msgid "Country"
 msgstr "Paese"
 
-#: places/templates/classifica.html:338 places/templates/map_view.html:521
-#: places/testi.py:52
+#: places/templates/classifica.html:338 places/templates/map_view.html:526
+#: places/testi.py:53
 msgid "EEA index"
 msgstr "Indice EEA"
 
@@ -311,7 +311,7 @@ msgstr "Grafici qualità dell'aria: %(luogo)s"
 msgid "Air quality charts"
 msgstr "Grafici qualità dell'aria"
 
-#: places/templates/grafici.html:200 places/testi.py:56
+#: places/templates/grafici.html:200 places/testi.py:57
 msgid "Pollutant trends"
 msgstr "Andamento inquinanti"
 
@@ -319,8 +319,8 @@ msgstr "Andamento inquinanti"
 msgid "Loading…"
 msgstr "Caricamento…"
 
-#: places/templates/grafici.html:210 places/templates/map_view.html:518
-#: places/testi.py:57
+#: places/templates/grafici.html:210 places/templates/map_view.html:523
+#: places/testi.py:58
 msgid "European Air Quality Index (EEA)"
 msgstr "Indice europeo della qualità dell'aria (EEA)"
 
@@ -328,79 +328,71 @@ msgstr "Indice europeo della qualità dell'aria (EEA)"
 msgid "hour by hour: the worst pollutant sets the level"
 msgstr "ora per ora: decide l'inquinante peggiore"
 
-#: places/templates/map_view.html:506
+#: places/templates/map_view.html:511
 msgid "Hide panel"
 msgstr "Nascondi pannello"
 
-#: places/templates/map_view.html:506
+#: places/templates/map_view.html:511
 msgid "Show panel"
 msgstr "Mostra pannello"
 
-#: places/templates/map_view.html:513
+#: places/templates/map_view.html:518
 msgid "None"
 msgstr "Nessuno"
 
-#: places/templates/map_view.html:529
+#: places/templates/map_view.html:534
 msgid "Intensity"
 msgstr "Intensità"
 
-#: places/templates/map_view.html:538
-msgid "24 hours earlier"
-msgstr "24 ore prima"
+#: places/templates/map_view.html:543
+msgid "4 hours earlier"
+msgstr "4 ore prima"
 
-#: places/templates/map_view.html:538
-msgid "One hour earlier"
-msgstr "Un'ora prima"
+#: places/templates/map_view.html:543
+msgid "4 hours later"
+msgstr "4 ore dopo"
 
-#: places/templates/map_view.html:539
-msgid "One hour later"
-msgstr "Un'ora dopo"
-
-#: places/templates/map_view.html:539
-msgid "24 hours later"
-msgstr "24 ore dopo"
-
-#: places/templates/map_view.html:543 places/testi.py:55
+#: places/templates/map_view.html:546 places/testi.py:56
 msgid "Forecast for"
 msgstr "Previsione per"
 
-#: places/templates/map_view.html:547 places/testi.py:14
+#: places/templates/map_view.html:550 places/testi.py:14
 msgid "now"
 msgstr "adesso"
 
-#: places/templates/map_view.html:548
+#: places/templates/map_view.html:551
 msgid "data not up to date"
 msgstr "dati non aggiornati"
 
-#: places/templates/map_view.html:550
+#: places/templates/map_view.html:554
 msgid "when it updates"
 msgstr "quando si aggiorna"
 
-#: places/templates/map_view.html:559 places/templates/map_view.html:1054
+#: places/templates/map_view.html:562 places/templates/map_view.html:1064
 msgid "Share"
 msgstr "Condividi"
 
-#: places/templates/map_view.html:561
+#: places/templates/map_view.html:564
 msgid "Share with…"
 msgstr "Condividi con…"
 
-#: places/templates/map_view.html:565
+#: places/templates/map_view.html:568
 msgid "Email"
 msgstr "Email"
 
-#: places/templates/map_view.html:572
+#: places/templates/map_view.html:575
 msgid "Copy link"
 msgstr "Copia link"
 
-#: places/templates/map_view.html:573
-msgid "Download image (PNG)"
-msgstr "Scarica immagine (PNG)"
+#: places/templates/map_view.html:576
+msgid "Download image (JPEG)"
+msgstr "Scarica immagine (JPEG)"
 
-#: places/templates/map_view.html:574
+#: places/templates/map_view.html:577
 msgid "Download PDF"
 msgstr "Scarica PDF"
 
-#: places/templates/map_view.html:879
+#: places/templates/map_view.html:889
 msgid "Area"
 msgstr "Area"
 
@@ -450,106 +442,111 @@ msgstr "Modello CAMS emesso il {date} alle 00 UTC"
 msgid "No forecast for this hour"
 msgstr "Nessuna previsione per quest'ora"
 
-#: places/testi.py:25
+#: places/testi.py:24
+#, python-brace-format
+msgid "Forecast available until {when}"
+msgstr "Previsioni disponibili fino a {when}"
+
+#: places/testi.py:26
 #, python-brace-format
 msgid "{n} cells · ~{km} km"
 msgstr "{n} celle · ~{km} km"
 
-#: places/testi.py:26
+#: places/testi.py:27
 msgctxt "map area button"
 msgid "Max"
 msgstr "Max"
 
-#: places/testi.py:27
+#: places/testi.py:28
 msgid "Whole area available (Europe), in blocks of 0.5°"
 msgstr "Tutta l'area disponibile (Europa), in blocchi da 0,5°"
 
-#: places/testi.py:28
+#: places/testi.py:29
 #, python-brace-format
 msgid "average of a {gradi}° block"
 msgstr "media di un blocco da {gradi}°"
 
-#: places/testi.py:30
+#: places/testi.py:31
 msgid "good air"
 msgstr "aria buona"
 
-#: places/testi.py:31
+#: places/testi.py:32
 msgid "below the EU threshold"
 msgstr "sotto la soglia UE"
 
-#: places/testi.py:32
+#: places/testi.py:33
 msgid "above the EU threshold"
 msgstr "oltre la soglia UE"
 
-#: places/testi.py:33
+#: places/testi.py:34
 msgid "well above the EU threshold"
 msgstr "molto oltre la soglia UE"
 
-#: places/testi.py:34
+#: places/testi.py:35
 #, python-brace-format
 msgid "{ratio}× the threshold"
 msgstr "{ratio}× la soglia"
 
-#: places/testi.py:35
+#: places/testi.py:36
 msgid "no threshold configured"
 msgstr "nessuna soglia configurata"
 
-#: places/testi.py:37
+#: places/testi.py:38
 #, python-brace-format
 msgid "EU threshold {pollutant}"
 msgstr "soglia UE {pollutant}"
 
-#: places/testi.py:38
+#: places/testi.py:39
 msgid "No threshold configured"
 msgstr "Nessuna soglia configurata"
 
-#: places/testi.py:40
+#: places/testi.py:41
 msgid "No data available for this area"
 msgstr "Nessun dato disponibile per quest'area"
 
-#: places/testi.py:41
+#: places/testi.py:42
 msgid "Error loading data"
 msgstr "Errore nel caricamento dei dati"
 
-#: places/testi.py:43
+#: places/testi.py:44
 msgid "average of the area shown on the map"
 msgstr "media dell'area mostrata in mappa"
 
-#: places/testi.py:44
+#: places/testi.py:45
 msgid "No data available for this period."
 msgstr "Nessun dato disponibile per il periodo."
 
-#: places/testi.py:45
+#: places/testi.py:46
 #, python-brace-format
 msgid "Threshold {pollutant}"
 msgstr "Soglia {pollutant}"
 
-#: places/testi.py:47
+#: places/testi.py:48
 msgid "Link copied"
 msgstr "Link copiato"
 
-#: places/testi.py:48
+#: places/testi.py:49
 msgid "Copy failed: copy the address from the browser bar"
 msgstr "Copia non riuscita: copia l'indirizzo dalla barra del browser"
 
-#: places/testi.py:49
+#: places/testi.py:50
 msgid "Preparing…"
 msgstr "Preparazione…"
 
-#: places/testi.py:50
+#: places/testi.py:51
 msgid "Could not create the file"
 msgstr "Impossibile creare il file"
 
-#: places/testi.py:53
+#: places/testi.py:54
 #, python-brace-format
 msgid "Generated on {date}"
 msgstr "Generato il {date}"
 
-#: places/testi.py:54
+#: places/testi.py:55
 msgid "Pollutant"
 msgstr "Inquinante"
 
-#: places/testi.py:59
+#: places/testi.py:60
 msgid ""
 "Forecasts of the CAMS European ensemble model (Copernicus Atmosphere "
 "Monitoring Service), on a grid of about 10 km. The map shows the value of "
@@ -569,9 +566,15 @@ msgstr ""
 "ore; sotto, l'indice europeo della qualità dell'aria, in cui l'inquinante "
 "peggiore di ogni ora decide il livello."
 
-#: places/testi.py:66
+#: places/testi.py:67
 msgid "Open the live map"
 msgstr "Apri la mappa aggiornata"
+
+#~ msgid "One hour earlier"
+#~ msgstr "Un'ora prima"
+
+#~ msgid "One hour later"
+#~ msgstr "Un'ora dopo"
 
 #, python-format
 #~ msgid "Ranking of %(data)s"

@@ -300,6 +300,11 @@
             font-weight: 600;
         }
 
+        .riferimento-dati .disponibili {
+            font-size: 11px;
+            color: var(--text);
+        }
+
         .riferimento-dati .corsa {
             font-size: 11px;
             color: var(--text-dim);
@@ -535,10 +540,8 @@
     <button type="button" class="pannello-apri" id="pannello-apri" title="{{ mostra }}"
             aria-controls="pollution-control" aria-expanded="false" hidden><span class="eea-mini" id="eea-mini" hidden></span><span id="pannello-apri-nome"></span> ▾</button>
     <div class="riferimento-dati" id="riferimento-dati" hidden>
-        {% translate "24 hours earlier" as prima24 %}{% translate "One hour earlier" as prima1 %}
-        {% translate "One hour later" as dopo1 %}{% translate "24 hours later" as dopo24 %}
-        <button type="button" data-passo="-24" title="{{ prima24 }}" aria-label="{{ prima24 }}">«</button>
-        <button type="button" data-passo="-1" title="{{ prima1 }}" aria-label="{{ prima1 }}">‹</button>
+        {% translate "4 hours earlier" as prima %}{% translate "4 hours later" as dopo %}
+        <button type="button" data-passo="-4" title="{{ prima }}" aria-label="{{ prima }}">‹</button>
         <div class="testo">
             <div class="etichetta">{% translate "Forecast for" %}</div>
             <div><span class="ora-grande" id="riferimento-ora"></span>
@@ -546,11 +549,11 @@
                 <span class="relativo" id="riferimento-relativo"></span>
                 <button type="button" class="adesso" id="torna-adesso" hidden>{% translate "now" %}</button>
                 <span class="vecchi" id="riferimento-vecchi" hidden>· {% translate "data not up to date" %}</span></div>
+            <div class="disponibili" id="riferimento-disponibili"></div>
             <div class="corsa"><span id="riferimento-corsa"></span> ·
                 <a href="{% url 'pagine:pagina' 'aggiornamenti' %}">{% translate "when it updates" %}</a></div>
         </div>
-        <button type="button" data-passo="1" title="{{ dopo1 }}" aria-label="{{ dopo1 }}">›</button>
-        <button type="button" data-passo="24" title="{{ dopo24 }}" aria-label="{{ dopo24 }}">»</button>
+        <button type="button" data-passo="4" title="{{ dopo }}" aria-label="{{ dopo }}">›</button>
     </div>
     {% comment %}pattern SVG di retino/tratteggio, referenziati dalle celle come fill="url(#…)";
     niente display:none, altrimenti i browser non li disegnano{% endcomment %}
@@ -569,7 +572,7 @@
         </div>
         <hr>
         <button type="button" role="menuitem" data-azione="copia">{% translate "Copy link" %}</button>
-        <button type="button" role="menuitem" data-azione="png">{% translate "Download image (PNG)" %}</button>
+        <button type="button" role="menuitem" data-azione="png">{% translate "Download image (JPEG)" %}</button>
         <button type="button" role="menuitem" data-azione="pdf">{% translate "Download PDF" %}</button>
         <div class="stato" id="menu-stato" aria-live="polite"></div>
     </div>
@@ -725,6 +728,13 @@
         mostrato = Date.parse(dati.timestamp);
         mostraOra(mostrato);
         // l'ultima ora disponibile è già passata: il job non ha girato, i dati sono vecchi
+        const fine = new Date(intervallo[1]);
+        document.getElementById('riferimento-disponibili').textContent = testo('disponibili_fino', {
+            when: testo('giorno_ora', {
+                day: fine.toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short' }),
+                time: fine.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' }),
+            }),
+        });
         document.getElementById('riferimento-vecchi').hidden = Date.now() < intervallo[1] + 2 * ORA_MS;
         document.getElementById('riferimento-corsa').textContent = dati.corsa
             ? testo('corsa', { date: new Date(dati.corsa).toLocaleDateString(LOCALE, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }) })
@@ -1032,7 +1042,7 @@
 
     // ── Condividi ──
     // Un pulsante sotto l'area apre il menu: link ai servizi più comuni (semplici URL, nessuno
-    // script dei social), copia del link, immagine PNG e PDF. Immagine e PDF sono composti nel
+    // script dei social), copia del link, immagine JPEG e PDF. Immagine e PDF sono composti nel
     // browser; jsPDF e Chart.js si scaricano solo al primo PDF.
     const URL_JSPDF = 'https://cdn.jsdelivr.net/npm/jspdf@3.0.4/dist/jspdf.umd.min.js';
     const URL_CHARTJS = 'https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js';
@@ -1132,9 +1142,7 @@
             }
         },
         async png() {
-            const tela = await componiImmagine();
-            const blob = await new Promise(ok => tela.toBlob(ok, 'image/png'));
-            scarica(blob, `${nomeFile()}.png`);
+            scarica(await immagineLeggera(await componiImmagine()), `${nomeFile()}.jpg`);
         },
         async pdf() {
             scarica(await creaPdf(), `${nomeFile()}.pdf`);
@@ -1199,6 +1207,32 @@
     // retino, etichette MapLibre, poi una fascia con titolo, ora, legenda e fonti.
     const SCALA_IMMAGINE = 2;
     const PIEDE = 132;   // altezza della fascia sotto la mappa, px CSS
+    // immagine da scaricare: JPEG entro LATO_MAX px e PESO_MAX byte, così i social la accettano
+    // (il PNG a doppia risoluzione pesava ~8 MB; Bluesky si ferma a ~1 MB, X a 5 MB)
+    const LATO_MAX = 2048;
+    const PESO_MAX = 950_000;
+
+    // ridimensiona dopo la composizione (a scala intera i pattern del retino restano allineati)
+    // e abbassa la qualità JPEG, poi il lato, finché il file non sta sotto PESO_MAX
+    async function immagineLeggera(tela) {
+        let lato = Math.min(LATO_MAX, Math.max(tela.width, tela.height));
+        for (;;) {
+            const f = lato / Math.max(tela.width, tela.height);
+            const ridotta = document.createElement('canvas');
+            ridotta.width = Math.round(tela.width * f);
+            ridotta.height = Math.round(tela.height * f);
+            const c = ridotta.getContext('2d');
+            c.imageSmoothingQuality = 'high';
+            c.drawImage(tela, 0, 0, ridotta.width, ridotta.height);
+            let blob = null;
+            for (const qualita of [0.88, 0.8, 0.7]) {
+                blob = await new Promise(ok => ridotta.toBlob(ok, 'image/jpeg', qualita));
+                if (blob.size <= PESO_MAX) return blob;
+            }
+            if (lato <= 1000) return blob;
+            lato = Math.round(lato * 0.8);
+        }
+    }
 
     // copia del canvas MapLibre subito dopo un ridisegno sincrono (redraw): nello stesso task il
     // buffer WebGL è ancora pieno, senza preserveDrawingBuffer che rallenterebbe la mappa

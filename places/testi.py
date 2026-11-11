@@ -21,6 +21,7 @@ def testi_js() -> dict[str, str]:
         'ore': pgettext('unit of time', 'hours'),
         'corsa': _('CAMS model run of {date} at 00 UTC'),
         'nessuna_corsa': _('No forecast for this hour'),
+        'disponibili_fino': _('Forecast available until {when}'),
         # pulsanti dell'area
         'area_celle': _('{n} cells · ~{km} km'),
         'area_max': pgettext('map area button', 'Max'),
