@@ -165,7 +165,7 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     in two: base below, labels in the `labels` pane above); light style only (the dark one was
     removed: almost unreadable under the cells; the old `coperni.sfondo` key is cleared). Every load has a number
     (`ultimaRichiesta`): stale responses are dropped (avoids duplicate layers). Bottom-left box
-    (`riferimento-dati`): shown hour and run used, ±1h/±24h arrows within the API's
+    (`riferimento-dati`): shown hour, "forecast available until" (`ultimo`) and run used, ‹ › arrows (±4h) within the API's
     `primo`/`ultimo` and a "now" button (`istante = null` = current hour). Rapid clicks: text
     immediately, request after 250 ms. The old layer stays until the new one arrives
     (`sostituisciLayer`); reframes only if `limiti` change. "Data not up to date" if `ultimo` is
@@ -177,12 +177,13 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     from the canonical URL (`PARAMETRI_VISTA`).
   - **Share** (`ControlloCondividi`, below the area buttons): menu with native share (if
     `navigator.share`), WhatsApp/Telegram/email/Facebook/X/LinkedIn/Bluesky as plain URLs (no
-    social scripts), copy link, PNG and PDF. The image is **recomposed on a canvas**
+    social scripts), copy link, JPEG and PDF. The image is **recomposed on a canvas**
     (`componiImmagine`): MapLibre canvases copied right after a synchronous `redraw()` (no
     `preserveDrawingBuffer`; layers in `stratiGl` from `_base_map.html`), cells redrawn from the
     last API response (`ultimiDati`) with the same halftone as canvas patterns (`gradinoDi`,
     `raggioPunto`, `colorePunto` shared with the SVG `trama`), then a footer with title, hour,
-    EEA level, legend and attribution. PDF (`creaPdf`): jsPDF 3.0.4 + Chart.js loaded from
+    EEA level, legend and attribution. Download = JPEG (`immagineLeggera`: ≤2048 px, ≤950 KB,
+    lowering quality then size) so social networks accept it (the 2× PNG was ~8 MB). PDF (`creaPdf`): jsPDF 3.0.4 + Chart.js loaded from
     jsdelivr only on first use, A4 one page, map as JPEG ≤2200 px, charts from the shared
     `_grafici_js.html` (also used by `grafici.html`) drawn off-screen, CAMS licence attribution.
     Standard PDF fonts lack subscripts: `pulisci()` turns NO₂ into NO2. Static files are not served
