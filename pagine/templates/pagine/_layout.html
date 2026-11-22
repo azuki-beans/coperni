@@ -279,7 +279,7 @@
         {% endfor %}
         <div class="firma">
             {% include "pagine/_logo_azuki.html" %}
-            <span>© azuki-beans<br><a href="{{ url_repo }}" target="_blank" rel="noopener">{% translate "Source code on GitHub" %}</a></span>
+            <span>© <a href="https://azukibeans.dev/{% if LANGUAGE_CODE == 'it' %}it/{% endif %}">azuki-beans</a><br><a href="{{ url_repo }}" target="_blank" rel="noopener">{% translate "Source code on GitHub" %}</a><br><a href="https://azukibeans.dev/{% if LANGUAGE_CODE == 'it' %}it/{% endif %}">{% translate "Other projects" %}</a></span>
         </div>
     </nav>
     <article>
