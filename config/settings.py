@@ -39,6 +39,11 @@ CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').sp
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 
+# HSTS: il sito è solo HTTPS (Cloudflare fa il redirect da http://). Django manda l'header solo
+# sulle richieste https, quindi in locale non ha effetto. Default 0 = spento; in produzione si
+# alza per gradi (3600 → 86400 → 31536000) perché i browser lo ricordano per tutta la durata.
+SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_HSTS_SECONDS', '0'))
+
 
 # Application definition
 

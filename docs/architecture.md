@@ -122,7 +122,7 @@ gcloud run deploy coperni-web --region REGION --project PROJECT \
   --image REGION-docker.pkg.dev/PROJECT/coperni/web:TAG \
   --service-account coperni-web@PROJECT.iam.gserviceaccount.com \
   --allow-unauthenticated --memory 512Mi --concurrency 8 --min-instances 0 --max-instances 3 \
-  --set-env-vars CAMS_STORAGE=gs://BUCKET/cams,DJANGO_DEBUG=False,DJANGO_ALLOWED_HOSTS=your.domain,CSRF_TRUSTED_ORIGINS=https://your.domain \
+  --set-env-vars CAMS_STORAGE=gs://BUCKET/cams,DJANGO_DEBUG=False,DJANGO_ALLOWED_HOSTS=your.domain,CSRF_TRUSTED_ORIGINS=https://your.domain,DJANGO_HSTS_SECONDS=31536000 \
   --set-secrets DJANGO_SECRET_KEY=django-secret-key:latest
 ```
 

@@ -232,7 +232,8 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
 - Context processor `sito` + `places/templates/_meta_head.html` (included in every `<head>`, expects
   `titolo_pagina`): description, canonical URL, Open Graph/Twitter preview, inline SVG favicon,
   `hreflang` links, Cloudflare Web Analytics beacon if `CLOUDFLARE_ANALYTICS_TOKEN` is set (manual
-  JS snippet: the domain is DNS-only on Cloudflare, so automatic injection would never see the pages).
+  JS snippet, kept even though the domain is now proxied by Cloudflare: it does not depend on the
+  dashboard's automatic injection; do not enable both or pages are counted twice).
 - Map and chart titles include the place name when the centre is a municipality or city
   (`Centro.e_luogo`): "Air quality forecast: Milano (MI)", good for shared links and search.
 - Preview image `docs/og-image.png` (1200×630), served from raw.githubusercontent.com like p7m-apri.
