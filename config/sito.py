@@ -33,8 +33,15 @@ POPOLAZIONE_MIN_CITTA = 500_000
 # stato della mappa nell'URL (link condivisi): non cambia la pagina, fuori dall'URL canonico
 PARAMETRI_VISTA = ('inquinante', 'lato', 'istante')
 
+# pagine che non dipendono dal centro: il canonico è senza query string. Prima il menu portava
+# il centro anche sulla classifica e Google ne vedeva centinaia di copie ("duplicate")
+PAGINE_SENZA_CENTRO = {'classifica'}
+
 
 def _url_canonico(request) -> str:
+    match = request.resolver_match
+    if match and match.url_name in PAGINE_SENZA_CENTRO:
+        return request.build_absolute_uri(request.path)
     query = urlencode([(k, v) for k, v in request.GET.items() if k not in PARAMETRI_VISTA])
     return request.build_absolute_uri(request.path + (f'?{query}' if query else ''))
 
