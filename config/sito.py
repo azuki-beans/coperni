@@ -61,7 +61,13 @@ def _json_ld(request) -> str:
         'inLanguage': get_language(),
         'description': _('Air quality forecasts from Copernicus on a map, for every town in Italy '
                          'and every city in Europe: now and for the next 48 hours.'),
-        'publisher': {'@type': 'Organization', 'name': 'azuki-beans', 'url': 'https://azukibeans.dev/'},
+        # stesso @id dell'organizzazione nel JSON-LD dell'hub azukibeans.dev: un'unica entità
+        'publisher': {
+            '@type': 'Organization',
+            '@id': 'https://azukibeans.dev/#org',
+            'name': 'azuki-beans',
+            'url': 'https://azukibeans.dev/',
+        },
     }
     # "<" escapato: il testo non può chiudere il tag <script>
     return json.dumps(dati, ensure_ascii=False).replace('<', '\\u003c')

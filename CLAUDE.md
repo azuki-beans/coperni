@@ -238,7 +238,8 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
 - **One `<h1>` per page**: the logo in `_header.html` is a `div.logo-nome`, not a heading. Map pages
   without the day summary get a visually hidden `<h1 class="solo-lettori">` (block `titolo_nascosto`).
   Meta descriptions: `descrizione_pagina` in the view context (place maps, ranking, about pages),
-  otherwise the site one. JSON-LD `WebSite` on every page (`_json_ld` in `config/sito.py`).
+  otherwise the site one. JSON-LD `WebSite` on every page (`_json_ld` in `config/sito.py`), publisher =
+  the hub's Organization `@id` `https://azukibeans.dev/#org` (keep them identical).
   Sitemap `lastmod` = day of the latest CAMS run (not on the about pages).
 - Map and chart titles include the place name when the centre is a municipality or city
   (`Centro.e_luogo`): "Air quality forecast: Milano (MI)", good for shared links and search.
