@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 22:45+0100\n"
+"POT-Creation-Date: 2026-11-22 15:48+0100\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -50,6 +50,10 @@ msgstr "Argomenti"
 #: pagine/templates/pagine/_layout.html:282 places/templates/_header.html:160
 msgid "Source code on GitHub"
 msgstr "Codice sorgente su GitHub"
+
+#: pagine/templates/pagine/_layout.html:282
+msgid "Other projects"
+msgstr "Altri progetti"
 
 #: pagine/views.py:20
 msgid "The project"

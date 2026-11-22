@@ -293,7 +293,7 @@
 
     // in testa: chi ha fatto il sito e da dove vengono i dati (resta negli screenshot condivisi)
     map.attributionControl.addAttribution(
-        '<a href="{{ url_repo }}" target="_blank">Coperni</a> by azuki-beans · ' +
+        '<a href="{{ url_repo }}" target="_blank">Coperni</a> by <a href="https://azukibeans.dev/{% if LANGUAGE_CODE == 'it' %}it/{% endif %}" target="_blank">azuki-beans</a> · ' +
         '{% translate "Air quality" as qualita %}{{ qualita|escapejs }}: ' +
         '<a href="https://atmosphere.copernicus.eu/" target="_blank">Copernicus CAMS</a>');
     map.attributionControl.addAttribution(
