@@ -24,6 +24,20 @@ PAGINE = {
     "privacy": _("Privacy"),
 }
 
+# meta description di ogni pagina (senza, tutte avevano quella generica del sito)
+DESCRIZIONI = {
+    "progetto": _("Coperni is an open source project that shows Copernicus air quality forecasts "
+                  "on a map for every town in Italy and every city in Europe."),
+    "dati": _("Where Coperni's air quality data comes from: CAMS European forecasts by Copernicus, "
+              "EU thresholds and the European Air Quality Index (EEA) bands."),
+    "aggiornamenti": _("When the air quality forecasts on Coperni are updated: a new Copernicus run "
+                       "every morning, with 48 hours of hourly forecasts."),
+    "mappa": _("How to read Coperni's air quality map: what the colours mean compared with the EU "
+               "thresholds, the area and hour controls, and how to share the map."),
+    "privacy": _("Coperni privacy notice: no accounts, no tracking cookies, what the server logs "
+                 "and which external services the pages use."),
+}
+
 NOMI_INQUINANTI = {
     "pm2p5": _("Fine particulate matter (PM2.5)"),
     "pm10": _("Particulate matter (PM10)"),
@@ -57,6 +71,7 @@ def pagina(request, slug="progetto"):
         "pagine": PAGINE,
         "slug": slug,
         "titolo": PAGINE[slug],
+        "descrizione_pagina": DESCRIZIONI.get(slug),
         "inquinanti": [
             (NOMI_INQUINANTI.get(p, p.upper()), settings.COPERNICUS_SOGLIE_ALLARME.get(p))
             for p in settings.COPERNICUS_POLLUTANTS

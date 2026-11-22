@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 20:22+0100\n"
+"POT-Creation-Date: 2026-11-22 21:10+0100\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -14,6 +14,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: config/sito.py:62 places/templates/_meta_head.html:6
+msgid ""
+"Air quality forecasts from Copernicus on a map, for every town in Italy and "
+"every city in Europe: now and for the next 48 hours."
+msgstr ""
+"Previsioni della qualità dell'aria di Copernicus su mappa, per ogni comune "
+"italiano e ogni città europea: ora e per le prossime 48 ore."
 
 #: copernicus/eaqi.py:25
 msgid "Good"
@@ -75,23 +83,66 @@ msgstr "Come leggere la mappa"
 msgid "Privacy"
 msgstr "Privacy"
 
-#: pagine/views.py:28
+#: pagine/views.py:29
+msgid ""
+"Coperni is an open source project that shows Copernicus air quality "
+"forecasts on a map for every town in Italy and every city in Europe."
+msgstr ""
+"Coperni è un progetto open source che mostra su una mappa le previsioni "
+"della qualità dell'aria di Copernicus per ogni comune italiano e ogni città "
+"europea."
+
+#: pagine/views.py:31
+msgid ""
+"Where Coperni's air quality data comes from: CAMS European forecasts by "
+"Copernicus, EU thresholds and the European Air Quality Index (EEA) bands."
+msgstr ""
+"Da dove vengono i dati sulla qualità dell'aria di Coperni: previsioni "
+"europee CAMS di Copernicus, soglie UE e fasce dell'indice europeo di qualità "
+"dell'aria (EEA)."
+
+#: pagine/views.py:33
+msgid ""
+"When the air quality forecasts on Coperni are updated: a new Copernicus run "
+"every morning, with 48 hours of hourly forecasts."
+msgstr ""
+"Quando si aggiornano le previsioni della qualità dell'aria su Coperni: una "
+"nuova corsa di Copernicus ogni mattina, con 48 ore di previsioni orarie."
+
+#: pagine/views.py:35
+msgid ""
+"How to read Coperni's air quality map: what the colours mean compared with "
+"the EU thresholds, the area and hour controls, and how to share the map."
+msgstr ""
+"Come leggere la mappa della qualità dell'aria di Coperni: cosa indicano i "
+"colori rispetto alle soglie UE, i comandi per area e ora e come condividere "
+"la mappa."
+
+#: pagine/views.py:37
+msgid ""
+"Coperni privacy notice: no accounts, no tracking cookies, what the server "
+"logs and which external services the pages use."
+msgstr ""
+"Informativa privacy di Coperni: niente account né cookie di tracciamento, "
+"cosa registra il server e quali servizi esterni usano le pagine."
+
+#: pagine/views.py:42
 msgid "Fine particulate matter (PM2.5)"
 msgstr "Particolato fine (PM2,5)"
 
-#: pagine/views.py:29
+#: pagine/views.py:43
 msgid "Particulate matter (PM10)"
 msgstr "Particolato (PM10)"
 
-#: pagine/views.py:30
+#: pagine/views.py:44
 msgid "Nitrogen dioxide (NO₂)"
 msgstr "Biossido di azoto (NO₂)"
 
-#: pagine/views.py:31
+#: pagine/views.py:45
 msgid "Ozone (O₃)"
 msgstr "Ozono (O₃)"
 
-#: pagine/views.py:32
+#: pagine/views.py:46
 msgid "Sulphur dioxide (SO₂)"
 msgstr "Biossido di zolfo (SO₂)"
 
@@ -115,6 +166,17 @@ msgstr ""
 "Previsione della qualità dell'aria a %(luogo)s per il %(data)s: medie del "
 "giorno %(valori)s. Mappa e previsioni a 48 ore da Copernicus."
 
+#: places/riepilogo.py:177
+#, python-format
+msgid ""
+"Air quality ranking for %(data)s: %(totale)d towns in Italy and cities in "
+"Europe compared on the European index and the daily means of each pollutant. "
+"Worst: %(peggiore)s; best: %(migliore)s."
+msgstr ""
+"Classifica della qualità dell'aria del %(data)s: %(totale)d comuni italiani "
+"e città europee a confronto sull'indice europeo e sulle medie del giorno di "
+"ogni inquinante. Peggiore: %(peggiore)s; migliore: %(migliore)s."
+
 #: places/templates/_base_map.html:6
 #, python-format
 msgid "Air quality forecast: %(luogo)s"
@@ -124,8 +186,8 @@ msgstr "Previsione qualità dell'aria: %(luogo)s"
 msgid "Air quality forecasts on a map"
 msgstr "Previsioni della qualità dell'aria su mappa"
 
-#: places/templates/_base_map.html:311 places/templates/_header.html:136
-#: places/templates/map_view.html:518 places/templates/map_view.html:1486
+#: places/templates/_base_map.html:317 places/templates/_header.html:136
+#: places/templates/map_view.html:521 places/templates/map_view.html:1489
 msgid "Air quality"
 msgstr "Qualità dell'aria"
 
@@ -164,14 +226,6 @@ msgstr "Centra sulla mia posizione"
 #: places/templates/_header.html:153
 msgid "Language"
 msgstr "Lingua"
-
-#: places/templates/_meta_head.html:6
-msgid ""
-"Air quality forecasts from Copernicus on a map, for every town in Italy and "
-"every city in Europe: now and for the next 48 hours."
-msgstr ""
-"Previsioni della qualità dell'aria di Copernicus su mappa, per ogni comune "
-"italiano e ogni città europea: ora e per le prossime 48 ore."
 
 #: places/templates/_meta_head.html:20
 msgid "Map of air quality forecasts over northern Italy"
@@ -390,7 +444,7 @@ msgstr "Luogo"
 msgid "Country"
 msgstr "Paese"
 
-#: places/templates/classifica.html:338 places/templates/map_view.html:530
+#: places/templates/classifica.html:338 places/templates/map_view.html:533
 #: places/testi.py:53
 msgid "EEA index"
 msgstr "Indice EEA"
@@ -433,7 +487,7 @@ msgstr "Andamento inquinanti"
 msgid "Loading…"
 msgstr "Caricamento…"
 
-#: places/templates/grafici.html:210 places/templates/map_view.html:527
+#: places/templates/grafici.html:210 places/templates/map_view.html:530
 #: places/testi.py:58
 msgid "European Air Quality Index (EEA)"
 msgstr "Indice europeo della qualità dell'aria (EEA)"
@@ -442,71 +496,71 @@ msgstr "Indice europeo della qualità dell'aria (EEA)"
 msgid "hour by hour: the worst pollutant sets the level"
 msgstr "ora per ora: decide l'inquinante peggiore"
 
-#: places/templates/map_view.html:515
+#: places/templates/map_view.html:518
 msgid "Hide panel"
 msgstr "Nascondi pannello"
 
-#: places/templates/map_view.html:515
+#: places/templates/map_view.html:518
 msgid "Show panel"
 msgstr "Mostra pannello"
 
-#: places/templates/map_view.html:522
+#: places/templates/map_view.html:525
 msgid "None"
 msgstr "Nessuno"
 
-#: places/templates/map_view.html:538
+#: places/templates/map_view.html:541
 msgid "Intensity"
 msgstr "Intensità"
 
-#: places/templates/map_view.html:547
+#: places/templates/map_view.html:550
 msgid "4 hours earlier"
 msgstr "4 ore prima"
 
-#: places/templates/map_view.html:547
+#: places/templates/map_view.html:550
 msgid "4 hours later"
 msgstr "4 ore dopo"
 
-#: places/templates/map_view.html:550 places/testi.py:56
+#: places/templates/map_view.html:553 places/testi.py:56
 msgid "Forecast for"
 msgstr "Previsione per"
 
-#: places/templates/map_view.html:554 places/testi.py:14
+#: places/templates/map_view.html:557 places/testi.py:14
 msgid "now"
 msgstr "adesso"
 
-#: places/templates/map_view.html:555
+#: places/templates/map_view.html:558
 msgid "data not up to date"
 msgstr "dati non aggiornati"
 
-#: places/templates/map_view.html:558
+#: places/templates/map_view.html:561
 msgid "when it updates"
 msgstr "quando si aggiorna"
 
-#: places/templates/map_view.html:566 places/templates/map_view.html:1068
+#: places/templates/map_view.html:569 places/templates/map_view.html:1071
 msgid "Share"
 msgstr "Condividi"
 
-#: places/templates/map_view.html:568
+#: places/templates/map_view.html:571
 msgid "Share with…"
 msgstr "Condividi con…"
 
-#: places/templates/map_view.html:572
+#: places/templates/map_view.html:575
 msgid "Email"
 msgstr "Email"
 
-#: places/templates/map_view.html:579
+#: places/templates/map_view.html:582
 msgid "Copy link"
 msgstr "Copia link"
 
-#: places/templates/map_view.html:580
+#: places/templates/map_view.html:583
 msgid "Download image (JPEG)"
 msgstr "Scarica immagine (JPEG)"
 
-#: places/templates/map_view.html:581
+#: places/templates/map_view.html:584
 msgid "Download PDF"
 msgstr "Scarica PDF"
 
-#: places/templates/map_view.html:893
+#: places/templates/map_view.html:896
 msgid "Area"
 msgstr "Area"
 

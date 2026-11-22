@@ -63,13 +63,13 @@
             color: #fff;
         }
 
-        .logo h1 {
+        .logo-nome {
             font-size: 18px;
             font-weight: 600;
             letter-spacing: -0.3px;
         }
 
-        .logo h1 span {
+        .logo-nome span {
             color: var(--text-dim);
             font-weight: 400;
             margin-left: 6px;
@@ -113,7 +113,7 @@
             margin: 0 auto;
         }
 
-        .intro h2 {
+        .intro h1 {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 6px;
@@ -280,7 +280,7 @@
 <!-- ── Content ── -->
 <div class="content">
     <div class="intro">
-        <h2>{{ titolo_pagina }}</h2>
+        <h1>{{ titolo_pagina }}</h1>
         <p>
             {% blocktranslate with km=km %}Daily average over an area about {{ km }} km wide around each place: the same area as the charts.{% endblocktranslate %}
             {% translate "EEA index: the worst hour of the day on the European Air Quality Index, computed from the hourly averages of the area." %}

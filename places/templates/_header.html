@@ -133,7 +133,7 @@
 <header>
     <div class="logo">
         <div class="logo-icon">C</div>
-        <h1>Coperni <span>{% translate "Air quality" %}</span></h1>
+        <div class="logo-nome">Coperni <span>{% translate "Air quality" %}</span></div>
     </div>
     <nav class="nav-links">
         <a href="{% url 'places:map' %}?{{ centro.querystring }}" {% if nav_attiva == 'map' %}class="active"{% endif %}>{% translate "Map" %}</a>

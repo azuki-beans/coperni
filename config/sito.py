@@ -2,15 +2,20 @@
 favicon, robots.txt, sitemap con le due lingue e i luoghi più popolosi, statistiche Cloudflare Web Analytics.
 """
 
+import json
+from datetime import date
 from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.sitemaps import Sitemap
 from django.http import HttpResponse
 from django.urls import reverse
+from django.utils.translation import get_language
+from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 
+from copernicus import griglia
 from luoghi.models import Citta, Comune
 
 URL_REPO = 'https://github.com/azuki-beans/coperni'
@@ -46,6 +51,22 @@ def _url_canonico(request) -> str:
     return request.build_absolute_uri(request.path + (f'?{query}' if query else ''))
 
 
+def _json_ld(request) -> str:
+    """Dati strutturati schema.org (WebSite), già pronti per <script type="application/ld+json">."""
+    dati = {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        'name': 'Coperni',
+        'url': request.build_absolute_uri(reverse('places:map')),
+        'inLanguage': get_language(),
+        'description': _('Air quality forecasts from Copernicus on a map, for every town in Italy '
+                         'and every city in Europe: now and for the next 48 hours.'),
+        'publisher': {'@type': 'Organization', 'name': 'azuki-beans', 'url': 'https://azukibeans.dev/'},
+    }
+    # "<" escapato: il testo non può chiudere il tag <script>
+    return json.dumps(dati, ensure_ascii=False).replace('<', '\\u003c')
+
+
 def sito(request):
     """Context processor: URL canonico, repository, immagine di anteprima, favicon e statistiche (se configurate)."""
     return {
@@ -54,6 +75,7 @@ def sito(request):
         'immagine_anteprima': IMMAGINE_ANTEPRIMA,
         'favicon_svg': FAVICON_SVG,
         'cf_analytics_token': settings.CLOUDFLARE_ANALYTICS_TOKEN,
+        'json_ld': _json_ld(request),
     }
 
 
@@ -82,6 +104,15 @@ def robots(request):
     return HttpResponse('\n'.join(righe) + '\n', content_type='text/plain')
 
 
+def _ultima_corsa() -> date | None:
+    """Giorno dell'ultima corsa CAMS: le mappe e la classifica cambiano con lei."""
+    try:
+        giorni = griglia.indice()['giorni']
+    except Exception:
+        return None
+    return date.fromisoformat(giorni[-1]) if giorni else None
+
+
 class SitemapBase(Sitemap):
     """Voci in tutte le lingue, con <xhtml:link hreflang> e x-default (inglese)."""
 
@@ -89,6 +120,11 @@ class SitemapBase(Sitemap):
     alternates = True
     x_default = True
     protocol = 'https'
+
+    def get_urls(self, *args, **kwargs):
+        # una lettura dell'indice per sitemap, non una per voce
+        self._corsa = _ultima_corsa()
+        return super().get_urls(*args, **kwargs)
 
 
 class SitemapPagine(SitemapBase):
@@ -108,6 +144,10 @@ class SitemapPagine(SitemapBase):
     def priority(self, item):
         return 1.0 if item == 'places:map' else 0.5
 
+    def lastmod(self, item):
+        # le pagine di documentazione non cambiano con i dati: niente data
+        return None if item.startswith('pagine:') else self._corsa
+
 
 class SitemapLuoghi(SitemapBase):
     changefreq = 'hourly'
@@ -120,6 +160,9 @@ class SitemapLuoghi(SitemapBase):
 
     def location(self, item):
         return f"{reverse('places:map')}?{item}"
+
+    def lastmod(self, item):
+        return self._corsa
 
 
 SITEMAPS = {'pagine': SitemapPagine, 'luoghi': SitemapLuoghi}

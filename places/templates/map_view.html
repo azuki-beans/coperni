@@ -3,6 +3,9 @@
 
 {% block body_class %}{% if riepilogo %} class="con-riepilogo"{% endif %}{% endblock %}
 
+{# con il riepilogo il titolo <h1> visibile è il suo #}
+{% block titolo_nascosto %}{% if not riepilogo %}{{ block.super }}{% endif %}{% endblock %}
+
 {% block sotto %}{% if riepilogo %}{% include "_riepilogo.html" %}{% endif %}{% endblock %}
 
 {% block extra_css %}

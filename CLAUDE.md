@@ -129,7 +129,8 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
     `GET /copernicus/api/serie/?lat&lon&lato&aspect`, with `Cache-Control` (grid until the top of
     the hour, series 15 min).
 - **`pagine`**: user documentation at `/info/` ("About" / "Info" in the menu). `PAGINE` in `views.py` =
-  `slug -> title`; new page = template `pagine/<lang>/<slug>.html` for every language + dictionary entry. Thresholds and
+  `slug -> title`, `DESCRIZIONI` = `slug -> meta description`; new page = template
+  `pagine/<lang>/<slug>.html` for every language + an entry in both dictionaries. Thresholds and
   pollutants read from settings, "latest forecast" from `griglia.indice()`. The update times
   (08:30 UTC) are written in `<lang>/aggiornamenti.html`: update them if the scheduler changes.
   `<lang>/privacy.html` is the GDPR notice (no cookie banner: only technical cookies): **update it**
@@ -234,6 +235,11 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
   `hreflang` links, Cloudflare Web Analytics beacon if `CLOUDFLARE_ANALYTICS_TOKEN` is set (manual
   JS snippet, kept even though the domain is now proxied by Cloudflare: it does not depend on the
   dashboard's automatic injection; do not enable both or pages are counted twice).
+- **One `<h1>` per page**: the logo in `_header.html` is a `div.logo-nome`, not a heading. Map pages
+  without the day summary get a visually hidden `<h1 class="solo-lettori">` (block `titolo_nascosto`).
+  Meta descriptions: `descrizione_pagina` in the view context (place maps, ranking, about pages),
+  otherwise the site one. JSON-LD `WebSite` on every page (`_json_ld` in `config/sito.py`).
+  Sitemap `lastmod` = day of the latest CAMS run (not on the about pages).
 - Map and chart titles include the place name when the centre is a municipality or city
   (`Centro.e_luogo`): "Air quality forecast: Milano (MI)", good for shared links and search.
 - Preview image `docs/og-image.png` (1200×630), served from raw.githubusercontent.com like p7m-apri.

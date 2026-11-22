@@ -64,13 +64,13 @@
             color: #fff;
         }
 
-        .logo h1 {
+        .logo-nome {
             font-size: 18px;
             font-weight: 600;
             letter-spacing: -0.3px;
         }
 
-        .logo h1 span {
+        .logo-nome span {
             color: var(--text-dim);
             font-weight: 400;
             margin-left: 6px;
@@ -144,7 +144,7 @@
             line-height: 1.65;
         }
 
-        article h2 {
+        article h1 {
             font-size: 26px;
             font-weight: 600;
             letter-spacing: -0.4px;
@@ -283,7 +283,7 @@
         </div>
     </nav>
     <article>
-        <h2>{{ titolo }}</h2>
+        <h1>{{ titolo }}</h1>
         {% block contenuto %}{% endblock %}
     </article>
 </div>
