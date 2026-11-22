@@ -207,6 +207,7 @@ All configuration is done with environment variables (see [`.env.example`](.env.
 | `COPERNICUS_LATITUDE`, `COPERNICUS_LONGITUDE` | default map centre |
 | `COPERNICUS_RETENTION_DAYS` | runs listed in `indice.json` (default 21) |
 | `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` | usual Django settings |
+| `DJANGO_HSTS_SECONDS` | `Strict-Transport-Security` max-age in seconds; default `0` (off), production `31536000` |
 
 ## Contributing
 
