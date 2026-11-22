@@ -30,19 +30,30 @@
             --accent: #3a5ee0;
             --radius: 10px;
             --shadow: 0 4px 20px rgba(20, 25, 40, 0.14);
+            --striscia: 46px;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
+        }
+
+        /* header + mappa occupano lo schermo; sotto, solo per i luoghi, il riepilogo del giorno */
+        .schermo {
             height: 100vh;
             /* su mobile 100vh include lo spazio dietro le barre del browser: la parte bassa
                della mappa (e il riquadro con data e ora) finirebbe fuori schermo */
             height: 100dvh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+        }
+
+        /* con il riepilogo la mappa lascia libera in basso la sua striscia: sulla mappa il
+           trascinamento sposta la mappa, quindi senza striscia su mobile non si scenderebbe */
+        .con-riepilogo .schermo {
+            height: calc(100vh - var(--striscia));
+            height: calc(100dvh - var(--striscia));
         }
 
         /* ── Header ── */
@@ -199,8 +210,9 @@
 {% block extra_css %}{% endblock %}
     </style>
 </head>
-<body>
+<body{% block body_class %}{% endblock %}>
 
+<div class="schermo">
 <!-- ── Header ── -->
 {% include "_header.html" %}
 
@@ -212,6 +224,8 @@
 {% block overlay %}{% endblock %}
     <div id="map"></div>
 </div>
+</div>
+{% block sotto %}{% endblock %}
 
 {{ testi|json_script:"testi" }}
 {{ inquadratura_max|json_script:"inquadratura-max" }}
