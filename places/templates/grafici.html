@@ -67,13 +67,13 @@
             color: #fff;
         }
 
-        .logo h1 {
+        .logo-nome {
             font-size: 18px;
             font-weight: 600;
             letter-spacing: -0.3px;
         }
 
-        .logo h1 span {
+        .logo-nome span {
             color: var(--text-dim);
             font-weight: 400;
             margin-left: 6px;
@@ -122,7 +122,7 @@
             gap: 8px;
         }
 
-        .chart-header h2 {
+        .chart-header h1, .chart-header h2 {
             font-size: 16px;
             font-weight: 600;
         }
@@ -197,7 +197,7 @@
 <!-- ── Content ── -->
 <div class="content">
     <div class="chart-header">
-        <h2>{% translate "Pollutant trends" %} · {{ centro.etichetta }}</h2>
+        <h1>{% translate "Pollutant trends" %} · {{ centro.etichetta }}</h1>
         <div class="range-info" id="range-info"></div>
     </div>
     <div class="chart-card">

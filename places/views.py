@@ -60,6 +60,7 @@ def classifica_view(request):
     inizio = corsa and datetime.combine(corsa, time(), UTC)
     context |= {
         "righe": righe,
+        "descrizione_pagina": riepilogo.descrizione_classifica(righe, corsa),
         "colonne": [{"codice": c, "soglia": s} for c, s in zip(inquinanti, soglie)],
         "eaqi_disponibile": bool(dati.get("eaqi")),
         "corsa": corsa,

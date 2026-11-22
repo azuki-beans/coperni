@@ -167,3 +167,18 @@ def descrizione(riepilogo: dict, etichetta: str) -> str:
         testo = _('Air quality forecast for %(luogo)s on %(data)s: daily means %(valori)s. '
                   'Map and 48-hour forecast from Copernicus.')
     return testo % parti
+
+
+def descrizione_classifica(righe: list[dict], corsa: date | None) -> str | None:
+    """Meta description della classifica, con il giorno e i luoghi agli estremi: senza, la pagina
+    aveva la descrizione generica del sito."""
+    if not righe or corsa is None:
+        return None
+    return _('Air quality ranking for %(data)s: %(totale)d towns in Italy and cities in Europe '
+             'compared on the European index and the daily means of each pollutant. '
+             'Worst: %(peggiore)s; best: %(migliore)s.') % {
+        'data': _data(corsa),
+        'totale': len(righe),
+        'peggiore': righe[0]['nome'],
+        'migliore': righe[-1]['nome'],
+    }

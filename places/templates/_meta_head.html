@@ -23,3 +23,4 @@ Si aspetta titolo_pagina dal template che lo include.
     <meta name="twitter:image" content="{{ immagine_anteprima }}">
     {% include "_lingue_head.html" %}
     {% if cf_analytics_token %}<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ cf_analytics_token }}"}'></script>{% endif %}
+    <script type="application/ld+json">{{ json_ld|safe }}</script>

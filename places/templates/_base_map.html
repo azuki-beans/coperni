@@ -89,13 +89,13 @@
             color: #fff;
         }
 
-        .logo h1 {
+        .logo-nome {
             font-size: 18px;
             font-weight: 600;
             letter-spacing: -0.3px;
         }
 
-        .logo h1 span {
+        .logo-nome span {
             color: var(--text-dim);
             font-weight: 400;
             margin-left: 6px;
@@ -207,12 +207,18 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-dim);
         }
+        /* titolo per motori di ricerca e lettori di schermo quando sotto la mappa non c'è il riepilogo */
+        .solo-lettori {
+            position: absolute; width: 1px; height: 1px; overflow: hidden;
+            clip: rect(0 0 0 0); white-space: nowrap;
+        }
 {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body{% block body_class %}{% endblock %}>
 
 <div class="schermo">
+{% block titolo_nascosto %}<h1 class="solo-lettori">{{ titolo_pagina }}</h1>{% endblock %}
 <!-- ── Header ── -->
 {% include "_header.html" %}
 
