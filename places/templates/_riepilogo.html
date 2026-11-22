@@ -1,0 +1,127 @@
+{% load i18n %}{% comment %}
+Riepilogo del giorno sotto la mappa (places/riepilogo.py): testo generato dal server, diverso per
+ogni luogo, che Google può indicizzare. La striscia in cima resta visibile sotto la mappa: si tocca
+(o si trascina) per scendere. Niente testi "dati mancanti": se i dati non ci sono, il riepilogo
+non c'è proprio.
+{% endcomment %}
+<style>
+    .riepilogo { background: var(--surface); border-top: 1px solid var(--border); }
+    .riepilogo-striscia {
+        display: flex; align-items: center; gap: 10px;
+        height: var(--striscia); padding: 0 24px;
+        color: var(--text); text-decoration: none; font-weight: 600; font-size: 15px;
+        white-space: nowrap; overflow: hidden;
+    }
+    .riepilogo-striscia span.testo { overflow: hidden; text-overflow: ellipsis; }
+    .riepilogo-striscia .freccia { margin-left: auto; color: var(--text-dim); }
+    .riepilogo-corpo { max-width: 760px; padding: 8px 24px 40px; line-height: 1.55; }
+    .riepilogo h1 { font-size: 22px; margin: 8px 0 4px; }
+    .riepilogo h2 { font-size: 17px; margin: 28px 0 8px; }
+    .riepilogo p { margin: 10px 0; }
+    .riepilogo .dim { color: var(--text-dim); }
+    .riepilogo .livello {
+        display: inline-block; padding: 1px 9px; border-radius: 999px;
+        font-size: 13px; font-weight: 600; color: #1d2130;
+    }
+    .riepilogo .livello.scuro { color: #fff; }
+    .riepilogo table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 15px; }
+    .riepilogo th, .riepilogo td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--border); }
+    .riepilogo th { font-size: 13px; color: var(--text-dim); font-weight: 500; }
+    .riepilogo td.numero, .riepilogo th.numero { text-align: right; white-space: nowrap; }
+    .riepilogo .pallino { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 6px; vertical-align: baseline; }
+    .riepilogo ul.vicini { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; }
+    .riepilogo ul.vicini li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .riepilogo ul.vicini .km { margin-left: auto; font-size: 13px; }
+    @media (max-width: 600px) {
+        .riepilogo-striscia, .riepilogo-corpo { padding-left: 16px; padding-right: 16px; }
+        .riepilogo .soglia { display: none; }
+    }
+</style>
+<section class="riepilogo" id="riepilogo" aria-labelledby="riepilogo-titolo">
+    <a class="riepilogo-striscia" href="#riepilogo">
+        {% if riepilogo.eaqi %}<span class="livello{% if riepilogo.eaqi.livello >= 4 %} scuro{% endif %}" style="background:{{ riepilogo.eaqi.colore }}">{{ riepilogo.eaqi.nome }}</span>{% endif %}
+        <span class="testo">{% blocktranslate with luogo=riepilogo.nome %}{{ luogo }}: the day in numbers{% endblocktranslate %}</span>
+        <span class="freccia" aria-hidden="true">▾</span>
+    </a>
+    <div class="riepilogo-corpo">
+        <h1 id="riepilogo-titolo">{% blocktranslate with luogo=centro.etichetta %}Air quality forecast for {{ luogo }}{% endblocktranslate %}</h1>
+        <p class="dim">
+            {% if riepilogo.giorni_fa <= 0 %}{% translate "Today" %}{% elif riepilogo.giorni_fa == 1 %}{% translate "Yesterday" %}{% endif %}{% if riepilogo.giorni_fa <= 1 %}, {% endif %}<time datetime="{{ riepilogo.corsa.isoformat }}">{# in italiano i mesi vanno in minuscolo #}{% if LANGUAGE_CODE == "it" %}{{ riepilogo.corsa|date:"j F Y"|lower }}{% else %}{{ riepilogo.corsa|date:"j F Y" }}{% endif %}</time>
+            · {% translate "Copernicus CAMS forecast, 00 UTC run" %}
+        </p>
+
+        {% if riepilogo.comune %}{% with c=riepilogo.comune %}
+        <p>
+            {% if c.alt_min is not None and c.alt_max is not None %}
+            {% blocktranslate trimmed with nome=c.nome provincia=c.sigla_provincia regione=c.regione alt_min=c.alt_min alt_max=c.alt_max %}
+            {{ nome }} is a municipality in the province of {{ provincia }} ({{ regione }}), between {{ alt_min }} and {{ alt_max }} metres above sea level.
+            {% endblocktranslate %}
+            {% else %}
+            {% blocktranslate trimmed with nome=c.nome provincia=c.sigla_provincia regione=c.regione %}
+            {{ nome }} is a municipality in the province of {{ provincia }} ({{ regione }}).
+            {% endblocktranslate %}
+            {% endif %}
+        </p>
+        {% endwith %}{% endif %}
+
+        {% if riepilogo.eaqi %}
+        <p>
+            {% blocktranslate trimmed with livello=riepilogo.eaqi.livello %}
+            European Air Quality Index for the day: level {{ livello }} of 6 in the worst hour,
+            {% endblocktranslate %}
+            <span class="livello{% if riepilogo.eaqi.livello >= 4 %} scuro{% endif %}" style="background:{{ riepilogo.eaqi.colore }}">{{ riepilogo.eaqi.nome }}</span>.
+            <a href="{% url 'pagine:pagina' 'dati' %}">{% translate "What the levels mean" %}</a>
+        </p>
+        {% endif %}
+
+        <p>
+            {% blocktranslate trimmed with km=riepilogo.km_finestra luogo=riepilogo.nome %}
+            Daily mean forecast over an area about {{ km }} km wide centred on {{ luogo }}, compared with the
+            EU reference values (Directive 2024/2881):
+            {% endblocktranslate %}
+        </p>
+        <table>
+            <thead>
+            <tr>
+                <th>{% translate "Pollutant" %}</th>
+                <th class="numero">{% translate "Daily mean" %}</th>
+                <th class="numero soglia">{% translate "EU reference" %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for v in riepilogo.valori %}{% if v.valore is not None %}
+            <tr>
+                <td>{{ v.nome }}</td>
+                <td class="numero">{{ v.valore|floatformat:1 }} µg/m³{% if v.colore %}<i class="pallino" style="background:{{ v.colore }}"></i>{% endif %}</td>
+                <td class="numero soglia dim">{% if v.soglia %}{{ v.soglia|floatformat:"-1" }} µg/m³{% endif %}</td>
+            </tr>
+            {% endif %}{% endfor %}
+            </tbody>
+        </table>
+
+        <p>
+            {% blocktranslate trimmed with luogo=riepilogo.nome posizione=riepilogo.posizione totale=riepilogo.totale %}
+            In the daily ranking {{ luogo }} is in position {{ posizione }} of {{ totale }}, from the worst air to the cleanest.
+            {% endblocktranslate %}
+            <a href="{% url 'places:classifica' %}">{% translate "See the full ranking" %}</a>
+        </p>
+
+        {% if riepilogo.vicini %}
+        <h2>{% translate "Nearby" %}</h2>
+        <ul class="vicini">
+            {% for v in riepilogo.vicini %}
+            <li>
+                {% if v.eaqi %}<span class="livello{% if v.eaqi.livello >= 4 %} scuro{% endif %}" style="background:{{ v.eaqi.colore }}" title="{{ v.eaqi.nome }}">{{ v.eaqi.livello }}</span>{% endif %}
+                <a href="{% url 'places:map' %}?{{ v.query }}">{{ v.nome }}</a>
+                <span class="km dim">{{ v.km }} km</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <p class="dim">
+            {% translate "These are forecasts from a model of the atmosphere, not measurements from monitoring stations: they describe the area, not a single street. For official data, refer to your regional or national environmental agency." %}
+            <a href="{% url 'pagine:pagina' 'dati' %}">{% translate "Where the data comes from" %}</a>
+        </p>
+    </div>
+</section>

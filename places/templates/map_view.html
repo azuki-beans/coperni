@@ -1,6 +1,10 @@
 {% extends "_base_map.html" %}
 {% load i18n %}
 
+{% block body_class %}{% if riepilogo %} class="con-riepilogo"{% endif %}{% endblock %}
+
+{% block sotto %}{% if riepilogo %}{% include "_riepilogo.html" %}{% endif %}{% endblock %}
+
 {% block extra_css %}
         /* Pollution control */
         .pollution-control {

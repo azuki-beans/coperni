@@ -3,7 +3,7 @@ Metadati comuni a tutte le pagine (context processor config.sito.sito): descrizi
 anteprima dei link sui social, favicon, versioni nelle altre lingue, statistiche Cloudflare Web Analytics.
 Si aspetta titolo_pagina dal template che lo include.
 {% endcomment %}
-{% translate "Air quality forecasts from Copernicus on a map, for every town in Italy and every city in Europe: now and for the next 48 hours." as descrizione %}
+{% translate "Air quality forecasts from Copernicus on a map, for every town in Italy and every city in Europe: now and for the next 48 hours." as descrizione_sito %}{% comment %}descrizione_pagina: specifica della pagina (mappa di un luogo, con i valori del giorno){% endcomment %}{% firstof descrizione_pagina descrizione_sito as descrizione %}
     <meta name="description" content="{{ descrizione }}">
     <link rel="canonical" href="{{ url_canonico }}">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,{{ favicon_svg|urlencode }}">
