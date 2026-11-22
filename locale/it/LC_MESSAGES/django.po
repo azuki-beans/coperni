@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coperni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 19:33+0100\n"
+"POT-Creation-Date: 2026-11-22 20:22+0100\n"
 "PO-Revision-Date: 2026-09-27 01:00+0200\n"
 "Last-Translator: Azuki Beans\n"
 "Language-Team: Italian\n"
@@ -95,20 +95,25 @@ msgstr "Ozono (O₃)"
 msgid "Sulphur dioxide (SO₂)"
 msgstr "Biossido di zolfo (SO₂)"
 
-#: places/riepilogo.py:156
+#: places/riepilogo.py:163
 #, python-format
 msgid ""
 "Air quality forecast for %(luogo)s on %(data)s: European index "
 "“%(livello)s”, daily means %(valori)s. Map and 48-hour forecast from "
 "Copernicus."
-msgstr "Previsione della qualità dell'aria a %(luogo)s per il %(data)s: indice europeo “%(livello)s”, medie del giorno %(valori)s. Mappa e previsioni a 48 ore da Copernicus."
+msgstr ""
+"Previsione della qualità dell'aria a %(luogo)s per il %(data)s: indice "
+"europeo “%(livello)s”, medie del giorno %(valori)s. Mappa e previsioni a 48 "
+"ore da Copernicus."
 
-#: places/riepilogo.py:160
+#: places/riepilogo.py:167
 #, python-format
 msgid ""
 "Air quality forecast for %(luogo)s on %(data)s: daily means %(valori)s. Map "
 "and 48-hour forecast from Copernicus."
-msgstr "Previsione della qualità dell'aria a %(luogo)s per il %(data)s: medie del giorno %(valori)s. Mappa e previsioni a 48 ore da Copernicus."
+msgstr ""
+"Previsione della qualità dell'aria a %(luogo)s per il %(data)s: medie del "
+"giorno %(valori)s. Mappa e previsioni a 48 ore da Copernicus."
 
 #: places/templates/_base_map.html:6
 #, python-format
@@ -199,7 +204,9 @@ msgstr "previsione Copernicus CAMS, corsa delle 00 UTC"
 msgid ""
 "%(nome)s is a municipality in the province of %(provincia)s (%(regione)s), "
 "between %(alt_min)s and %(alt_max)s metres above sea level."
-msgstr "%(nome)s è un comune in provincia di %(provincia)s (%(regione)s), tra %(alt_min)s e %(alt_max)s metri sul livello del mare."
+msgstr ""
+"%(nome)s è un comune in provincia di %(provincia)s (%(regione)s), tra "
+"%(alt_min)s e %(alt_max)s metri sul livello del mare."
 
 #: places/templates/_riepilogo.html:60
 #, python-format
@@ -212,7 +219,9 @@ msgstr "%(nome)s è un comune in provincia di %(provincia)s (%(regione)s)."
 msgid ""
 "European Air Quality Index for the day: level %(livello)s of 6 in the worst "
 "hour,"
-msgstr "Indice europeo di qualità dell'aria del giorno: livello %(livello)s su 6 nell'ora peggiore,"
+msgstr ""
+"Indice europeo di qualità dell'aria del giorno: livello %(livello)s su 6 "
+"nell'ora peggiore,"
 
 #: places/templates/_riepilogo.html:73
 msgid "What the levels mean"
@@ -223,7 +232,9 @@ msgstr "Cosa significano i livelli"
 msgid ""
 "Daily mean forecast over an area about %(km)s km wide centred on %(luogo)s, "
 "compared with the EU reference values (Directive 2024/2881):"
-msgstr "Media del giorno prevista su un'area larga circa %(km)s km centrata su %(luogo)s, confrontata con i valori di riferimento UE (Direttiva 2024/2881):"
+msgstr ""
+"Media del giorno prevista su un'area larga circa %(km)s km centrata su "
+"%(luogo)s, confrontata con i valori di riferimento UE (Direttiva 2024/2881):"
 
 #: places/templates/_riepilogo.html:86 places/testi.py:55
 msgid "Pollutant"
@@ -242,7 +253,9 @@ msgstr "Riferimento UE"
 msgid ""
 "In the daily ranking %(luogo)s is in position %(posizione)s of %(totale)s, "
 "from the worst air to the cleanest."
-msgstr "Nella classifica del giorno %(luogo)s è in posizione %(posizione)s su %(totale)s, dall'aria peggiore alla più pulita."
+msgstr ""
+"Nella classifica del giorno %(luogo)s è in posizione %(posizione)s su "
+"%(totale)s, dall'aria peggiore alla più pulita."
 
 #: places/templates/_riepilogo.html:106
 msgid "See the full ranking"
@@ -257,7 +270,10 @@ msgid ""
 "These are forecasts from a model of the atmosphere, not measurements from "
 "monitoring stations: they describe the area, not a single street. For "
 "official data, refer to your regional or national environmental agency."
-msgstr "Sono previsioni di un modello dell'atmosfera, non misure delle centraline: descrivono l'area, non una singola strada. Per i dati ufficiali fai riferimento all'agenzia ambientale della tua regione o del tuo paese."
+msgstr ""
+"Sono previsioni di un modello dell'atmosfera, non misure delle centraline: "
+"descrivono l'area, non una singola strada. Per i dati ufficiali fai "
+"riferimento all'agenzia ambientale della tua regione o del tuo paese."
 
 #: places/templates/classifica.html:6
 msgid "Air quality ranking"
