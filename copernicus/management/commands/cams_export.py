@@ -3,19 +3,20 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from copernicus.export import esporta
+from copernicus.export import esporta, gia_esportata
 
 
 class Command(BaseCommand):
     help = (
         "Scarica la corsa CAMS di un giorno su tutta l'Europa, la converte in Parquet e la pubblica "
-        'su CAMS_STORAGE (gira ogni giorno come Cloud Run Job).'
+        'su CAMS_STORAGE (gira più volte al giorno come Cloud Run Job: senza --date, se la corsa di oggi '
+        'è già pubblicata non fa nulla).'
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--date', type=date.fromisoformat, default=None,
-            help='Giorno della corsa (YYYY-MM-DD). Default: oggi (UTC).',
+            help='Giorno della corsa (YYYY-MM-DD). Default: oggi (UTC). Se indicato, riesporta sempre.',
         )
         parser.add_argument(
             '--netcdf', type=Path, default=None,
@@ -24,6 +25,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         giorno = options['date'] or datetime.now(UTC).date()
+        # ADS a volte pubblica in ritardo, quindi lo scheduler lancia il job più volte al giorno:
+        # le esecuzioni successive alla prima riuscita non devono riscaricare tutto
+        if not options['date'] and not options['netcdf'] and gia_esportata(giorno):
+            self.stdout.write(f'Corsa {giorno} già pubblicata: niente da fare')
+            return
         esito = esporta(giorno, options['netcdf'])
         self.stdout.write(self.style.SUCCESS(
             f"Corsa {esito['giorno']}: {esito['righe']:,} righe, {esito['dimensione_mb']} MB; "

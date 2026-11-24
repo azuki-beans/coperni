@@ -13,7 +13,7 @@ comments are in Italian; the repository documentation is in English.
 Architecture (see [`docs/architecture.md`](docs/architecture.md)):
 
 ```
-Cloud Scheduler (08:30 UTC) → Cloud Run Job (manage.py cams_export)
+Cloud Scheduler (every 2 h, 08:30–20:30 UTC) → Cloud Run Job (manage.py cams_export)
     └─ 1 ADS request: all of Europe, 5 pollutants, 49h → gs://<bucket>/cams/YYYY-MM-DD.parquet + indice.json
                                                                                     + classifica.json
 Browser → Cloud Run service (Django + DuckDB) → reads over HTTPS only the requested window
@@ -30,8 +30,8 @@ poetry install --with job,luoghi          # main = web only; job = CAMS export; 
 poetry run python manage.py migrate && poetry run python manage.py luoghi_load   # local places DB
 poetry run python manage.py runserver
 
-poetry run python manage.py cams_export                     # today's run (UTC) → CAMS_STORAGE
-poetry run python manage.py cams_export --date 2026-09-22   # a given day (idempotent)
+poetry run python manage.py cams_export                     # today's run (UTC) → CAMS_STORAGE, no-op if already there
+poetry run python manage.py cams_export --date 2026-09-22   # a given day (always re-exported, idempotent)
 poetry run python manage.py cams_export --netcdf file.nc    # reuse an already downloaded NetCDF
 
 poetry run python manage.py luoghi_build --shapefile data/Com01012025/Com01012025_WGS84.shp
@@ -50,7 +50,10 @@ fail at the DuckDB step. Build natively locally; CI is native amd64.
 
 - Dataset `cams-europe-air-quality-forecasts`, model `ensemble`, 0.1° grid, domain lat 30–72,
   lon -25–45 (420×700 ≈ 294k cells). One run per day at 00 UTC; data **guaranteed on ADS by
-  08:00 UTC** (ECMWF knowledge base) → scheduler at 08:30 UTC.
+  08:00 UTC** (ECMWF knowledge base), but it can be late (24 Nov 2026: at 08:30 UTC the ADS answered
+  `400 invalid request`, the same request worked at 18:55) → scheduler every 2 hours, 08:30–20:30 UTC.
+  Without `--date`, `cams_export` exits at once if today's run is already published
+  (`export.gia_esportata`: `corsa` in `classifica.json`, the last file written).
 - **Request parameters (verified):** `time=['00:00']` (run) and `leadtime_hour=0..48` (offset).
   Beyond 48h the service silently truncates. The opposite (24 values in `time`) yields a single
   instant.
@@ -132,7 +135,7 @@ that hour), shown as a large coloured tile in the panel and a small badge on the
   `slug -> title`, `DESCRIZIONI` = `slug -> meta description`; new page = template
   `pagine/<lang>/<slug>.html` for every language + an entry in both dictionaries. Thresholds and
   pollutants read from settings, "latest forecast" from `griglia.indice()`. The update times
-  (08:30 UTC) are written in `<lang>/aggiornamenti.html`: update them if the scheduler changes.
+  (first attempt 08:30 UTC) are written in `<lang>/aggiornamenti.html`: update them if the scheduler changes.
   `<lang>/privacy.html` is the GDPR notice (no cookie banner: only technical cookies): **update it**
   when adding a cookie, a `localStorage` key, an external script/CDN or tracking, or when log
   retention changes (Cloud Logging `_Default` = 30 days). Contact `privacy@azukibeans.dev`

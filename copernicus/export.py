@@ -205,12 +205,29 @@ class Archivio:
         blob.cache_control = cache_control
         blob.upload_from_filename(locale, content_type=content_type)
 
+    def leggi_json(self, nome: str) -> dict:
+        """Contenuto di un file JSON dell'archivio, `{}` se non esiste ancora."""
+        if self.bucket is None:
+            file = Path(self.url, nome)
+            return json.loads(file.read_text()) if file.exists() else {}
+        blob = self.bucket.get_blob(f'{self.prefisso}/{nome}'.lstrip('/'))
+        return json.loads(blob.download_as_bytes()) if blob else {}
+
     def giorni(self) -> list[date]:
         if self.bucket is None:
             nomi = (p.name for p in Path(self.url).glob('*.parquet'))
         else:
             nomi = (b.name.rsplit('/', 1)[-1] for b in self.bucket.list_blobs(prefix=f'{self.prefisso}/'))
         return sorted(date.fromisoformat(n.removesuffix('.parquet')) for n in nomi if n.endswith('.parquet'))
+
+
+def gia_esportata(giorno: date) -> bool:
+    """True se la corsa di `giorno` è l'ultima pubblicata per intero.
+
+    Si guarda `classifica.json` perché è l'ultimo file scritto da `esporta`: se un'esecuzione si
+    ferma a metà (Parquet o indice già caricati), quella dopo la completa.
+    """
+    return Archivio(settings.CAMS_STORAGE).leggi_json('classifica.json').get('corsa') == giorno.isoformat()
 
 
 def esporta(giorno: date, netcdf: Path | None = None) -> dict:
