@@ -97,7 +97,7 @@ Both are small CSV files versioned in `luoghi/dati/` and loaded into SQLite when
 ## How it works
 
 ```
-Cloud Scheduler (08:30 UTC)
+Cloud Scheduler (every 2 h, 08:30–20:30 UTC)
   └─ Cloud Run Job  →  manage.py cams_export
        └─ 1 ADS request: all of Europe, 5 pollutants, 49 h (~275 MB NetCDF)
             └─ convert  →  gs://<bucket>/cams/YYYY-MM-DD.parquet  (~54 MB)  +  indice.json
@@ -114,7 +114,8 @@ the reasoning behind it and how to deploy your own copy.
 ### Daily export (`copernicus/export.py`)
 
 - CAMS publishes one run per day at 00 UTC. Data is guaranteed on the ADS by 08:00 UTC, so the job
-  runs at 08:30 UTC.
+  first runs at 08:30 UTC. The data is sometimes late, so it is triggered again every two hours until
+  20:30 UTC and exits at once if today's run is already published.
 - A single request covers the whole domain. The ADS request limit is measured in *fields*
   (variables × hours × days). The geographic area does not count toward it, so splitting Europe
   into tiles would only multiply the cost.
@@ -179,7 +180,7 @@ poetry run python manage.py runserver
 Other export options:
 
 ```bash
-poetry run python manage.py cams_export --date 2026-09-22   # a specific day (idempotent)
+poetry run python manage.py cams_export --date 2026-09-22   # a specific day (always re-exported)
 poetry run python manage.py cams_export --netcdf file.nc    # reuse an already downloaded NetCDF
 ```
 

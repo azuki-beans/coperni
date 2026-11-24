@@ -6,7 +6,7 @@ bucket, and a stateless web service reads just the slice it needs with DuckDB.
 
 ```
                     ┌────────────────────────────┐
-  08:30 UTC ───────►│ Cloud Scheduler            │
+  every 2 hours ───►│ Cloud Scheduler            │
                     └─────────────┬──────────────┘
                                   │ POST …/jobs/<job>:run (OAuth, run.invoker)
                     ┌─────────────▼──────────────┐      ┌──────────────────────────────┐
@@ -30,8 +30,8 @@ bucket, and a stateless web service reads just the slice it needs with DuckDB.
 
 | Component | Role | Notes |
 |---|---|---|
-| **Cloud Run Job** | Downloads the daily CAMS run and converts it to Parquet | Image `--target job`. Retries 3×. Needs the ADS key (Secret Manager) and write access to the bucket. |
-| **Cloud Scheduler** | Triggers the job at 08:30 UTC | CAMS guarantees the 00 UTC run on the ADS by 08:00 UTC. |
+| **Cloud Run Job** | Downloads the daily CAMS run and converts it to Parquet | Image `--target job`. Retries 3× (within minutes; late data is covered by the later triggers). Needs the ADS key (Secret Manager) and write access to the bucket. |
+| **Cloud Scheduler** | Triggers the job every 2 hours, 08:30–20:30 UTC | CAMS guarantees the 00 UTC run on the ADS by 08:00 UTC, but it can be late. Once today's run is published, the later executions exit at once. |
 | **Cloud Storage** | Stores the Parquet files, `indice.json` and `classifica.json` (ranking) | Public read (Copernicus data is open; attribution is on the site). Lifecycle rule deletes old `.parquet` files. |
 | **Cloud Run service** | Serves the site and the JSON APIs | Image `--target web`. Scales to zero; concurrency 8, gunicorn with 1 worker × 8 threads so all requests share one DuckDB metadata cache. |
 | **Artifact Registry** | Hosts the `web` and `job` images | Pushed by GitHub Actions on `v*` tags. |
@@ -114,7 +114,7 @@ gcloud run jobs create coperni-job --region REGION --project PROJECT \
   --set-secrets CDS_API_KEY=cds-api-key:latest
 
 gcloud scheduler jobs create http coperni-job-daily --location REGION --project PROJECT \
-  --schedule "30 8 * * *" --time-zone UTC --http-method POST \
+  --schedule "30 8-20/2 * * *" --time-zone UTC --http-method POST \
   --uri "https://run.googleapis.com/v2/projects/PROJECT/locations/REGION/jobs/coperni-job:run" \
   --oauth-service-account-email coperni-scheduler@PROJECT.iam.gserviceaccount.com
 
